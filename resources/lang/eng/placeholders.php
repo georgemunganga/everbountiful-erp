@@ -103,7 +103,7 @@ return array(
     'gdpr' => array(
         'additionDescription' => 'Enter Additional Description',
     ),
-    'productName' => 'e.g. Web Hosting, Laptop, Notebook, Mobile App etc.',
+    'productName' => 'e.g. Eggs, Trays, Tommatoes, Crops etc.',
     'leave' => array(
         'reason' => 'e.g. Feeling not well',
     ),
