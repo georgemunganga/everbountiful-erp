@@ -308,7 +308,7 @@ class DashboardController extends AccountBaseController
                         'start' => $holiday->date,
                         'end' => $holiday->date,
                         'event_type' => 'holiday',
-                        'extendedProps' => ['bg_color' => '#1d82f5', 'color' => '#fff', 'icon' => 'fa-star']
+                        'extendedProps' => ['bg_color' => '#126e21', 'color' => '#fff', 'icon' => 'fa-star']
                     ];
                 }
             }
@@ -369,7 +369,7 @@ class DashboardController extends AccountBaseController
                         'start' => $startTime?->toDateTimeString(),
                         'end' => $endTime?->toDateTimeString(),
                         'event_type' => 'ticket',
-                        'extendedProps' => ['bg_color' => '#1d82f5', 'color' => '#fff', 'icon' => 'fa-ticket-alt']
+                        'extendedProps' => ['bg_color' => '#126e21', 'color' => '#fff', 'icon' => 'fa-ticket-alt']
                     ];
                 }
             }
@@ -424,7 +424,7 @@ class DashboardController extends AccountBaseController
                         'start' => $followUp->next_follow_up_date->timezone(company()->timezone),
                         'end' => $followUp->next_follow_up_date->timezone(company()->timezone),
                         'event_type' => 'follow_up',
-                        'extendedProps' => ['bg_color' => '#1d82f5', 'color' => '#fff', 'icon' => 'fa-thumbs-up']
+                        'extendedProps' => ['bg_color' => '#126e21', 'color' => '#fff', 'icon' => 'fa-thumbs-up']
                     ];
                 }
             }

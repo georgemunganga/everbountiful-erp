@@ -46,7 +46,7 @@
             --fc-button-text-color: #99A5B5;
             --fc-button-border-color: #99A5B5;
             --fc-button-bg-color: #ffffff;
-            --fc-button-active-bg-color: #171f29;
+            --fc-button-active-bg-color: #126e21;
             --fc-today-bg-color: #f2f4f7;
         }
 
