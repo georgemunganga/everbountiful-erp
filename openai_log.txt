@@ -1,0 +1,22 @@
+HTTP Code: 401
+Prompt: Please analyze the following business data and return a valid JSON object with date labels like:
+
+{"labels": [""], "sales": [...], ...}
+
+And also give insights.
+
+what does this do
+
+↩️ **Sales Return Summary** (2025-09-01 to 2025-09-30):
+No sales return data found.
+
+
+Response:
+{
+    "error": {
+        "message": "Incorrect API key provided: demo-api*************************************..... You can find your API key at https://platform.openai.com/account/api-keys.",
+        "type": "invalid_request_error",
+        "param": null,
+        "code": "invalid_api_key"
+    }
+}

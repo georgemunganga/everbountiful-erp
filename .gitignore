@@ -1,0 +1,16 @@
+assets/data/outgoing/backup.sql
+application/cache/temp
+assets/img/captcha
+assets/img/user
+assets/img/banner
+assets/img/icons
+application/config/database.php
+assets/data/pdf
+.vscode/
+*.zip
+*.rar
+# *.jpg
+# *.jpeg
+# *.png
+# *.xlsx
+*.sql

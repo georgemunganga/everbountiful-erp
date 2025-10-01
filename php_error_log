@@ -1,0 +1,74 @@
+[05-Jan-2025 05:44:08 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'username'@'localhost' (using password: YES) in D:\laragon\www\SalesERP-V10.0\SalesERP-V10.0\saleserp_v10\v10\index.php on line 323
+[05-Jan-2025 05:47:50 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'username'@'localhost' (using password: YES) in D:\laragon\www\SalesERP-V10.0\SalesERP-V10.0\saleserp_v10\v10\index.php on line 323
+[05-Jan-2025 06:00:57 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:01 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:05 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:09 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:14 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:18 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:22 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:26 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:30 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:34 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:38 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:42 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:46 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:50 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:54 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:01:59 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:03 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:07 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:11 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:15 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:19 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:23 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:27 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:31 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:36 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:40 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:44 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:48 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:52 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:02:56 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:03:00 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:03:04 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:50:20 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:50:24 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:50:28 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
+[05-Jan-2025 06:50:32 Europe/Berlin] PHP Warning:  mysqli::__construct(): (HY000/2002): No connection could be made because the target machine actively refused it.
+ in D:\laragon\www\SalesERP-V10.0\sales-v10\index.php on line 323
