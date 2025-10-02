@@ -1004,7 +1004,6 @@
                     <?php } ?>
                     <!-- =============================== Payroll menu end =================== -->                    <!--  Personal loan start -->
                     <?php if (
-                        $this->permission1->method('add_officeloan_person', 'create')->access() ||
                         $this->permission1->method('manage_office_loan_person', 'read')->access() ||
                         $this->permission1->method('add_office_loan', 'create')->access() ||
                         $this->permission1->method('add_office_loan_payment', 'create')->access()) { ?>
@@ -1030,13 +1029,6 @@
                                 </span>
                             </a>
                             <ul class="treeview-menu">
-                                <?php if ($this->permission1->method('add_officeloan_person', 'create')->access()) { ?>
-                                    <li class="treeview <?php if ($this->uri->segment('1') == ("add_officeloan_person")) {
-                                                            echo "active";
-                                                        } else {
-                                                            echo " ";
-                                                        } ?>"><a href="<?php echo base_url('add_officeloan_person') ?>"><?php echo display('add_person'); ?></a></li>
-                                <?php } ?>
                                 <?php if ($this->permission1->method('manage_office_loan_person', 'read')->access()) { ?>
                                     <li class="treeview <?php if ($this->uri->segment('1') == ("manage_office_loans")) {
                                                             echo "active";
