@@ -49,58 +49,70 @@
                                <input type="number" class="form-control" name="ammount" id="ammount" required="" placeholder="<?php echo display('ammount') ?>" min="0" tabindex="3"/>
                             </div>
                         </div>
-                         <div class="form-group row" id="payment_from">
-                                
-                                    <label for="payment_type" class="col-sm-3 col-form-label"><?php
-                                        echo display('payment_type');
-                                        ?> <i class="text-danger">*</i></label>
-                                    <div class="col-sm-6">
-                                        <select name="paytype" class="form-control" required="" onchange="bank_paymetExpense(this.value)" tabindex="3">
-                            <option value="1"><?php echo display('cash_payment')?></option>
-                            <option value="2"><?php echo display('bank_payment')?></option> 
-                                        </select>
-                                      
-
-                                     
-                                    </div>
-                                
-                            </div>
-                              
-                            <div class="form-group row" id="bank_div">
-                                <label for="bank" class="col-sm-3 col-form-label"><?php
-                                    echo display('bank');
-                                    ?> <i class="text-danger">*</i></label>
-                                <div class="col-sm-6">
-                                   <select name="bank_id" class="form-control"  id="bank_id">
-                                        <option value="">Select Location</option>
-                                        <?php foreach($bank_list as $bank){?>
-                                            <option value="<?php echo $bank['bank_id']?>"><?php echo $bank['bank_name'];?></option>
-                                        <?php }?>
-                                    </select>
-                                 
-                                </div>
-                             
-                            </div>
-                        
-                        <div class="form-group row">
-                            <label for="date" class="col-sm-3 col-form-label"><?php echo display('date') ?> <i class="text-danger"></i></label>
+                        <div class="form-group row" id="payment_from">
+                            <label for="payment_type" class="col-sm-3 col-form-label"><?php echo display('payment_type'); ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
-                               <input type="text" class="form-control datepicker" name="date" id="date" value="<?php echo date("Y-m-d");?>" placeholder="<?php echo display('date') ?>" tabindex="4"/>
+                                <select name="paytype" class="form-control" id="payment_type" required onchange="bank_paymetExpense(this.value)" tabindex="4">
+                                    <?php if (!empty($payment_channels)) { foreach ($payment_channels as $key => $label) { ?>
+                                        <option value="<?php echo html_escape($key);?>" <?php echo (isset($schedule['payment_channel']) && $schedule['payment_channel'] === $key) ? 'selected' : '';?>><?php echo html_escape($label);?></option>
+                                    <?php }} ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row" id="disbursement_row">
+                            <label for="disbursement_date" class="col-sm-3 col-form-label">Disbursement Date <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control datepicker" name="date" id="disbursement_date" value="<?php echo html_escape(isset($schedule['disbursement_date']) ? $schedule['disbursement_date'] : date('Y-m-d'));?>" placeholder="YYYY-MM-DD" required tabindex="5"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row" id="bank_div" style="<?php echo (isset($schedule['payment_channel']) && $schedule['payment_channel'] === 'bank') ? '' : 'display:none;';?>">
+                            <label for="bank_id" class="col-sm-3 col-form-label"><?php echo display('bank'); ?> <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                               <select name="bank_id" class="form-control" id="bank_id" <?php echo (isset($schedule['payment_channel']) && $schedule['payment_channel'] === 'bank') ? 'required' : ''; ?> tabindex="6">
+                                    <option value=""><?php echo display('select_one');?></option>
+                                    <?php if (!empty($bank_list)) { foreach ($bank_list as $bank) { ?>
+                                        <option value="<?php echo html_escape($bank['bank_id']);?>"><?php echo html_escape($bank['bank_name']);?></option>
+                                    <?php }} ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="repayment_period" class="col-sm-3 col-form-label">Repayment Period (months) <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input type="number" class="form-control" name="repayment_period" id="repayment_period" min="1" value="<?php echo isset($schedule['repayment_period']) ? (int) $schedule['repayment_period'] : 6;?>" required tabindex="7"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="repayment_start_date" class="col-sm-3 col-form-label">Repayment Start Date <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control datepicker" name="repayment_start_date" id="repayment_start_date" value="<?php echo html_escape(isset($schedule['repayment_start_date']) ? $schedule['repayment_start_date'] : '');?>" placeholder="YYYY-MM-DD" required tabindex="8"/>
+                                <small class="text-muted">Auto-calculated from the disbursement date; adjust if payroll timing differs.</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="repayment_end_date" class="col-sm-3 col-form-label">Repayment End Date <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control datepicker" name="repayment_end_date" id="repayment_end_date" value="<?php echo html_escape(isset($schedule['repayment_end_date']) ? $schedule['repayment_end_date'] : '');?>" placeholder="YYYY-MM-DD" required tabindex="9"/>
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <label for="details" class="col-sm-3 col-form-label"><?php echo display('details') ?> <i class="text-danger"></i></label>
                             <div class="col-sm-6">
-                                <textarea class="form-control" name="details" id="details" placeholder="<?php echo display('details') ?>" tabindex="5"></textarea>
+                                <textarea class="form-control" name="details" id="details" placeholder="<?php echo display('details') ?>" tabindex="10"></textarea>
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <label for="example-text-input" class="col-sm-4 col-form-label"></label>
                             <div class="col-sm-6">
-                                <input type="reset" class="btn btn-danger" value="<?php echo display('reset') ?>" tabindex="6"/>
-                                <input type="submit" id="add-deposit" class="btn btn-success" name="add-deposit" value="<?php echo display('save') ?>" tabindex="7"/>
+                                <input type="reset" class="btn btn-danger" value="<?php echo display('reset') ?>" tabindex="11"/>
+                                <input type="submit" id="add-deposit" class="btn btn-success" name="add-deposit" value="<?php echo display('save') ?>" tabindex="12"/>
                             </div>
                         </div>
                     </div>
