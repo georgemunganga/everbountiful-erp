@@ -1342,6 +1342,191 @@ class Payroll extends MX_Controller {
 		echo Modules::run('template/layout', $data); 
 	}
 
+
+    public function tax_slabs()
+    {
+        $this->permission1->method('employee_salary_generate','read')->access();
+
+        $data['title']      = 'Tax Slabs';
+        $data['module']     = 'hrm';
+        $data['page']       = 'payroll/tax_slabs';
+        $data['tax_slabs']  = $this->Payroll_model->get_tax_slabs();
+
+        echo Modules::run('template/layout', $data);
+    }
+
+    public function salary_components()
+    {
+        $this->permission1->method('manage_salary_setup','read')->access();
+
+        $data['title']       = 'Salary Components';
+        $data['module']      = 'hrm';
+        $data['page']        = 'payroll/salary_components';
+        $data['components']  = $this->Payroll_model->get_salary_components();
+
+        echo Modules::run('template/layout', $data);
+    }
+
+    public function save_salary_component()
+    {
+        $component_id = $this->input->post('component_id', true);
+        $is_update = !empty($component_id);
+
+        $this->permission1->method('manage_salary_setup', $is_update ? 'update' : 'create')->access();
+
+        $this->form_validation->set_rules('component_name', 'Component Name', 'required|max_length[100]');
+        $this->form_validation->set_rules('component_type', 'Component Type', 'required|in_list[earning,deduction]');
+        $this->form_validation->set_rules('amount_type', 'Amount Type', 'required|in_list[fixed,percentage]');
+        $this->form_validation->set_rules('amount_value', 'Amount Value', 'required|numeric');
+        $this->form_validation->set_rules('component_code', 'Component Code', 'max_length[50]');
+        $this->form_validation->set_rules('description', 'Description', 'max_length[1000]');
+
+        if ($this->input->post('amount_type', true) === 'percentage') {
+            $this->form_validation->set_rules('percentage_base', 'Percentage Base', 'required|in_list[gross,basic,net]');
+        }
+
+        if ($this->form_validation->run() === false) {
+            $this->session->set_flashdata('exception', strip_tags(validation_errors()));
+            redirect('salary_components');
+        }
+
+        $amount_type  = $this->input->post('amount_type', true);
+        $amount_value = floatval($this->input->post('amount_value', true));
+
+        if ($amount_type === 'percentage' && ($amount_value < 0 || $amount_value > 100)) {
+            $this->session->set_flashdata('exception', 'Percentage value must be between 0 and 100.');
+            redirect('salary_components');
+        }
+
+        if ($amount_type === 'fixed' && $amount_value < 0) {
+            $this->session->set_flashdata('exception', 'Amount value cannot be negative.');
+            redirect('salary_components');
+        }
+
+        $code = trim($this->input->post('component_code', true));
+        $data = array(
+            'component_name'  => $this->input->post('component_name', true),
+            'component_code'  => $code !== '' ? $code : null,
+            'component_type'  => $this->input->post('component_type', true),
+            'amount_type'     => $amount_type,
+            'amount_value'    => $amount_value,
+            'percentage_base' => $amount_type === 'percentage' ? $this->input->post('percentage_base', true) : null,
+            'is_taxable'      => ($this->input->post('is_taxable', true) !== null ? (int) $this->input->post('is_taxable', true) : 0),
+            'status'          => ($this->input->post('status', true) !== null ? (int) $this->input->post('status', true) : 0),
+            'description'     => $this->input->post('description', true),
+        );
+
+        $timestamp = date('Y-m-d H:i:s');
+        $user_id   = $this->session->userdata('id');
+        $success   = false;
+
+        if ($is_update) {
+            $data['updated_by'] = $user_id;
+            $data['updated_at'] = $timestamp;
+            $success = $this->Payroll_model->update_salary_component($component_id, $data);
+        } else {
+            $data['created_by'] = $user_id;
+            $data['created_at'] = $timestamp;
+            $success = $this->Payroll_model->insert_salary_component($data);
+        }
+
+        if ($success) {
+            $this->session->set_flashdata('message', $is_update ? display('successfully_updated') : display('successfully_saved'));
+        } else {
+            $db_error = $this->db->error();
+            $message  = !empty($db_error['message']) ? $db_error['message'] : display('please_try_again');
+            $this->session->set_flashdata('exception', $message);
+        }
+
+        redirect('salary_components');
+    }
+
+    public function delete_salary_component($id = null)
+    {
+        $this->permission1->method('manage_salary_setup','delete')->access();
+
+        if (empty($id) || !$this->Payroll_model->delete_salary_component($id)) {
+            $this->session->set_flashdata('exception', display('please_try_again'));
+        } else {
+            $this->session->set_flashdata('message', display('delete_successfully'));
+        }
+
+        redirect('salary_components');
+    }
+
+    public function save_tax_slab()
+    {
+        $slab_id   = $this->input->post('slab_id', true);
+        $is_update = !empty($slab_id);
+
+        $this->permission1->method('employee_salary_generate', $is_update ? 'update' : 'create')->access();
+
+        $this->form_validation->set_rules('min_amount', 'Minimum Amount', 'required|numeric');
+        $this->form_validation->set_rules('max_amount', 'Maximum Amount', 'numeric');
+        $this->form_validation->set_rules('rate_percent', 'Tax Rate (%)', 'required|numeric');
+        $this->form_validation->set_rules('additional_amount', 'Additional Amount', 'numeric');
+        $this->form_validation->set_rules('notes', 'Notes', 'max_length[1000]');
+
+        if ($this->form_validation->run() === false) {
+            $this->session->set_flashdata('exception', strip_tags(validation_errors()));
+            redirect('tax_slabs');
+        }
+
+        $min = floatval($this->input->post('min_amount', true));
+        $max_input = $this->input->post('max_amount', true);
+        $max = ($max_input === '' ? null : floatval($max_input));
+        if (!is_null($max) && $max <= $min) {
+            $this->session->set_flashdata('exception', 'Maximum amount must be greater than minimum amount.');
+            redirect('tax_slabs');
+        }
+
+        $data = array(
+            'min_amount'        => $min,
+            'max_amount'        => $max,
+            'rate_percent'      => floatval($this->input->post('rate_percent', true)),
+            'additional_amount' => floatval($this->input->post('additional_amount', true)),
+            'status'            => ($this->input->post('status', true) !== null ? (int) $this->input->post('status', true) : 0),
+            'notes'             => $this->input->post('notes', true),
+        );
+
+        $timestamp = date('Y-m-d H:i:s');
+        $user_id   = $this->session->userdata('id');
+        $success   = false;
+
+        if ($is_update) {
+            $data['updated_by'] = $user_id;
+            $data['updated_at'] = $timestamp;
+            $success = $this->Payroll_model->update_tax_slab($slab_id, $data);
+        } else {
+            $data['created_by'] = $user_id;
+            $data['created_at'] = $timestamp;
+            $success = $this->Payroll_model->insert_tax_slab($data);
+        }
+
+        if ($success) {
+            $this->session->set_flashdata('message', $is_update ? display('successfully_updated') : display('successfully_saved'));
+        } else {
+            $db_error = $this->db->error();
+            $message  = !empty($db_error['message']) ? $db_error['message'] : display('please_try_again');
+            $this->session->set_flashdata('exception', $message);
+        }
+
+        redirect('tax_slabs');
+    }
+
+    public function delete_tax_slab($id = null)
+    {
+        $this->permission1->method('employee_salary_generate','delete')->access();
+
+        if (empty($id) || !$this->Payroll_model->delete_tax_slab($id)) {
+            $this->session->set_flashdata('exception', display('please_try_again'));
+        } else {
+            $this->session->set_flashdata('message', display('delete_successfully'));
+        }
+
+        redirect('tax_slabs');
+    }
+
 	public function salary_pay_slip($id)
 	{ 
 		$data['title']         = display('view_employee_payment'); 
@@ -1890,3 +2075,7 @@ class Payroll extends MX_Controller {
 	}
 
 }
+
+
+
+

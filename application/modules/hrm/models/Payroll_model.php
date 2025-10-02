@@ -577,5 +577,63 @@ public function create_employee_payment($data = array())
 		return $this->db->where('ssg_id', $ssg_id)
 			->update("gmb_salary_sheet_generate", $data);
 	}
-}
 
+	public function get_salary_components($only_active = false)
+	{
+		$this->db->from('hrm_salary_components');
+		if ($only_active) {
+			$this->db->where('status', 1);
+		}
+		return $this->db->order_by('component_name', 'asc')->get()->result();
+	}
+
+	public function get_salary_component($id)
+	{
+		return $this->db->get_where('hrm_salary_components', ['id' => $id])->row();
+	}
+
+	public function insert_salary_component($data = array())
+	{
+		return $this->db->insert('hrm_salary_components', $data);
+	}
+
+	public function update_salary_component($id, $data = array())
+	{
+		return $this->db->where('id', $id)->update('hrm_salary_components', $data);
+	}
+
+	public function delete_salary_component($id)
+	{
+		return $this->db->where('id', $id)->delete('hrm_salary_components');
+	}
+
+	public function get_tax_slabs($only_active = false)
+	{
+		$this->db->from('hrm_tax_slabs');
+		if ($only_active) {
+			$this->db->where('status', 1);
+		}
+		return $this->db->order_by('min_amount', 'asc')->get()->result();
+	}
+
+	public function get_tax_slab($id)
+	{
+		return $this->db->get_where('hrm_tax_slabs', ['id' => $id])->row();
+	}
+
+	public function insert_tax_slab($data = array())
+	{
+		return $this->db->insert('hrm_tax_slabs', $data);
+	}
+
+	public function update_tax_slab($id, $data = array())
+	{
+		return $this->db->where('id', $id)->update('hrm_tax_slabs', $data);
+	}
+
+	public function delete_tax_slab($id)
+	{
+		return $this->db->where('id', $id)->delete('hrm_tax_slabs');
+	}
+
+}
