@@ -51,7 +51,7 @@
                                                         }
                                                     ?>
                                                 </td>
-                                                <td><?php echo nl2br(html_escape($loan['details'])); ?></td>
+                                                <td><?php echo html_escape($loan['details']); ?></td>
                                                 <td>
                                                     <?php if($this->permission1->method('manage_office_loan_person','update')->access()){ ?>
                                                         <a href="<?php echo base_url('bdtask_edit_office_loan/' . $loan['transaction_id']); ?>" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="left" title="<?php echo display('update'); ?>">

@@ -53,69 +53,46 @@
                         <div class="form-group row" id="payment_from">
                             <label for="payment_type" class="col-sm-3 col-form-label"><?php echo display('payment_type'); ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
-                                <select name="paytype" class="form-control" id="payment_type" required onchange="bank_paymetExpense(this.value)" tabindex="4">
-                                    <?php if (!empty($payment_channels)) { foreach ($payment_channels as $key => $label) { ?>
-                                        <option value="<?php echo html_escape($key);?>" <?php echo ($paytype === $key) ? 'selected' : '';?>><?php echo html_escape($label);?></option>
-                                    <?php }} ?>
+                                <select name="paytype" class="form-control" required="" onchange="bank_paymetExpense(this.value)" tabindex="4">
+                                    <option value="1" <?php echo ($paytype == 1)?'selected':'';?>><?php echo display('cash_payment')?></option>
+                                    <option value="2" <?php echo ($paytype == 2)?'selected':'';?>><?php echo display('bank_payment')?></option>
                                 </select>
                             </div>
                         </div>
 
-                        <div class="form-group row" id="disbursement_row">
-                            <label for="disbursement_date" class="col-sm-3 col-form-label">Disbursement Date <i class="text-danger">*</i></label>
+                        <div class="form-group row" id="bank_div" style="<?php echo ($paytype == 2)?'':'display:none;';?>">
+                            <label for="bank" class="col-sm-3 col-form-label"><?php echo display('bank'); ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
-                               <input type="text" class="form-control datepicker" name="date" id="disbursement_date" value="<?php echo html_escape($schedule['disbursement_date']);?>" placeholder="YYYY-MM-DD" required tabindex="5"/>
-                            </div>
-                        </div>
-
-                        <div class="form-group row" id="bank_div" style="<?php echo ($paytype === 'bank') ? '' : 'display:none;';?>">
-                            <label for="bank_id" class="col-sm-3 col-form-label"><?php echo display('bank'); ?> <i class="text-danger">*</i></label>
-                            <div class="col-sm-6">
-                               <select name="bank_id" class="form-control" id="bank_id" <?php echo ($paytype === 'bank') ? 'required' : ''; ?> tabindex="6">
+                               <select name="bank_id" class="form-control" id="bank_id">
                                     <option value=""><?php echo display('select_one');?></option>
                                     <?php if(!empty($bank_list)){foreach($bank_list as $bank){
                                         $selected_bank = ($bank_id == $bank['bank_id'])?'selected':'';
                                     ?>
-                                        <option value="<?php echo html_escape($bank['bank_id']);?>" <?php echo $selected_bank;?>><?php echo html_escape($bank['bank_name']);?></option>
+                                        <option value="<?php echo $bank['bank_id'];?>" <?php echo $selected_bank;?>><?php echo html_escape($bank['bank_name']);?></option>
                                     <?php }}?>
                                 </select>
                             </div>
                         </div>
 
                         <div class="form-group row">
-                            <label for="repayment_period" class="col-sm-3 col-form-label">Repayment Period (months) <i class="text-danger">*</i></label>
+                            <label for="date" class="col-sm-3 col-form-label"><?php echo display('date') ?> <i class="text-danger"></i></label>
                             <div class="col-sm-6">
-                                <input type="number" class="form-control" name="repayment_period" id="repayment_period" min="1" value="<?php echo (int) $schedule['repayment_period'];?>" required tabindex="7"/>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="repayment_start_date" class="col-sm-3 col-form-label">Repayment Start Date <i class="text-danger">*</i></label>
-                            <div class="col-sm-6">
-                                <input type="text" class="form-control datepicker" name="repayment_start_date" id="repayment_start_date" value="<?php echo html_escape($schedule['repayment_start_date']);?>" placeholder="YYYY-MM-DD" required tabindex="8"/>
-                                <small class="text-muted">Auto-calculated from the disbursement date; adjust if payroll timing differs.</small>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="repayment_end_date" class="col-sm-3 col-form-label">Repayment End Date <i class="text-danger">*</i></label>
-                            <div class="col-sm-6">
-                                <input type="text" class="form-control datepicker" name="repayment_end_date" id="repayment_end_date" value="<?php echo html_escape($schedule['repayment_end_date']);?>" placeholder="YYYY-MM-DD" required tabindex="9"/>
+                               <input type="text" class="form-control datepicker" name="date" id="date" value="<?php echo html_escape($loan['date']);?>" placeholder="<?php echo display('date') ?>" tabindex="5"/>
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <label for="details" class="col-sm-3 col-form-label"><?php echo display('details') ?></label>
                             <div class="col-sm-6">
-                                <textarea class="form-control" name="details" id="details" placeholder="<?php echo display('details') ?>" tabindex="10"><?php echo html_escape($loan['details']);?></textarea>
+                                <textarea class="form-control" name="details" id="details" placeholder="<?php echo display('details') ?>" tabindex="6"><?php echo html_escape($loan['details']);?></textarea>
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <label for="example-text-input" class="col-sm-4 col-form-label"></label>
                             <div class="col-sm-6">
-                                <input type="reset" class="btn btn-danger" value="<?php echo display('reset') ?>" tabindex="11"/>
-                                <input type="submit" class="btn btn-success" value="<?php echo display('save') ?>" tabindex="12"/>
+                                <input type="reset" class="btn btn-danger" value="<?php echo display('reset') ?>" tabindex="7"/>
+                                <input type="submit" class="btn btn-success" value="<?php echo display('save') ?>" tabindex="8"/>
                             </div>
                         </div>
                     </div>
@@ -128,170 +105,19 @@
             (function() {
                 var employeeSelect = document.getElementById('employee_id');
                 var phoneInput = document.getElementById('phone');
-                if (employeeSelect) {
-                    employeeSelect.addEventListener('change', function() {
-                        var option = this.options[this.selectedIndex];
-                        if (!option) {
-                            return;
-                        }
-                        var phone = option.getAttribute('data-phone') || '';
-                        if (phoneInput) {
-                            phoneInput.value = phone;
-                        }
-                    });
+                if (!employeeSelect) {
+                    return;
                 }
 
-                var disbursementInput = document.getElementById('disbursement_date');
-                var periodInput = document.getElementById('repayment_period');
-                var startInput = document.getElementById('repayment_start_date');
-                var endInput = document.getElementById('repayment_end_date');
-                var paymentTypeSelect = document.getElementById('payment_type');
-                var bankSelect = document.getElementById('bank_id');
-
-                function parseDateInput(value) {
-                    if (!value) {
-                        return null;
-                    }
-                    var parts = value.split('-');
-                    if (parts.length !== 3) {
-                        return null;
-                    }
-                    var year = parseInt(parts[0], 10);
-                    var month = parseInt(parts[1], 10) - 1;
-                    var day = parseInt(parts[2], 10);
-                    if (isNaN(year) || isNaN(month) || isNaN(day)) {
-                        return null;
-                    }
-                    var date = new Date(year, month, day);
-                    if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
-                        return null;
-                    }
-                    return date;
-                }
-
-                function formatDateOutput(date) {
-                    if (!(date instanceof Date)) {
-                        return '';
-                    }
-                    var month = (date.getMonth() + 1).toString().padStart(2, '0');
-                    var day = date.getDate().toString().padStart(2, '0');
-                    return date.getFullYear() + '-' + month + '-' + day;
-                }
-
-                function addMonths(date, months) {
-                    var working = new Date(date.getTime());
-                    var originalDay = working.getDate();
-                    working.setMonth(working.getMonth() + months);
-                    if (working.getDate() < originalDay) {
-                        working.setDate(0);
-                    }
-                    return working;
-                }
-
-                var startDirty = false;
-                var endDirty = false;
-
-                if (disbursementInput && startInput) {
-                    var initialDisbursement = parseDateInput(disbursementInput.value);
-                    var initialStart = parseDateInput(startInput.value);
-                    if (initialDisbursement) {
-                        var expectedStart = formatDateOutput(addMonths(initialDisbursement, 1));
-                        if (startInput.value && startInput.value !== expectedStart) {
-                            startDirty = true;
-                        }
-                    }
-                    if (initialStart && endInput && periodInput) {
-                        var months = parseInt(periodInput.value, 10);
-                        if (!isNaN(months) && months > 0) {
-                            var expectedEnd = formatDateOutput(addMonths(initialStart, months - 1));
-                            if (endInput.value && endInput.value !== expectedEnd) {
-                                endDirty = true;
-                            }
-                        }
-                    }
-                }
-
-                function updateEndDate(force) {
-                    if (!startInput || !endInput || !periodInput) {
+                employeeSelect.addEventListener('change', function() {
+                    var option = this.options[this.selectedIndex];
+                    if (!option) {
                         return;
                     }
-                    var startDate = parseDateInput(startInput.value);
-                    var months = parseInt(periodInput.value, 10);
-                    if (!startDate || isNaN(months) || months <= 0) {
-                        return;
+                    var phone = option.getAttribute('data-phone') || '';
+                    if (phoneInput) {
+                        phoneInput.value = phone;
                     }
-                    var calculated = formatDateOutput(addMonths(startDate, months - 1));
-                    if (force || !endDirty || !endInput.value) {
-                        endInput.value = calculated;
-                        endDirty = false;
-                    }
-                }
-
-                function updateStartFromDisbursement() {
-                    if (!disbursementInput || !startInput) {
-                        return;
-                    }
-                    var disbursementDate = parseDateInput(disbursementInput.value);
-                    if (!disbursementDate) {
-                        return;
-                    }
-                    var proposedStart = formatDateOutput(addMonths(disbursementDate, 1));
-                    if (!startDirty || !startInput.value) {
-                        startInput.value = proposedStart;
-                        startDirty = false;
-                    }
-                    updateEndDate(true);
-                }
-
-                if (disbursementInput) {
-                    disbursementInput.addEventListener('change', function() {
-                        startDirty = false;
-                        updateStartFromDisbursement();
-                    });
-                }
-
-                if (periodInput) {
-                    periodInput.addEventListener('input', function() {
-                        updateEndDate(true);
-                    });
-                    periodInput.addEventListener('change', function() {
-                        updateEndDate(true);
-                    });
-                }
-
-                if (startInput) {
-                    startInput.addEventListener('input', function() {
-                        startDirty = true;
-                        updateEndDate(true);
-                    });
-                    startInput.addEventListener('change', function() {
-                        startDirty = true;
-                        updateEndDate(true);
-                    });
-                }
-
-                if (endInput) {
-                    endInput.addEventListener('input', function() {
-                        endDirty = true;
-                    });
-                    endInput.addEventListener('change', function() {
-                        endDirty = true;
-                    });
-                }
-
-                updateStartFromDisbursement();
-                updateEndDate(false);
-
-                if (paymentTypeSelect && typeof bank_paymetExpense === 'function') {
-                    bank_paymetExpense(paymentTypeSelect.value);
-                }
-
-                if (bankSelect) {
-                    bankSelect.addEventListener('change', function() {
-                        if (this.value) {
-                            this.classList.remove('is-invalid');
-                        }
-                    });
-                }
+                });
             })();
         </script>

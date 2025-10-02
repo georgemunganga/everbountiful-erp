@@ -477,6 +477,7 @@ class Loan extends MX_Controller {
             foreach ($loan_list as $key => $loan) {
                 $loan_list[$key]['date'] = $this->occational->dateConvert($loan['date']);
                 $loan_list[$key]['debit'] = (float) $loan['debit'];
+<<<<<<< HEAD
                 $parsed_details = $this->parse_schedule_from_details($loan['details']);
                 $details_parts = array();
                 $base_details = trim($parsed_details['details']);
@@ -491,6 +492,8 @@ class Loan extends MX_Controller {
                     }
                 }
                 $loan_list[$key]['details'] = trim(implode("\n\n", $details_parts));
+=======
+>>>>>>> final
                 $total_amount += $loan_list[$key]['debit'];
             }
         }
@@ -635,13 +638,19 @@ class Loan extends MX_Controller {
     }
 
        public function bdtask_add_office_loan() {
+<<<<<<< HEAD
        $data['title']       = display('add_office_loan');
        $data['employees']   = $this->db->select('id, first_name, last_name, phone, address_line_1')
+=======
+        $data['title']       = display('add_office_loan');
+        $data['employees']   = $this->db->select('id, first_name, last_name, phone, address_line_1')
+>>>>>>> final
             ->from('employee_history')
             ->order_by('first_name', 'asc')
             ->order_by('last_name', 'asc')
             ->get()
             ->result();
+<<<<<<< HEAD
         $data['bank_list']   = $this->db->select('bank_id, bank_name')
             ->from('bank_add')
             ->order_by('bank_name', 'asc')
@@ -649,6 +658,8 @@ class Loan extends MX_Controller {
             ->result_array();
         $data['payment_channels'] = $this->get_payment_channel_options();
         $data['schedule'] = $this->build_schedule_payload();
+=======
+>>>>>>> final
         $data['module']      = "hrm";
         $data['page']        = "office_loan/add_office_loan";
         echo modules::run('template/layout', $data);
@@ -659,6 +670,7 @@ class Loan extends MX_Controller {
      public function bdtask_insert_office_loan() {
         $employee_id = $this->input->post('employee_id', TRUE);
         $amount      = (float) $this->input->post('ammount', TRUE);
+<<<<<<< HEAD
         $details     = $this->input->post('details', TRUE);
         $channel     = $this->normalize_payment_channel($this->input->post('paytype', TRUE));
         $bank_id     = $this->input->post('bank_id', TRUE);
@@ -680,6 +692,19 @@ class Loan extends MX_Controller {
                 redirect(base_url('add_office_loan'));
             }
         } else {
+=======
+        $date        = $this->input->post('date', TRUE);
+        $details     = $this->input->post('details', TRUE);
+        $paytype     = (int) $this->input->post('paytype', TRUE);
+        $bank_id     = $this->input->post('bank_id', TRUE);
+
+        if (empty($date)) {
+            $date = date('Y-m-d');
+        }
+        $details = !empty($details) ? $details : '';
+        if ($paytype !== 2) {
+            $paytype = 1;
+>>>>>>> final
             $bank_id = '';
         }
 
@@ -739,6 +764,7 @@ class Loan extends MX_Controller {
         $transaction_id = $this->occational->generator(10);
 
         $bankcoaid = '';
+<<<<<<< HEAD
         if ($this->payment_channel_requires_bank($channel)) {
             $bank = $this->db->select('bank_name')
                 ->from('bank_add')
@@ -746,6 +772,20 @@ class Loan extends MX_Controller {
                 ->get()
                 ->row();
 
+=======
+        if ($paytype === 2) {
+            if (empty($bank_id)) {
+                $this->session->set_flashdata(array('exception' => display('not_added')));
+                redirect(base_url('add_office_loan'));
+            }
+
+            $bank = $this->db->select('bank_name')
+                ->from('bank_add')
+                ->where('bank_id', $bank_id)
+                ->get()
+                ->row();
+
+>>>>>>> final
             if (!$bank) {
                 $this->session->set_flashdata(array('exception' => display('not_added')));
                 redirect(base_url('add_office_loan'));
@@ -765,14 +805,21 @@ class Loan extends MX_Controller {
             }
         }
 
+<<<<<<< HEAD
         $details_with_schedule = $this->decorate_details_with_schedule($details, $schedule);
 
+=======
+>>>>>>> final
         $ledger_data = array(
             'transaction_id' => $transaction_id,
             'person_id'      => $personinfo->person_id,
             'debit'          => $amount,
             'date'           => $date,
+<<<<<<< HEAD
             'details'        => $details_with_schedule,
+=======
+            'details'        => $details,
+>>>>>>> final
             'status'         => 1
         );
 
@@ -781,7 +828,11 @@ class Loan extends MX_Controller {
           'Vtype'          =>  'LNR',
           'VDate'          =>  $date,
           'COAID'          =>  $headcode,
+<<<<<<< HEAD
           'Narration'      =>  'Loan for '.$personinfo->person_name,
+=======
+          'Narration'      =>  'Loan for .'.$personinfo->person_name,
+>>>>>>> final
           'Debit'          =>  $amount,
           'Credit'         =>  0,
           'IsPosted'       =>  1,
@@ -794,11 +845,16 @@ class Loan extends MX_Controller {
           'VNo'            =>  $transaction_id,
           'Vtype'          =>  'LNR',
           'VDate'          =>  $date,
+<<<<<<< HEAD
           'COAID'          =>  $this->payment_channel_requires_bank($channel) ? $bankcoaid : 111000002,
           'Narration'      =>  ($this->payment_channel_requires_bank($channel)
                 ? 'Bank disbursement for '
                 : ($channel === 'payroll' ? 'Payroll disbursement for ' : 'Cash in hand credit for '))
                 . $personinfo->person_name,
+=======
+          'COAID'          =>  $paytype === 2 ? $bankcoaid : 111000002,
+          'Narration'      =>  ($paytype === 2 ? 'Loan for .' : 'Cash in Hand Credit For ').$personinfo->person_name,
+>>>>>>> final
           'Debit'          =>  0,
           'Credit'         =>  $amount,
           'IsPosted'       =>  1,
@@ -833,11 +889,14 @@ class Loan extends MX_Controller {
             redirect(base_url('manage_office_loans'));
         }
 
+<<<<<<< HEAD
         $parsed_details = $this->parse_schedule_from_details($loan['details']);
         $loan['details'] = $parsed_details['details'];
         $schedule = $this->build_schedule_payload($parsed_details['schedule'], $loan['date']);
         $loan['date'] = $schedule['disbursement_date'];
 
+=======
+>>>>>>> final
         $credit_entry = $this->db->select('a.COAID, b.HeadName')
             ->from('acc_transaction a')
             ->join('acc_coa b', 'b.HeadCode = a.COAID', 'left')
@@ -846,8 +905,15 @@ class Loan extends MX_Controller {
             ->get()
             ->row();
 
+<<<<<<< HEAD
         $bank_id  = '';
         if ($credit_entry && (int) $credit_entry->COAID !== 111000002) {
+=======
+        $paytype  = 1;
+        $bank_id  = '';
+        if ($credit_entry && (int) $credit_entry->COAID !== 111000002) {
+            $paytype = 2;
+>>>>>>> final
             if (!empty($credit_entry->HeadName)) {
                 $bank = $this->db->select('bank_id')
                     ->from('bank_add')
@@ -860,6 +926,7 @@ class Loan extends MX_Controller {
             }
         }
 
+<<<<<<< HEAD
         if (empty($parsed_details['schedule'])) {
             $schedule['payment_channel'] = ($credit_entry && (int) $credit_entry->COAID !== 111000002) ? 'bank' : 'cash';
         }
@@ -875,6 +942,8 @@ class Loan extends MX_Controller {
             }
         }
 
+=======
+>>>>>>> final
         $employee_id = '';
         if (!empty($loan['person_id']) && strpos($loan['person_id'], 'EMP') === 0) {
             $employee_id = (int) ltrim(substr($loan['person_id'], 3), '0');
@@ -899,10 +968,15 @@ class Loan extends MX_Controller {
         $data['module']       = "hrm";
         $data['page']         = "office_loan/edit_office_loan";
         $data['loan']         = $loan;
+<<<<<<< HEAD
+=======
+        $data['paytype']      = $paytype;
+>>>>>>> final
         $data['bank_id']      = $bank_id;
         $data['employees']    = $employees;
         $data['employee_id']  = $employee_id;
         $data['transaction_id'] = $transaction_id;
+<<<<<<< HEAD
         $data['payment_channels'] = $this->get_payment_channel_options();
         $data['schedule']     = $schedule;
         $data['paytype']      = $schedule['payment_channel'];
@@ -911,6 +985,8 @@ class Loan extends MX_Controller {
             ->order_by('bank_name', 'asc')
             ->get()
             ->result_array();
+=======
+>>>>>>> final
 
         echo modules::run('template/layout', $data);
     }
@@ -920,6 +996,7 @@ class Loan extends MX_Controller {
         $transaction_id = $this->input->post('transaction_id', TRUE);
         $employee_id    = $this->input->post('employee_id', TRUE);
         $amount         = (float) $this->input->post('ammount', TRUE);
+<<<<<<< HEAD
         $details        = $this->input->post('details', TRUE);
         $channel        = $this->normalize_payment_channel($this->input->post('paytype', TRUE));
         $bank_id        = $this->input->post('bank_id', TRUE);
@@ -941,6 +1018,19 @@ class Loan extends MX_Controller {
                 redirect(base_url('bdtask_edit_office_loan/' . $transaction_id));
             }
         } else {
+=======
+        $date           = $this->input->post('date', TRUE);
+        $details        = $this->input->post('details', TRUE);
+        $paytype        = (int) $this->input->post('paytype', TRUE);
+        $bank_id        = $this->input->post('bank_id', TRUE);
+
+        if (empty($date)) {
+            $date = date('Y-m-d');
+        }
+        $details = !empty($details) ? $details : '';
+        if ($paytype !== 2) {
+            $paytype = 1;
+>>>>>>> final
             $bank_id = '';
         }
 
@@ -997,7 +1087,16 @@ class Loan extends MX_Controller {
         }
 
         $bankcoaid = '';
+<<<<<<< HEAD
         if ($this->payment_channel_requires_bank($channel)) {
+=======
+        if ($paytype === 2) {
+            if (empty($bank_id)) {
+                $this->session->set_flashdata(array('exception' => display('not_added')));
+                redirect(base_url('bdtask_edit_office_loan/' . $transaction_id));
+            }
+
+>>>>>>> final
             $bank = $this->db->select('bank_name')
                 ->from('bank_add')
                 ->where('bank_id', $bank_id)
@@ -1023,13 +1122,20 @@ class Loan extends MX_Controller {
             }
         }
 
+<<<<<<< HEAD
         $details_with_schedule = $this->decorate_details_with_schedule($details, $schedule);
 
+=======
+>>>>>>> final
         $ledger_update = array(
             'person_id' => $personinfo->person_id,
             'debit'     => $amount,
             'date'      => $date,
+<<<<<<< HEAD
             'details'   => $details_with_schedule,
+=======
+            'details'   => $details,
+>>>>>>> final
         );
 
         $this->db->where('transaction_id', $transaction_id)
@@ -1040,7 +1146,11 @@ class Loan extends MX_Controller {
           'Vtype'          =>  'LNR',
           'VDate'          =>  $date,
           'COAID'          =>  $headcode,
+<<<<<<< HEAD
           'Narration'      =>  'Loan for '.$personinfo->person_name,
+=======
+          'Narration'      =>  'Loan for .'.$personinfo->person_name,
+>>>>>>> final
           'Debit'          =>  $amount,
           'Credit'         =>  0,
           'IsPosted'       =>  1,
@@ -1053,11 +1163,16 @@ class Loan extends MX_Controller {
           'VNo'            =>  $transaction_id,
           'Vtype'          =>  'LNR',
           'VDate'          =>  $date,
+<<<<<<< HEAD
           'COAID'          =>  $this->payment_channel_requires_bank($channel) ? $bankcoaid : 111000002,
           'Narration'      =>  ($this->payment_channel_requires_bank($channel)
                 ? 'Bank disbursement for '
                 : ($channel === 'payroll' ? 'Payroll disbursement for ' : 'Cash in hand credit for '))
                 . $personinfo->person_name,
+=======
+          'COAID'          =>  $paytype === 2 ? $bankcoaid : 111000002,
+          'Narration'      =>  ($paytype === 2 ? 'Loan for .' : 'Cash in Hand Credit For ').$personinfo->person_name,
+>>>>>>> final
           'Debit'          =>  0,
           'Credit'         =>  $amount,
           'IsPosted'       =>  1,

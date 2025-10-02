@@ -125,171 +125,20 @@
             (function() {
                 var employeeSelect = document.getElementById('employee_id');
                 var phoneInput = document.getElementById('phone');
-                if (employeeSelect) {
-                    employeeSelect.addEventListener('change', function() {
-                        var option = this.options[this.selectedIndex];
-                        if (!option) {
-                            return;
-                        }
-                        var phone = option.getAttribute('data-phone') || '';
-                        if (phoneInput) {
-                            phoneInput.value = phone;
-                        }
-                    });
+                if (!employeeSelect) {
+                    return;
                 }
 
-                var disbursementInput = document.getElementById('disbursement_date');
-                var periodInput = document.getElementById('repayment_period');
-                var startInput = document.getElementById('repayment_start_date');
-                var endInput = document.getElementById('repayment_end_date');
-                var paymentTypeSelect = document.getElementById('payment_type');
-                var bankSelect = document.getElementById('bank_id');
-
-                function parseDateInput(value) {
-                    if (!value) {
-                        return null;
-                    }
-                    var parts = value.split('-');
-                    if (parts.length !== 3) {
-                        return null;
-                    }
-                    var year = parseInt(parts[0], 10);
-                    var month = parseInt(parts[1], 10) - 1;
-                    var day = parseInt(parts[2], 10);
-                    if (isNaN(year) || isNaN(month) || isNaN(day)) {
-                        return null;
-                    }
-                    var date = new Date(year, month, day);
-                    if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
-                        return null;
-                    }
-                    return date;
-                }
-
-                function formatDateOutput(date) {
-                    if (!(date instanceof Date)) {
-                        return '';
-                    }
-                    var month = (date.getMonth() + 1).toString().padStart(2, '0');
-                    var day = date.getDate().toString().padStart(2, '0');
-                    return date.getFullYear() + '-' + month + '-' + day;
-                }
-
-                function addMonths(date, months) {
-                    var working = new Date(date.getTime());
-                    var originalDay = working.getDate();
-                    working.setMonth(working.getMonth() + months);
-                    if (working.getDate() < originalDay) {
-                        working.setDate(0);
-                    }
-                    return working;
-                }
-
-                var startDirty = false;
-                var endDirty = false;
-
-                if (disbursementInput && startInput) {
-                    var initialDisbursement = parseDateInput(disbursementInput.value);
-                    var initialStart = parseDateInput(startInput.value);
-                    if (initialDisbursement) {
-                        var expectedStart = formatDateOutput(addMonths(initialDisbursement, 1));
-                        if (startInput.value && startInput.value !== expectedStart) {
-                            startDirty = true;
-                        }
-                    }
-                    if (initialStart && endInput && periodInput) {
-                        var months = parseInt(periodInput.value, 10);
-                        if (!isNaN(months) && months > 0) {
-                            var expectedEnd = formatDateOutput(addMonths(initialStart, months - 1));
-                            if (endInput.value && endInput.value !== expectedEnd) {
-                                endDirty = true;
-                            }
-                        }
-                    }
-                }
-
-                function updateEndDate(force) {
-                    if (!startInput || !endInput || !periodInput) {
+                employeeSelect.addEventListener('change', function() {
+                    var option = this.options[this.selectedIndex];
+                    if (!option) {
                         return;
                     }
-                    var startDate = parseDateInput(startInput.value);
-                    var months = parseInt(periodInput.value, 10);
-                    if (!startDate || isNaN(months) || months <= 0) {
-                        return;
+                    var phone = option.getAttribute('data-phone') || '';
+                    if (phoneInput) {
+                        phoneInput.value = phone;
                     }
-                    var calculated = formatDateOutput(addMonths(startDate, months - 1));
-                    if (force || !endDirty || !endInput.value) {
-                        endInput.value = calculated;
-                        endDirty = false;
-                    }
-                }
-
-                function updateStartFromDisbursement() {
-                    if (!disbursementInput || !startInput) {
-                        return;
-                    }
-                    var disbursementDate = parseDateInput(disbursementInput.value);
-                    if (!disbursementDate) {
-                        return;
-                    }
-                    var proposedStart = formatDateOutput(addMonths(disbursementDate, 1));
-                    if (!startDirty || !startInput.value) {
-                        startInput.value = proposedStart;
-                        startDirty = false;
-                    }
-                    updateEndDate(true);
-                }
-
-                if (disbursementInput) {
-                    disbursementInput.addEventListener('change', function() {
-                        startDirty = false;
-                        updateStartFromDisbursement();
-                    });
-                }
-
-                if (periodInput) {
-                    periodInput.addEventListener('input', function() {
-                        updateEndDate(true);
-                    });
-                    periodInput.addEventListener('change', function() {
-                        updateEndDate(true);
-                    });
-                }
-
-                if (startInput) {
-                    startInput.addEventListener('input', function() {
-                        startDirty = true;
-                        updateEndDate(true);
-                    });
-                    startInput.addEventListener('change', function() {
-                        startDirty = true;
-                        updateEndDate(true);
-                    });
-                }
-
-                if (endInput) {
-                    endInput.addEventListener('input', function() {
-                        endDirty = true;
-                    });
-                    endInput.addEventListener('change', function() {
-                        endDirty = true;
-                    });
-                }
-
-                updateStartFromDisbursement();
-                updateEndDate(false);
-
-                if (paymentTypeSelect && typeof bank_paymetExpense === 'function') {
-                    bank_paymetExpense(paymentTypeSelect.value);
-                }
-
-                if (bankSelect) {
-                    bankSelect.addEventListener('change', function() {
-                        if (this.value) {
-                            this.classList.remove('is-invalid');
-                        }
-                    });
-                }
+                });
             })();
         </script>
    
