@@ -589,14 +589,29 @@ class Loan extends MX_Controller {
         if (!empty($ledger)) {
             foreach ($ledger as $k => $v) {
                 $ledger[$k]['balance']     = ($ledger[$k]['debit'] - $ledger[$k]['credit']) + $balance;
-            $balance                       = $ledger[$k]['balance'];
-            $ledger[$k]['date']            = $this->occational->dateConvert($ledger[$k]['date']);
-            $ledger[$k]['subtotalDebit']   = $total_debit + $ledger[$k]['debit'];
-            $total_debit                   = $ledger[$k]['subtotalDebit'];
-            $ledger[$k]['subtotalCredit']  = $total_credit + $ledger[$k]['credit'];
-            $total_credit                  = $ledger[$k]['subtotalCredit'];
-            $ledger[$k]['subtotalBalance'] = $total_balance + $ledger[$k]['balance'];
-            $total_balance = $ledger[$k]['subtotalBalance'];
+                $balance                   = $ledger[$k]['balance'];
+                $ledger[$k]['date']        = $this->occational->dateConvert($ledger[$k]['date']);
+                $ledger[$k]['subtotalDebit']   = $total_debit + $ledger[$k]['debit'];
+                $total_debit                   = $ledger[$k]['subtotalDebit'];
+                $ledger[$k]['subtotalCredit']  = $total_credit + $ledger[$k]['credit'];
+                $total_credit                  = $ledger[$k]['subtotalCredit'];
+                $ledger[$k]['subtotalBalance'] = $total_balance + $ledger[$k]['balance'];
+                $total_balance                 = $ledger[$k]['subtotalBalance'];
+
+                $parsed_entry = $this->parse_schedule_from_details(isset($ledger[$k]['details']) ? $ledger[$k]['details'] : '');
+                $details_block = array();
+                $base_detail = trim($parsed_entry['details']);
+                if ($base_detail !== '') {
+                    $details_block[] = $base_detail;
+                }
+                if (!empty($parsed_entry['schedule'])) {
+                    $schedule_entry = $this->build_schedule_payload($parsed_entry['schedule'], $v['date']);
+                    $summary_lines_entry = $this->summarize_schedule($schedule_entry, $this->payment_channel_label($schedule_entry['payment_channel']));
+                    if (!empty($summary_lines_entry)) {
+                        $details_block[] = implode("\n", $summary_lines_entry);
+                    }
+                }
+                $ledger[$k]['details'] = trim(implode("\n\n", $details_block));
             }
         }
 
