@@ -1009,6 +1009,7 @@
                         $this->permission1->method('add_office_loan_payment', 'create')->access()) { ?>
                         <li class="treeview <?php
                                             if (
+                                                $this->uri->segment('1') == ("add_officeloan_person") ||
                                                 $this->uri->segment('1') == ("manage_office_loans") ||
                                                 $this->uri->segment('1') == ("add_office_loan") ||
                                                 $this->uri->segment('1') == ("add_office_loan_payment") ||
