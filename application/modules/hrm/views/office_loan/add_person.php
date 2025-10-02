@@ -21,6 +21,25 @@
                    <?php echo form_open_multipart('hrm/loan/submit_office_loan_person',array('class' => 'form-vertical','id' => 'inflow_entry' ))?>
                     <div class="panel-body">
 
+                        <?php if (!empty($employees)) { ?>
+                        <div class="form-group row">
+                            <label for="officeLoanEmployee" class="col-sm-3 col-form-label">Existing Employee</label>
+                            <div class="col-sm-6">
+                                <select class="form-control" id="officeLoanEmployee">
+                                    <option value="">-- <?php echo display('select_one'); ?> --</option>
+                                    <?php foreach ($employees as $employee) { ?>
+                                        <option value="<?php echo html_escape($employee->id); ?>" data-name="<?php echo html_escape(trim($employee->first_name . ' ' . $employee->last_name)); ?>" data-phone="<?php echo html_escape($employee->phone); ?>" data-address="<?php echo html_escape($employee->address_line_1); ?>">
+                                            <?php echo html_escape(trim($employee->first_name . ' ' . $employee->last_name)); ?>
+                                        </option>
+                                    <?php } ?>
+                                </select>
+                                <small class="text-muted">Select an employee to auto-fill the person details.</small>
+                            </div>
+                        </div>
+                        <?php } ?>
+
+                        <input type="hidden" name="employee_id" id="officeLoanEmployeeId" value="">
+
                     	<div class="form-group row">
                             <label for="name" class="col-sm-3 col-form-label"><?php echo display('name') ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
@@ -56,3 +75,25 @@
         </div>
 
 
+<script type="text/javascript">
+    (function ($) {
+        'use strict';
+
+        $('#officeLoanEmployee').on('change', function () {
+            var option = $(this).find('option:selected');
+            var employeeId = option.val();
+
+            if (employeeId) {
+                $('#officeLoanEmployeeId').val(employeeId);
+                $('#name').val(option.data('name') || '').prop('readonly', true);
+                $('#phone').val(option.data('phone') || '');
+                $('#address').val(option.data('address') || '');
+            } else {
+                $('#officeLoanEmployeeId').val('');
+                $('#name').val('').prop('readonly', false);
+                $('#phone').val('');
+                $('#address').val('');
+            }
+        });
+    }(jQuery));
+</script>

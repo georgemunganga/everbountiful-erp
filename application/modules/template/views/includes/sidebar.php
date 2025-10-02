@@ -1002,10 +1002,65 @@
                             </ul>
                         </li>
                     <?php } ?>
-                    <!-- =============================== Payroll menu end =================== -->
-
-                    <!--  Personal loan start -->
-
+                    <!-- =============================== Payroll menu end =================== -->                    <!--  Personal loan start -->
+                    <?php if (
+                        $this->permission1->method('add_officeloan_person', 'create')->access() ||
+                        $this->permission1->method('manage_office_loan_person', 'read')->access() ||
+                        $this->permission1->method('add_office_loan', 'create')->access() ||
+                        $this->permission1->method('add_office_loan_payment', 'create')->access()) { ?>
+                        <li class="treeview <?php
+                                            if (
+                                                $this->uri->segment('1') == ("add_officeloan_person") ||
+                                                $this->uri->segment('1') == ("manage_office_loan_person") ||
+                                                $this->uri->segment('1') == ("add_office_loan") ||
+                                                $this->uri->segment('1') == ("add_office_loan_payment") ||
+                                                $this->uri->segment('1') == ("office_loan_person_ledger") ||
+                                                $this->uri->segment('1') == ("office_loan_person_ledgerdata") ||
+                                                $this->uri->segment('1') == ("edit_office_loan_person")
+                                            ) {
+                                                echo "active";
+                                            } else {
+                                                echo " ";
+                                            }
+                                            ?>">
+                            <a href="#">
+                                <i class="fa fa-building"></i><span><?php echo display('office_loan'); ?></span>
+                                <span class="pull-right-container">
+                                    <i class="fa fa-angle-left pull-right"></i>
+                                </span>
+                            </a>
+                            <ul class="treeview-menu">
+                                <?php if ($this->permission1->method('add_officeloan_person', 'create')->access()) { ?>
+                                    <li class="treeview <?php if ($this->uri->segment('1') == ("add_officeloan_person")) {
+                                                            echo "active";
+                                                        } else {
+                                                            echo " ";
+                                                        } ?>"><a href="<?php echo base_url('add_officeloan_person') ?>"><?php echo display('add_person'); ?></a></li>
+                                <?php } ?>
+                                <?php if ($this->permission1->method('manage_office_loan_person', 'read')->access()) { ?>
+                                    <li class="treeview <?php if ($this->uri->segment('1') == ("manage_office_loan_person")) {
+                                                            echo "active";
+                                                        } else {
+                                                            echo " ";
+                                                        } ?>"><a href="<?php echo base_url('manage_office_loan_person') ?>"><?php echo display('manage_person'); ?></a></li>
+                                <?php } ?>
+                                <?php if ($this->permission1->method('add_office_loan', 'create')->access()) { ?>
+                                    <li class="treeview <?php if ($this->uri->segment('1') == ("add_office_loan")) {
+                                                            echo "active";
+                                                        } else {
+                                                            echo " ";
+                                                        } ?>"><a href="<?php echo base_url('add_office_loan') ?>"><?php echo display('add_office_loan'); ?></a></li>
+                                <?php } ?>
+                                <?php if ($this->permission1->method('add_office_loan_payment', 'create')->access()) { ?>
+                                    <li class="treeview <?php if ($this->uri->segment('1') == ("add_office_loan_payment")) {
+                                                            echo "active";
+                                                        } else {
+                                                            echo " ";
+                                                        } ?>"><a href="<?php echo base_url('add_office_loan_payment') ?>"><?php echo display('add_payment'); ?></a></li>
+                                <?php } ?>
+                            </ul>
+                        </li>
+                    <?php } ?>
                     <!-- loan end -->
                 </ul>
             </li>
@@ -1473,5 +1528,8 @@
 
     </ul>
 </div> <!-- /.sidebar -->
+
+
+
 
 

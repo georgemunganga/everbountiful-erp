@@ -1350,7 +1350,7 @@ class Payroll extends MX_Controller {
         $data['title']      = 'Tax Slabs';
         $data['module']     = 'hrm';
         $data['page']       = 'payroll/tax_slabs';
-        $data['tax_slabs']  = $this->Payroll_model->get_tax_slabs();
+        $data['tax_slabs']  = $this->db->table_exists('hrm_tax_slabs') ? $this->Payroll_model->get_tax_slabs() : array();
 
         echo Modules::run('template/layout', $data);
     }
@@ -1362,7 +1362,7 @@ class Payroll extends MX_Controller {
         $data['title']       = 'Salary Components';
         $data['module']      = 'hrm';
         $data['page']        = 'payroll/salary_components';
-        $data['components']  = $this->Payroll_model->get_salary_components();
+        $data['components']  = $this->db->table_exists('hrm_salary_components') ? $this->Payroll_model->get_salary_components() : array();
 
         echo Modules::run('template/layout', $data);
     }
@@ -1445,7 +1445,9 @@ class Payroll extends MX_Controller {
     {
         $this->permission1->method('manage_salary_setup','delete')->access();
 
-        if (empty($id) || !$this->Payroll_model->delete_salary_component($id)) {
+        $component_id = $id ?: $this->input->post('component_id', true);
+
+        if (empty($component_id) || !$this->Payroll_model->delete_salary_component($component_id)) {
             $this->session->set_flashdata('exception', display('please_try_again'));
         } else {
             $this->session->set_flashdata('message', display('delete_successfully'));
@@ -1518,7 +1520,9 @@ class Payroll extends MX_Controller {
     {
         $this->permission1->method('employee_salary_generate','delete')->access();
 
-        if (empty($id) || !$this->Payroll_model->delete_tax_slab($id)) {
+        $slab_id = $id ?: $this->input->post('slab_id', true);
+
+        if (empty($slab_id) || !$this->Payroll_model->delete_tax_slab($slab_id)) {
             $this->session->set_flashdata('exception', display('please_try_again'));
         } else {
             $this->session->set_flashdata('message', display('delete_successfully'));
@@ -2075,7 +2079,3 @@ class Payroll extends MX_Controller {
 	}
 
 }
-
-
-
-

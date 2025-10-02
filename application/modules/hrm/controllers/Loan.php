@@ -25,44 +25,93 @@ class Loan extends MX_Controller {
         $data['title']      = display('add_person');
         $data['module']     = "hrm";
         $data['page']       = "office_loan/add_person"; 
+        $data['employees']  = $this->db->select('id, first_name, last_name, phone, address_line_1')->from('employee_history')->order_by('first_name', 'asc')->order_by('last_name', 'asc')->get()->result();
         echo modules::run('template/layout', $data);
     }
+    public function submit_office_loan_person()
+    {
+        $employee_id    = $this->input->post('employee_id', TRUE);
+        $person_id      = $this->occational->generator(10);
+        $person_name    = $this->input->post('name', TRUE);
+        $person_phone   = $this->input->post('phone', TRUE);
+        $person_address = $this->input->post('address', TRUE);
 
+        if (!empty($employee_id)) {
+            $employee = $this->db->select('id, first_name, last_name, phone, address_line_1')
+                ->from('employee_history')
+                ->where('id', $employee_id)
+                ->get()
+                ->row();
 
-      public function submit_office_loan_person() {
-         $person_id = $this->occational->generator(10);
-         $coa       = $this->loanheadcode();
-           if($coa->HeadCode!=NULL){
-                $headcode=$coa->HeadCode+1;
-           }else{
-                $headcode="10203020001";
+            if ($employee) {
+                $person_id      = sprintf('EMP%05d', $employee->id);
+                $person_name    = trim($employee->first_name . ' ' . $employee->last_name);
+                $person_phone   = !empty($employee->phone) ? $employee->phone : $person_phone;
+                $person_address = !empty($employee->address_line_1) ? $employee->address_line_1 : $person_address;
             }
+        }
+
         $data = array(
             'person_id'      => $person_id,
-            'person_name'    => $this->input->post('name',TRUE),
-            'person_phone'   => $this->input->post('phone',TRUE),
-            'person_address' => $this->input->post('address',TRUE),
+            'person_name'    => $person_name,
+            'person_phone'   => $person_phone,
+            'person_address' => $person_address,
             'status'         => 1
         );
-         $loan_coa = [
-             'HeadCode'         => $headcode,
-             'HeadName'         => $person_id.'-'.$this->input->post('name',TRUE),
-             'PHeadName'        => 'Loan Receivable',
-             'HeadLevel'        => '4',
-             'IsActive'         => '1',
-             'IsTransaction'    => '1',
-             'IsGL'             => '0',
-             'HeadType'         => 'A',
-             'IsBudget'         => '0',
-             'IsDepreciation'   => '0',
-             'DepreciationRate' => '0',
-             'CreateBy'         => $this->session->userdata('id'),
-             'CreateDate'       => date('Y-m-d H:i:s'),
-        ];
 
-        $result = $this->loan_model->submit_officeloan_person($data);
+        $existing_person = $this->db->select('person_id, person_name')
+            ->from('person_information')
+            ->where('person_id', $person_id)
+            ->get()
+            ->row();
+
+        $loan_head_code = '10203020001';
+        $coa            = $this->loanheadcode();
+        if ($coa && $coa->HeadCode != null) {
+            $loan_head_code = $coa->HeadCode + 1;
+        }
+
+        $result = false;
+
+        if ($existing_person) {
+            $update_data = $data;
+            unset($update_data['person_id']);
+            $result = $this->loan_model->update_person($update_data, $person_id);
+
+            if ($result) {
+                $existing_head_name = $existing_person->person_id . '-' . $existing_person->person_name;
+                $new_head_name      = $person_id . '-' . $person_name;
+                $this->db->where('HeadName', $existing_head_name)
+                    ->update('acc_coa', array(
+                        'HeadName'   => $new_head_name,
+                        'UpdateBy'   => $this->session->userdata('id'),
+                        'UpdateDate' => date('Y-m-d H:i:s'),
+                    ));
+            }
+        } else {
+            $result = $this->loan_model->submit_officeloan_person($data);
+
+            if ($result) {
+                $loan_coa = array(
+                    'HeadCode'         => $loan_head_code,
+                    'HeadName'         => $person_id . '-' . $person_name,
+                    'PHeadName'        => 'Loan Receivable',
+                    'HeadLevel'        => '4',
+                    'IsActive'         => '1',
+                    'IsTransaction'    => '1',
+                    'IsGL'             => '0',
+                    'HeadType'         => 'A',
+                    'IsBudget'         => '0',
+                    'IsDepreciation'   => '0',
+                    'DepreciationRate' => '0',
+                    'CreateBy'         => $this->session->userdata('id'),
+                    'CreateDate'       => date('Y-m-d H:i:s'),
+                );
+                $this->db->insert('acc_coa', $loan_coa);
+            }
+        }
+
         if ($result) {
-             $this->db->insert('acc_coa',$loan_coa);
             $this->session->set_flashdata(array('message' => display('successfully_added')));
             redirect(base_url('manage_office_loan_person'));
         } else {
@@ -71,7 +120,7 @@ class Loan extends MX_Controller {
         }
     }
 
-      public function loanheadcode(){
+    public function loanheadcode(){
         $query=$this->db->query("SELECT MAX(HeadCode) as HeadCode FROM acc_coa WHERE HeadLevel='4' And HeadCode LIKE '1020302000%'");
         return $query->row();
 
@@ -726,4 +775,9 @@ class Loan extends MX_Controller {
     }
 
 }
+
+
+
+
+
 
