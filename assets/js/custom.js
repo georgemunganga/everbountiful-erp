@@ -726,15 +726,22 @@ $(document).ready(function () {
 
 ("use strict");
 function bank_paymetExpense(val) {
-  if (val == 2) {
-    var style = "block";
-    $("#bank_id").prop("required", true);
-  } else {
-    var style = "none";
-    $("#bank_id").prop("required", false);
+  var normalized = val;
+  if (typeof normalized === "string") {
+    normalized = normalized.toLowerCase();
   }
 
-  document.getElementById("bank_div").style.display = style;
+  var requiresBank =
+    normalized === "bank" || normalized === 2 || normalized === "2" || normalized === 3 || normalized === "3";
+  var style = requiresBank ? "block" : "none";
+
+  if (document.getElementById("bank_div")) {
+    document.getElementById("bank_div").style.display = style;
+  }
+
+  if (document.getElementById("bank_id")) {
+    $("#bank_id").prop("required", requiresBank);
+  }
 }
 
 $("body").on("change", "#nameofficeloanperson", function (event) {

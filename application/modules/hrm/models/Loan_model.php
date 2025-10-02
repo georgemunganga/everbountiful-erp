@@ -21,6 +21,31 @@ class Loan_model extends CI_Model {
         return false;
     }
 
+    /**
+     * Retrieve paginated office loan entries.
+     */
+    public function office_loan_entries($per_page, $limit)
+    {
+        return $this->db->select('pl.*, pi.person_name, pi.person_phone, pi.person_address')
+            ->from('person_ledger pl')
+            ->join('person_information pi', 'pi.person_id = pl.person_id', 'left')
+            ->where('pl.debit >', 0)
+            ->order_by('pl.date', 'desc')
+            ->limit($per_page, $limit)
+            ->get()
+            ->result_array();
+    }
+
+    /**
+     * Count total office loan entries.
+     */
+    public function office_loan_entries_count()
+    {
+        return $this->db->where('debit >', 0)
+            ->from('person_ledger')
+            ->count_all_results();
+    }
+
 
         public function office_person_list_count() {
         $this->db->select('*');
@@ -177,7 +202,20 @@ class Loan_model extends CI_Model {
         } else {
             return false;
         }
-    } 
+    }
+
+    /**
+     * Retrieve a single office loan transaction.
+     */
+    public function get_office_loan_by_transaction($transaction_id)
+    {
+        return $this->db->select('pl.*, pi.person_name, pi.person_phone, pi.person_address')
+            ->from('person_ledger pl')
+            ->join('person_information pi', 'pi.person_id = pl.person_id', 'left')
+            ->where('pl.transaction_id', $transaction_id)
+            ->get()
+            ->row_array();
+    }
 
          // personal loan person id selecetd
         public function select_loan_person_by_id($person_id) {

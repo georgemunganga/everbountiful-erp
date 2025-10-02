@@ -4,7 +4,7 @@
             <div class="col-sm-12">
                
                 <?php if($this->permission1->method('manage_ofln_person','read')->access()){ ?>
-                  <a href="<?php echo base_url('manage_office_loan_person')?>" class="btn btn-success m-b-5 m-r-2"><i class="ti-align-justify"> </i> <?php echo display('manage_person')?> </a>
+                  <a href="<?php echo base_url('manage_office_loans')?>" class="btn btn-success m-b-5 m-r-2"><i class="ti-align-justify"> </i> <?php echo display('manage_loan')?> </a>
               <?php }?>
               
             </div>
