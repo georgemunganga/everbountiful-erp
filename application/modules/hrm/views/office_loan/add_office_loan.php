@@ -1,17 +1,13 @@
 
         <div class="row">
             <div class="col-sm-12">
-               
-                <?php if($this->permission1->method('add_ofloan_person','create')->access()){ ?>
-                   <a href="<?php echo base_url('add_officeloan_person')?>" class="btn btn-success m-b-5 m-r-2"><i class="ti-plus"> </i> <?php echo display('add_person')?> </a>
-               <?php }?>
         <?php if($this->permission1->method('add_loan_payment','create')->access()){ ?>
                   <a href="<?php echo base_url('add_office_loan_payment')?>" class="btn btn-success m-b-5 m-r-2"><i class="ti-plus"> </i> <?php echo display('add_payment')?> </a>
                <?php }?>
                <?php if($this->permission1->method('manage_ofln_person','read')->access()){ ?>
-                  <a href="<?php echo base_url('manage_office_loan_person')?>" class="btn btn-primary m-b-5 m-r-2"><i class="ti-plus"> </i> <?php echo display('manage_person')?> </a>
+                  <a href="<?php echo base_url('manage_office_loans')?>" class="btn btn-primary m-b-5 m-r-2"><i class="ti-plus"> </i> <?php echo display('manage_loan')?> </a>
                   <?php }?>
-               
+
             </div>
         </div>
 
@@ -26,14 +22,16 @@
                    <?php echo form_open_multipart('hrm/loan/bdtask_insert_office_loan',array('class' => 'form-vertical','id' => 'inflow_entry' ))?>
                     <div class="panel-body">
 
-                    	<div class="form-group row">
-                            <label for="name" class="col-sm-3 col-form-label"><?php echo display('name') ?> <i class="text-danger">*</i></label>
+                        <div class="form-group row">
+                            <label for="employee_id" class="col-sm-3 col-form-label"><?php echo display('name') ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
-                                <select class="form-control" required name="person_id" id="nameofficeloanperson" tabindex="1">
+                                <select class="form-control" required name="employee_id" id="employee_id" tabindex="1">
                                     <option value=''><?php echo display('select_one')?></option>
-                                  <?php foreach($person_list as $persons){?>
-                                    <option value="<?php echo $persons['person_id']?>"><?php echo $persons['person_name']?></option>
-                                   <?php }?>
+                                  <?php if(!empty($employees)){foreach($employees as $employee){?>
+                                    <option value="<?php echo $employee->id?>" data-phone="<?php echo html_escape($employee->phone);?>" data-address="<?php echo html_escape($employee->address_line_1);?>">
+                                        <?php echo html_escape(trim($employee->first_name.' '.$employee->last_name));?>
+                                    </option>
+                                   <?php }}?>
                                 </select>
                             </div>
                         </div>
@@ -41,7 +39,7 @@
                         <div class="form-group row">
                             <label for="phone" class="col-sm-3 col-form-label"><?php echo display('phone') ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
-                                <input type="number" class="form-control phone" name="phone" id="phone" required="" placeholder="<?php echo display('phone') ?>" min="0" tabindex="2"/>
+                                <input type="text" class="form-control phone" name="phone" id="phone" placeholder="<?php echo display('phone') ?>" tabindex="2"/>
                             </div>
                         </div>
 
@@ -110,6 +108,27 @@
                 </div>
             </div>
         </div>
+
+        <script type="text/javascript">
+            (function() {
+                var employeeSelect = document.getElementById('employee_id');
+                var phoneInput = document.getElementById('phone');
+                if (!employeeSelect) {
+                    return;
+                }
+
+                employeeSelect.addEventListener('change', function() {
+                    var option = this.options[this.selectedIndex];
+                    if (!option) {
+                        return;
+                    }
+                    var phone = option.getAttribute('data-phone') || '';
+                    if (phoneInput) {
+                        phoneInput.value = phone;
+                    }
+                });
+            })();
+        </script>
    
 
 

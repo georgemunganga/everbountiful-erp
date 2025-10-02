@@ -49,13 +49,15 @@ $route['expense_statement']       = "hrm/expense/expense_statement";
 
 /*office loan part*/
 $route['add_officeloan_person']   = "hrm/loan/bdtask_add_office_loan_person";
-$route['manage_office_loan_person']= "hrm/loan/manage_ofln_person";
-$route['manage_office_loan_person/(:num)'] = "hrm/loan/manage_ofln_person/$1";
+$route['manage_office_loans']     = "hrm/loan/manage_office_loans";
+$route['manage_office_loans/(:num)'] = "hrm/loan/manage_office_loans/$1";
 $route['office_loan_person_ledger/(:any)'] = "hrm/loan/office_loan_person_ledger/$1";
 $route['office_loan_person_ledgerdata']    = "hrm/loan/office_loan_ledger_search";
 $route['add_office_loan']          = "hrm/loan/bdtask_add_office_loan";
 $route['add_office_loan_payment']  = "hrm/loan/bdtask_add_office_loan_payment";
 $route['edit_office_loan_person/(:any)']= "hrm/loan/bdtask_edit_office_person/$1";
+$route['bdtask_edit_office_loan/(:any)']= "hrm/loan/bdtask_edit_office_loan/$1";
+$route['delete_office_loan_entry/(:any)'] = "hrm/loan/delete_office_loan_entry/$1";
 /*personal loan part start*/
 $route['add_person']               = "hrm/loan/bdtask_add_person";
 $route['manage_person']            = "hrm/loan/manage_person";
