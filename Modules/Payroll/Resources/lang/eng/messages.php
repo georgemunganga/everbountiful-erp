@@ -31,4 +31,6 @@ return [
     'confirmRemovePolicy' => 'Confirm Remove',
     'policyRemoveConfirm' => 'This Employees overtime policy will removed!',
     'recordUpdated' => 'Record updated successfully',
+    'installmentAlreadySettled' => 'This loan installment has already been settled.',
+    'paymentAmountCapped' => 'The payment amount exceeded the outstanding balance and was reduced to the remaining due.',
 ];
