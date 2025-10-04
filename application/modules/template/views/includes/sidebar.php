@@ -1004,7 +1004,7 @@
                     <?php } ?>
                     <!-- =============================== Payroll menu end =================== -->                    <!--  Personal loan start -->
                     <?php if (
-                                                $this->permission1->method('manage_office_loan_person', 'read')->access() ||
+                        $this->permission1->method('manage_office_loan_person', 'read')->access() ||
                         $this->permission1->method('add_office_loan', 'create')->access() ||
                         $this->permission1->method('add_office_loan_payment', 'create')->access()) { ?>
                         <li class="treeview <?php
