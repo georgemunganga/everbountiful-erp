@@ -1,4 +1,10 @@
 
+<?php
+$loan_today = date('Y-m-d');
+$default_period_months = 12;
+$default_start_date = date('Y-m-d', strtotime('+1 month', strtotime($loan_today)));
+$default_end_date = date('Y-m-d', strtotime('+' . ($default_period_months - 1) . ' month', strtotime($default_start_date)));
+?>
         <div class="row">
             <div class="col-sm-12">
         <?php if($this->permission1->method('add_loan_payment','create')->access()){ ?>
@@ -46,61 +52,98 @@
                         <div class="form-group row">
                             <label for="ammount" class="col-sm-3 col-form-label"><?php echo display('ammount') ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
-                               <input type="number" class="form-control" name="ammount" id="ammount" required="" placeholder="<?php echo display('ammount') ?>" min="0" tabindex="3"/>
+                               <input type="number" class="form-control" name="ammount" id="ammount" required placeholder="<?php echo display('ammount') ?>" min="0" tabindex="3"/>
                             </div>
                         </div>
-                         <div class="form-group row" id="payment_from">
-                                
-                                    <label for="payment_type" class="col-sm-3 col-form-label"><?php
-                                        echo display('payment_type');
-                                        ?> <i class="text-danger">*</i></label>
-                                    <div class="col-sm-6">
-                                        <select name="paytype" class="form-control" required="" onchange="bank_paymetExpense(this.value)" tabindex="3">
-                            <option value="1"><?php echo display('cash_payment')?></option>
-                            <option value="2"><?php echo display('bank_payment')?></option> 
-                                        </select>
-                                      
 
-                                     
-                                    </div>
-                                
+                        <div class="form-group row" id="payment_from">
+                            <label for="payment_type" class="col-sm-3 col-form-label"><?php echo display('payment_type'); ?> <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <select name="paytype" class="form-control" required onchange="bank_paymetExpense(this.value)" tabindex="4">
+                                    <option value="1"><?php echo display('cash_payment')?></option>
+                                    <option value="2"><?php echo display('bank_payment')?></option>
+                                </select>
                             </div>
-                              
-                            <div class="form-group row" id="bank_div">
-                                <label for="bank" class="col-sm-3 col-form-label"><?php
-                                    echo display('bank');
-                                    ?> <i class="text-danger">*</i></label>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="disbursement_date" class="col-sm-3 col-form-label"><?php echo display('disbursement_date'); ?> <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control datepicker" name="disbursement_date" id="disbursement_date" value="<?php echo $loan_today; ?>" required tabindex="5"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="repayment_period" class="col-sm-3 col-form-label"><?php echo display('repayment_period'); ?> <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="repayment_period" id="repayment_period" value="<?php echo $default_period_months; ?>" min="1" required tabindex="6"/>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><?php echo display('months'); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="repayment_start_date" class="col-sm-3 col-form-label"><?php echo display('repayment_start_date'); ?> <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control datepicker" name="repayment_start_date" id="repayment_start_date" value="<?php echo $default_start_date; ?>" required tabindex="7"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="repayment_end_date" class="col-sm-3 col-form-label"><?php echo display('repayment_end_date'); ?> <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" name="repayment_end_date" id="repayment_end_date" value="<?php echo $default_end_date; ?>" required readonly tabindex="8"/>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label text-muted"><?php echo html_escape('Payroll deduction preview'); ?></label>
+                            <div class="col-sm-6">
+                                <div class="border rounded p-3 bg-light" id="loan-deduction-helper">
+                                    <p class="m-b-5"><strong><?php echo html_escape('Monthly deduction amount'); ?>:</strong> <span id="loan-helper-amount">0.00</span></p>
+                                    <p class="m-b-5"><strong><?php echo html_escape('Total deductions'); ?>:</strong> <span id="loan-helper-total-deductions">0</span></p>
+                                    <p class="m-b-0 text-muted" id="loan-helper-schedule"><?php echo html_escape('Enter amount, period, and dates to preview payroll deductions.'); ?></p>
+                                    <div class="m-t-10" id="loan-helper-dates" style="display: none;">
+                                        <small class="text-muted">
+                                            <strong>First deduction:</strong> <span id="loan-helper-first-date">-</span><br>
+                                            <strong>Final deduction:</strong> <span id="loan-helper-final-date">-</span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                        <div class="form-group row" id="bank_div" style="display:none;">
+                                <label for="bank" class="col-sm-3 col-form-label"><?php echo display('bank'); ?> <i class="text-danger">*</i></label>
                                 <div class="col-sm-6">
                                    <select name="bank_id" class="form-control"  id="bank_id">
-                                        <option value="">Select Location</option>
+                                        <option value=""><?php echo display('select_one'); ?></option>
                                         <?php foreach($bank_list as $bank){?>
-                                            <option value="<?php echo $bank['bank_id']?>"><?php echo $bank['bank_name'];?></option>
+                                            <option value="<?php echo $bank['bank_id'];?>"><?php echo html_escape($bank['bank_name']); ?></option>
                                         <?php }?>
                                     </select>
-                                 
                                 </div>
-                             
                             </div>
-                        
+
                         <div class="form-group row">
-                            <label for="date" class="col-sm-3 col-form-label"><?php echo display('date') ?> <i class="text-danger"></i></label>
+                            <label for="date" class="col-sm-3 col-form-label"><?php echo display('date') ?></label>
                             <div class="col-sm-6">
-                               <input type="text" class="form-control datepicker" name="date" id="date" value="<?php echo date("Y-m-d");?>" placeholder="<?php echo display('date') ?>" tabindex="4"/>
+                               <input type="text" class="form-control datepicker" name="date" id="date" value="<?php echo $loan_today;?>" placeholder="<?php echo display('date') ?>" tabindex="9"/>
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <label for="details" class="col-sm-3 col-form-label"><?php echo display('details') ?> <i class="text-danger"></i></label>
                             <div class="col-sm-6">
-                                <textarea class="form-control" name="details" id="details" placeholder="<?php echo display('details') ?>" tabindex="5"></textarea>
+                                <textarea class="form-control" name="details" id="details" placeholder="<?php echo display('details') ?>" tabindex="10"></textarea>
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <label for="example-text-input" class="col-sm-4 col-form-label"></label>
                             <div class="col-sm-6">
-                                <input type="reset" class="btn btn-danger" value="<?php echo display('reset') ?>" tabindex="6"/>
-                                <input type="submit" id="add-deposit" class="btn btn-success" name="add-deposit" value="<?php echo display('save') ?>" tabindex="7"/>
+                                <input type="reset" class="btn btn-danger" value="<?php echo display('reset') ?>" tabindex="11"/>
+                                <input type="submit" id="add-deposit" class="btn btn-success" name="add-deposit" value="<?php echo display('save') ?>" tabindex="12"/>
                             </div>
                         </div>
                     </div>
@@ -127,6 +170,228 @@
                         phoneInput.value = phone;
                     }
                 });
+            })();
+
+            (function() {
+                var disbursementInput = document.getElementById('disbursement_date');
+                var periodInput = document.getElementById('repayment_period');
+                var startInput = document.getElementById('repayment_start_date');
+                var endInput = document.getElementById('repayment_end_date');
+                if (!disbursementInput || !periodInput || !startInput || !endInput) {
+                    return;
+                }
+
+                var startManual = false;
+                var suppressStartListener = false;
+
+                function parseDate(value) {
+                    if (!value) return null;
+                    var parts = value.split('-');
+                    if (parts.length !== 3) return null;
+                    var year = parseInt(parts[0], 10);
+                    var month = parseInt(parts[1], 10) - 1;
+                    var day = parseInt(parts[2], 10);
+                    if (isNaN(year) || isNaN(month) || isNaN(day)) {
+                        return null;
+                    }
+                    return new Date(year, month, day);
+                }
+
+                function formatDate(date) {
+                    if (!(date instanceof Date)) {
+                        return '';
+                    }
+                    var month = String(date.getMonth() + 1).padStart(2, '0');
+                    var day = String(date.getDate()).padStart(2, '0');
+                    return date.getFullYear() + '-' + month + '-' + day;
+                }
+
+                function addMonths(date, months) {
+                    var result = new Date(date.getTime());
+                    var targetDay = result.getDate();
+                    result.setMonth(result.getMonth() + months);
+                    if (result.getDate() !== targetDay) {
+                        result.setDate(0);
+                    }
+                    return result;
+                }
+
+                function setStartValue(value) {
+                    suppressStartListener = true;
+                    startInput.value = value;
+                    suppressStartListener = false;
+                }
+
+                function updateEndDate() {
+                    var period = parseInt(periodInput.value, 10);
+                    var startDate = parseDate(startInput.value);
+                    if (!period || period < 1 || !startDate) {
+                        endInput.value = '';
+                        return;
+                    }
+                    var endDate = addMonths(startDate, Math.max(period - 1, 0));
+                    endInput.value = formatDate(endDate);
+                }
+
+                function handleDisbursementChange() {
+                    var disbursementDate = parseDate(disbursementInput.value);
+                    if (!disbursementDate) {
+                        return;
+                    }
+                    if (!startManual) {
+                        var defaultStart = addMonths(disbursementDate, 1);
+                        setStartValue(formatDate(defaultStart));
+                    }
+                    updateEndDate();
+                }
+
+                function handlePeriodChange() {
+                    var period = parseInt(periodInput.value, 10);
+                    if (isNaN(period) || period < 1) {
+                        periodInput.value = 1;
+                        period = 1;
+                    }
+                    updateEndDate();
+                }
+
+                disbursementInput.addEventListener('change', handleDisbursementChange);
+                periodInput.addEventListener('change', handlePeriodChange);
+                periodInput.addEventListener('keyup', handlePeriodChange);
+
+                startInput.addEventListener('change', function() {
+                    if (!suppressStartListener) {
+                        startManual = true;
+                    }
+                    updateEndDate();
+                });
+
+                startInput.addEventListener('keyup', function() {
+                    updateEndDate();
+                });
+
+                handleDisbursementChange();
+                handlePeriodChange();
+            })();
+            (function() {
+                var amountInput = document.getElementById('ammount');
+                var periodInput = document.getElementById('repayment_period');
+                var startInput = document.getElementById('repayment_start_date');
+                var endInput = document.getElementById('repayment_end_date');
+                var amountHelper = document.getElementById('loan-helper-amount');
+                var scheduleHelper = document.getElementById('loan-helper-schedule');
+                if (!amountInput || !periodInput || !amountHelper || !scheduleHelper) {
+                    return;
+                }
+
+                function parseDate(value) {
+                    if (!value) {
+                        return null;
+                    }
+                    var parts = value.split('-');
+                    if (parts.length !== 3) {
+                        return null;
+                    }
+                    var year = parseInt(parts[0], 10);
+                    var month = parseInt(parts[1], 10) - 1;
+                    var day = parseInt(parts[2], 10);
+                    if (isNaN(year) || isNaN(month) || isNaN(day)) {
+                        return null;
+                    }
+                    var date = new Date(year, month, day);
+                    if (isNaN(date.getTime())) {
+                        return null;
+                    }
+                    return date;
+                }
+
+                function formatCurrency(value) {
+                    if (!isFinite(value) || value <= 0) {
+                        return '0.00';
+                    }
+                    try {
+                        return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    } catch (e) {
+                        return value.toFixed(2);
+                    }
+                }
+
+                function formatDisplayDate(date) {
+                    if (!(date instanceof Date) || isNaN(date.getTime())) {
+                        return '';
+                    }
+                    var month = date.toLocaleString(undefined, { month: 'short' });
+                    var day = String(date.getDate()).padStart(2, '0');
+                    var year = date.getFullYear();
+                    return month + ' ' + day + ', ' + year;
+                }
+
+                function pluralize(count, singular) {
+                    if (!count || count === 1) {
+                        return singular;
+                    }
+                    return singular + 's';
+                }
+
+                function buildScheduleText(period, startDate, endDate) {
+                    var readablePeriod = period ? period + ' ' + pluralize(period, 'deduction') : '';
+                    var startLabel = formatDisplayDate(startDate);
+                    var endLabel = formatDisplayDate(endDate);
+                    if (startLabel && endLabel && readablePeriod) {
+                        return readablePeriod + ' scheduled from ' + startLabel + ' to ' + endLabel + '.';
+                    }
+                    if (readablePeriod) {
+                        return readablePeriod + ' scheduled.';
+                    }
+                    return 'Enter amount, period, and dates to preview payroll deductions.';
+                }
+
+                function updateHelper() {
+                    var amount = parseFloat(amountInput.value);
+                    var period = parseInt(periodInput.value, 10);
+                    var monthly = (!isNaN(amount) && amount > 0 && !isNaN(period) && period > 0) ? amount / period : 0;
+                    amountHelper.textContent = formatCurrency(monthly);
+
+                    // Update total deductions count
+                    var totalDeductionsElement = document.getElementById('loan-helper-total-deductions');
+                    if (totalDeductionsElement) {
+                        totalDeductionsElement.textContent = (!isNaN(period) && period > 0) ? period : '0';
+                    }
+
+                    var startDate = startInput ? parseDate(startInput.value) : null;
+                    var endDate = endInput ? parseDate(endInput.value) : null;
+                    scheduleHelper.textContent = buildScheduleText(isNaN(period) ? null : period, startDate, endDate);
+                    
+                    // Update deduction dates
+                    var datesDiv = document.getElementById('loan-helper-dates');
+                    var firstDateSpan = document.getElementById('loan-helper-first-date');
+                    var finalDateSpan = document.getElementById('loan-helper-final-date');
+                    
+                    if (startDate && endDate && datesDiv && firstDateSpan && finalDateSpan) {
+                        firstDateSpan.textContent = formatDisplayDate(startDate);
+                        finalDateSpan.textContent = formatDisplayDate(endDate);
+                        datesDiv.style.display = 'block';
+                    } else if (datesDiv) {
+                        datesDiv.style.display = 'none';
+                    }
+                }
+
+                ['change', 'keyup', 'input'].forEach(function(eventName) {
+                    amountInput.addEventListener(eventName, updateHelper);
+                    periodInput.addEventListener(eventName, updateHelper);
+                });
+
+                if (startInput) {
+                    ['change', 'keyup'].forEach(function(eventName) {
+                        startInput.addEventListener(eventName, updateHelper);
+                    });
+                }
+                if (endInput) {
+                    ['change', 'keyup'].forEach(function(eventName) {
+                        endInput.addEventListener(eventName, updateHelper);
+                    });
+                }
+
+                updateHelper();
             })();
         </script>
    

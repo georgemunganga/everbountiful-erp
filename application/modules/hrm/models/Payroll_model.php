@@ -237,7 +237,18 @@ class Payroll_model extends CI_Model {
 
         public function setting()
     {
-        return $this->db->get('web_setting')->result_array();
+        $settings = $this->db->get('web_setting')->result_array();
+        
+        // Add currency_symbol property for backward compatibility
+        if (!empty($settings)) {
+            foreach ($settings as &$setting) {
+                if (isset($setting['currency'])) {
+                    $setting['currency_symbol'] = $setting['currency'];
+                }
+            }
+        }
+        
+        return $settings;
     }
     
         public function companyinfo()
@@ -510,6 +521,91 @@ public function create_employee_payment($data = array())
 			->update("grand_loan", $data);
 	}
 
+	// Office loan installment deduction for payroll
+	public function office_loan_installment_deduction($emp_id, $current_date = null)
+	{
+		if (!$current_date) {
+			$current_date = date('Y-m-d');
+		}
+
+		$query = "SELECT 
+			old.*, 
+			pl.transaction_id,
+			pi.person_id,
+			pi.employee_id,
+			(old.principal_amount - IFNULL(old.total_paid, 0)) as remaining_balance,
+			CASE 
+				WHEN old.next_due_date IS NULL THEN old.repayment_start_date
+				ELSE old.next_due_date
+			END as next_payment_date
+		FROM office_loan_details old
+		JOIN person_ledger pl ON pl.transaction_id = old.transaction_id
+		JOIN person_information pi ON pi.person_id = pl.person_id
+		WHERE pi.employee_id = ? 
+		AND old.monthly_installment > 0
+		AND (old.principal_amount - IFNULL(old.total_paid, 0)) > 0
+		AND (
+			old.next_due_date IS NULL 
+			OR old.next_due_date <= ?
+		)
+		ORDER BY old.disbursement_date ASC
+		LIMIT 1";
+
+		return $this->db->query($query, array($emp_id, $current_date))->row();
+	}
+
+	// Update office loan payment after deduction
+	public function update_office_loan_payment($data = array())
+	{
+		$transaction_id = $data['transaction_id'];
+		$payment_amount = $data['payment_amount'];
+		$payment_date = $data['payment_date'];
+
+		// Update office_loan_details
+		$this->db->query("UPDATE office_loan_details 
+			SET total_paid = IFNULL(total_paid, 0) + ?,
+				last_deduction_date = ?,
+				next_due_date = DATE_ADD(?, INTERVAL 1 MONTH)
+			WHERE transaction_id = ?", 
+			array($payment_amount, $payment_date, $payment_date, $transaction_id));
+
+		// Add credit entry to person_ledger
+		$ledger_data = array(
+			'person_id' => $data['person_id'],
+			'transaction_id' => $transaction_id,
+			'date' => $payment_date,
+			'debit' => 0,
+			'credit' => $payment_amount,
+			'details' => 'Payroll deduction - ' . date('M Y', strtotime($payment_date))
+		);
+
+		return $this->db->insert('person_ledger', $ledger_data);
+	}
+
+	// Get office loan summary for employee
+	public function get_employee_office_loan_summary($emp_id)
+	{
+		$query = "SELECT 
+			old.*,
+			pl.transaction_id,
+			pi.person_id,
+			(old.principal_amount - IFNULL(old.total_paid, 0)) as remaining_balance,
+			CASE 
+				WHEN old.principal_amount > 0 AND old.monthly_installment > 0 
+				THEN CEIL((old.principal_amount - IFNULL(old.total_paid, 0)) / old.monthly_installment)
+				ELSE 0
+			END as remaining_installments
+		FROM office_loan_details old
+		JOIN person_ledger pl ON pl.transaction_id = old.transaction_id
+		JOIN person_information pi ON pi.person_id = pl.person_id
+		WHERE pi.employee_id = ? 
+		AND old.monthly_installment > 0
+		AND (old.principal_amount - IFNULL(old.total_paid, 0)) > 0
+		ORDER BY old.disbursement_date DESC";
+
+		return $this->db->query($query, array($emp_id))->result();
+	}
+
 	public function employee_salary_generate_info($id)
 	{
 
@@ -578,13 +674,57 @@ public function create_employee_payment($data = array())
 			->update("gmb_salary_sheet_generate", $data);
 	}
 
+	public function ensure_tax_slab_support()
+	{
+		if ($this->db->table_exists('hrm_salary_components')) {
+			$column = $this->db->query("SHOW COLUMNS FROM `hrm_salary_components` LIKE 'amount_type'");
+			if ($column && $column->num_rows() > 0) {
+				$row = $column->row();
+				if (strpos($row->Type, 'tax_slab') === false) {
+					$this->db->query("ALTER TABLE `hrm_salary_components` MODIFY `amount_type` ENUM('fixed','percentage','tax_slab') NOT NULL DEFAULT 'fixed'");
+				}
+			}
+		}
+
+		if (!$this->db->table_exists('hrm_salary_component_tax_slabs')) {
+			$this->db->query("CREATE TABLE IF NOT EXISTS `hrm_salary_component_tax_slabs` (
+				`id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+				`component_id` int(10) UNSIGNED NOT NULL,
+				`slab_id` int(10) UNSIGNED NOT NULL,
+				`created_at` datetime DEFAULT NULL,
+				PRIMARY KEY (`id`),
+				KEY `component_id` (`component_id`),
+				KEY `slab_id` (`slab_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+		}
+	}
+
 	public function get_salary_components($only_active = false)
 	{
 		$this->db->from('hrm_salary_components');
 		if ($only_active) {
 			$this->db->where('status', 1);
 		}
-		return $this->db->order_by('component_name', 'asc')->get()->result();
+		$components = $this->db->order_by('component_name', 'asc')->get()->result();
+
+		if (!empty($components) && $this->db->table_exists('hrm_salary_component_tax_slabs')) {
+			$ids = array();
+			foreach ($components as $component) {
+				if (isset($component->id)) {
+					$ids[] = (int) $component->id;
+				}
+			}
+
+			if (!empty($ids)) {
+				$map = $this->get_component_tax_slabs_map($ids);
+				foreach ($components as $component) {
+					$component_id = isset($component->id) ? (int) $component->id : 0;
+					$component->tax_slabs = isset($map[$component_id]) ? $map[$component_id] : array();
+				}
+			}
+		}
+
+		return $components;
 	}
 
 	public function get_salary_component($id)
@@ -604,10 +744,226 @@ public function create_employee_payment($data = array())
 
 	public function delete_salary_component($id)
 	{
-		return $this->db->where('id', $id)->delete('hrm_salary_components');
+		$deleted = $this->db->where('id', $id)->delete('hrm_salary_components');
+
+		if ($deleted && $this->db->table_exists('hrm_salary_component_tax_slabs')) {
+			$this->db->where('component_id', (int) $id)->delete('hrm_salary_component_tax_slabs');
+		}
+
+		return $deleted;
 	}
 
-	public function get_tax_slabs($only_active = false)
+		public function replace_component_tax_slabs($component_id, $slab_ids = array())
+	{
+		if (!$this->db->table_exists('hrm_salary_component_tax_slabs')) {
+			return true;
+		}
+
+		$component_id = (int) $component_id;
+		$this->db->where('component_id', $component_id)->delete('hrm_salary_component_tax_slabs');
+
+		$unique_ids = array_unique(array_filter(array_map('intval', (array) $slab_ids)));
+		if (empty($unique_ids)) {
+			return true;
+		}
+
+		$rows = array();
+		$now  = date('Y-m-d H:i:s');
+		foreach ($unique_ids as $slab_id) {
+			$rows[] = array(
+				'component_id' => $component_id,
+				'slab_id'      => (int) $slab_id,
+				'created_at'   => $now,
+			);
+		}
+
+		return $this->db->insert_batch('hrm_salary_component_tax_slabs', $rows);
+	}
+
+	public function get_component_tax_slabs_map($component_ids = array())
+	{
+		if (!$this->db->table_exists('hrm_salary_component_tax_slabs')) {
+			return array();
+		}
+
+		if (!empty($component_ids)) {
+			$component_ids = array_unique(array_filter(array_map('intval', (array) $component_ids)));
+			if (empty($component_ids)) {
+				return array();
+			}
+		}
+
+		$this->db->select('cts.component_id, cts.slab_id, ts.min_amount, ts.max_amount, ts.rate_percent, ts.additional_amount');
+		$this->db->from('hrm_salary_component_tax_slabs cts');
+		$this->db->join('hrm_tax_slabs ts', 'ts.id = cts.slab_id', 'left');
+		if (!empty($component_ids)) {
+			$this->db->where_in('cts.component_id', $component_ids);
+		}
+		$result = $this->db->get()->result();
+
+		$map = array();
+		if (!empty($result)) {
+			foreach ($result as $row) {
+				$component_id = isset($row->component_id) ? (int) $row->component_id : 0;
+				$slab_id      = isset($row->slab_id) ? (int) $row->slab_id : 0;
+				$min_value   = isset($row->min_amount) ? (float) $row->min_amount : 0.0;
+				$min_label   = number_format($min_value, 2);
+				$max_raw      = isset($row->max_amount) ? $row->max_amount : null;
+				$max_value   = ($max_raw !== null) ? (float) $max_raw : null;
+				$max_label   = ($max_value !== null) ? number_format($max_value, 2) : 'No limit';
+				$rate_value  = isset($row->rate_percent) ? (float) $row->rate_percent : 0.0;
+				$rate_label  = number_format($rate_value, 2);
+				$additional_value = isset($row->additional_amount) ? (float) $row->additional_amount : 0.0;
+				$label        = $min_label . ' - ' . $max_label . ' @ ' . $rate_label . '%';
+
+				$map[$component_id][] = array(
+					'id'                => $slab_id,
+					'label'             => $label,
+					'min_amount'        => $min_value,
+					'max_amount'        => $max_value,
+					'rate_percent'      => $rate_value,
+					'additional_amount' => $additional_value,
+				);
+			}
+		}
+
+		return $map;
+	}
+
+
+	public function calculate_component_breakdown($salary_info = null)
+	{
+		$breakdown = array(
+			'earnings' => array(),
+			'deductions' => array(),
+			'earning_total' => 0.0,
+			'deduction_total' => 0.0,
+		);
+
+		if (empty($salary_info) || !$this->db->table_exists('hrm_salary_components')) {
+			return $breakdown;
+		}
+
+		$this->ensure_tax_slab_support();
+
+		$components = $this->get_salary_components(true);
+		if (empty($components)) {
+			return $breakdown;
+		}
+
+		$gross_amount = isset($salary_info->gross_salary) ? (float) $salary_info->gross_salary : 0.0;
+		$basic_amount = isset($salary_info->basic_salary_pro_rated) ? (float) $salary_info->basic_salary_pro_rated : (isset($salary_info->basic) ? (float) $salary_info->basic : 0.0);
+		$net_amount   = isset($salary_info->net_salary) ? (float) $salary_info->net_salary : 0.0;
+
+		foreach ($components as $component) {
+			$component_status = isset($component->status) ? (string) $component->status : '1';
+			if ($component_status !== '1') {
+				continue;
+			}
+
+			$amount = $this->calculate_component_amount($component, $salary_info, $gross_amount, $basic_amount, $net_amount);
+			if (abs($amount) < 0.0001) {
+				continue;
+			}
+
+			$rounded = round($amount, 2);
+			$entry = array(
+				'name'   => isset($component->component_name) ? $component->component_name : '',
+				'code'   => isset($component->component_code) ? $component->component_code : '',
+				'amount' => $rounded,
+			);
+
+			$type = isset($component->component_type) ? strtolower((string) $component->component_type) : 'earning';
+			if ($type === 'earning') {
+				$breakdown['earnings'][] = $entry;
+				$breakdown['earning_total'] += $rounded;
+			} else {
+				$breakdown['deductions'][] = $entry;
+				$breakdown['deduction_total'] += $rounded;
+			}
+		}
+
+		$breakdown['earning_total'] = round($breakdown['earning_total'], 2);
+		$breakdown['deduction_total'] = round($breakdown['deduction_total'], 2);
+
+		return $breakdown;
+	}
+
+	protected function calculate_component_amount($component, $salary_info, $gross_amount, $basic_amount, $net_amount)
+	{
+		$amount_type = isset($component->amount_type) ? strtolower((string) $component->amount_type) : 'fixed';
+
+		switch ($amount_type) {
+			case 'percentage':
+				$percentage = isset($component->amount_value) ? (float) $component->amount_value : 0.0;
+				if ($percentage === 0.0) {
+					return 0.0;
+				}
+
+				$base_key = isset($component->percentage_base) ? strtolower((string) $component->percentage_base) : 'gross';
+				$base_amount = $gross_amount;
+				if ($base_key === 'basic') {
+					$base_amount = $basic_amount;
+				} elseif ($base_key === 'net') {
+					$base_amount = $net_amount > 0 ? $net_amount : $gross_amount;
+				}
+
+				return ($base_amount * $percentage) / 100.0;
+
+			case 'tax_slab':
+				return $this->calculate_tax_slab_component_amount($component, $gross_amount);
+
+			case 'fixed':
+			default:
+				return isset($component->amount_value) ? (float) $component->amount_value : 0.0;
+		}
+	}
+
+	protected function calculate_tax_slab_component_amount($component, $base_amount)
+	{
+		if ($base_amount <= 0 || empty($component->tax_slabs) || !is_array($component->tax_slabs)) {
+			return 0.0;
+		}
+
+		$slabs = $component->tax_slabs;
+		usort($slabs, function ($a, $b) {
+			$aMin = isset($a['min_amount']) ? (float) $a['min_amount'] : 0.0;
+			$bMin = isset($b['min_amount']) ? (float) $b['min_amount'] : 0.0;
+			if ($aMin === $bMin) {
+				return 0;
+			}
+
+			return ($aMin < $bMin) ? -1 : 1;
+		});
+
+		$amount = 0.0;
+		foreach ($slabs as $slab) {
+			$min = isset($slab['min_amount']) ? (float) $slab['min_amount'] : 0.0;
+			$max = (isset($slab['max_amount']) && $slab['max_amount'] !== null) ? (float) $slab['max_amount'] : null;
+			$rate = isset($slab['rate_percent']) ? (float) $slab['rate_percent'] : 0.0;
+			$additional = isset($slab['additional_amount']) ? (float) $slab['additional_amount'] : 0.0;
+
+			if ($rate <= 0) {
+				continue;
+			}
+
+			if ($max !== null && $max > $min) {
+				if ($base_amount > $min && $base_amount <= $max) {
+					$amount = (($base_amount - $min) * $rate / 100.0) + $additional;
+					break;
+				}
+			} else {
+				if ($base_amount > $min) {
+					$amount = (($base_amount - $min) * $rate / 100.0) + $additional;
+					break;
+				}
+			}
+		}
+
+		return $amount;
+	}
+
+public function get_tax_slabs($only_active = false)
 	{
 		$this->db->from('hrm_tax_slabs');
 		if ($only_active) {
@@ -634,6 +990,47 @@ public function create_employee_payment($data = array())
 	public function delete_tax_slab($id)
 	{
 		return $this->db->where('id', $id)->delete('hrm_tax_slabs');
+	}
+
+	// Update office loan deduction after payroll processing
+	public function update_office_loan_deduction($data = array())
+	{
+		$transaction_id = $data['transaction_id'];
+		$deduction_amount = $data['deduction_amount'];
+		$deduction_date = $data['deduction_date'];
+
+		// Update office_loan_details
+		$this->db->query("UPDATE office_loan_details 
+			SET total_paid = IFNULL(total_paid, 0) + ?,
+				last_deduction_date = ?,
+				next_due_date = DATE_ADD(?, INTERVAL 1 MONTH)
+			WHERE transaction_id = ?", 
+			array($deduction_amount, $deduction_date, $deduction_date, $transaction_id));
+
+		// Get person_id for this transaction
+		$person_query = $this->db->select('pl.person_id')
+			->from('person_ledger pl')
+			->where('pl.transaction_id', $transaction_id)
+			->limit(1)
+			->get();
+
+		if ($person_query->num_rows() > 0) {
+			$person_id = $person_query->row()->person_id;
+
+			// Add credit entry to person_ledger
+			$ledger_data = array(
+				'person_id' => $person_id,
+				'transaction_id' => $transaction_id,
+				'date' => $deduction_date,
+				'debit' => 0,
+				'credit' => $deduction_amount,
+				'details' => 'Payroll deduction - ' . date('M Y', strtotime($deduction_date))
+			);
+
+			return $this->db->insert('person_ledger', $ledger_data);
+		}
+
+		return false;
 	}
 
 }

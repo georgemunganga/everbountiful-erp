@@ -1,3 +1,16 @@
+<?php
+$loan_today = date('Y-m-d');
+$loan_details = isset($loan_details) && is_array($loan_details) ? $loan_details : array();
+$base_disbursement = !empty($loan_details['disbursement_date']) ? $loan_details['disbursement_date'] : (!empty($loan['date']) ? $loan['date'] : $loan_today);
+$disbursement_date = $base_disbursement;
+$repayment_period = !empty($loan_details['repayment_period']) ? (int) $loan_details['repayment_period'] : 12;
+if ($repayment_period < 1) {
+    $repayment_period = 12;
+}
+$default_start_date = date('Y-m-d', strtotime('+1 month', strtotime($disbursement_date)));
+$repayment_start_date = !empty($loan_details['repayment_start_date']) ? $loan_details['repayment_start_date'] : $default_start_date;
+$repayment_end_date = !empty($loan_details['repayment_end_date']) ? $loan_details['repayment_end_date'] : date('Y-m-d', strtotime('+' . ($repayment_period - 1) . ' month', strtotime($repayment_start_date)));
+?>
         <div class="row">
             <div class="col-sm-12">
                 <?php if($this->permission1->method('manage_ofln_person','read')->access()){ ?>
@@ -46,17 +59,50 @@
                         <div class="form-group row">
                             <label for="ammount" class="col-sm-3 col-form-label"><?php echo display('ammount') ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
-                               <input type="number" class="form-control" name="ammount" id="ammount" required="" placeholder="<?php echo display('ammount') ?>" min="0" tabindex="3" value="<?php echo html_escape($loan['debit']);?>"/>
+                               <input type="number" class="form-control" name="ammount" id="ammount" required placeholder="<?php echo display('ammount') ?>" min="0" tabindex="3" value="<?php echo html_escape($loan['debit']);?>"/>
                             </div>
                         </div>
 
                         <div class="form-group row" id="payment_from">
                             <label for="payment_type" class="col-sm-3 col-form-label"><?php echo display('payment_type'); ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
-                                <select name="paytype" class="form-control" required="" onchange="bank_paymetExpense(this.value)" tabindex="4">
+                                <select name="paytype" class="form-control" required onchange="bank_paymetExpense(this.value)" tabindex="4">
                                     <option value="1" <?php echo ($paytype == 1)?'selected':'';?>><?php echo display('cash_payment')?></option>
                                     <option value="2" <?php echo ($paytype == 2)?'selected':'';?>><?php echo display('bank_payment')?></option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="disbursement_date" class="col-sm-3 col-form-label"><?php echo display('disbursement_date'); ?> <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control datepicker" name="disbursement_date" id="disbursement_date" value="<?php echo html_escape($disbursement_date); ?>" required tabindex="5"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="repayment_period" class="col-sm-3 col-form-label"><?php echo display('repayment_period'); ?> <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="repayment_period" id="repayment_period" value="<?php echo (int) $repayment_period; ?>" min="1" required tabindex="6"/>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><?php echo display('months'); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="repayment_start_date" class="col-sm-3 col-form-label"><?php echo display('repayment_start_date'); ?> <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control datepicker" name="repayment_start_date" id="repayment_start_date" value="<?php echo html_escape($repayment_start_date); ?>" required tabindex="7"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="repayment_end_date" class="col-sm-3 col-form-label"><?php echo display('repayment_end_date'); ?> <i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" name="repayment_end_date" id="repayment_end_date" value="<?php echo html_escape($repayment_end_date); ?>" required readonly tabindex="8"/>
                             </div>
                         </div>
 
@@ -64,7 +110,7 @@
                             <label for="bank" class="col-sm-3 col-form-label"><?php echo display('bank'); ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
                                <select name="bank_id" class="form-control" id="bank_id">
-                                    <option value=""><?php echo display('select_one');?></option>
+                                    <option value=""><?php echo display('select_one'); ?></option>
                                     <?php if(!empty($bank_list)){foreach($bank_list as $bank){
                                         $selected_bank = ($bank_id == $bank['bank_id'])?'selected':'';
                                     ?>
@@ -75,24 +121,24 @@
                         </div>
 
                         <div class="form-group row">
-                            <label for="date" class="col-sm-3 col-form-label"><?php echo display('date') ?> <i class="text-danger"></i></label>
+                            <label for="date" class="col-sm-3 col-form-label"><?php echo display('date') ?></label>
                             <div class="col-sm-6">
-                               <input type="text" class="form-control datepicker" name="date" id="date" value="<?php echo html_escape($loan['date']);?>" placeholder="<?php echo display('date') ?>" tabindex="5"/>
+                               <input type="text" class="form-control datepicker" name="date" id="date" value="<?php echo html_escape($loan['date']);?>" placeholder="<?php echo display('date') ?>" tabindex="9"/>
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <label for="details" class="col-sm-3 col-form-label"><?php echo display('details') ?></label>
                             <div class="col-sm-6">
-                                <textarea class="form-control" name="details" id="details" placeholder="<?php echo display('details') ?>" tabindex="6"><?php echo html_escape($loan['details']);?></textarea>
+                                <textarea class="form-control" name="details" id="details" placeholder="<?php echo display('details') ?>" tabindex="10"><?php echo html_escape($loan['details']);?></textarea>
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <label for="example-text-input" class="col-sm-4 col-form-label"></label>
                             <div class="col-sm-6">
-                                <input type="reset" class="btn btn-danger" value="<?php echo display('reset') ?>" tabindex="7"/>
-                                <input type="submit" class="btn btn-success" value="<?php echo display('save') ?>" tabindex="8"/>
+                                <input type="reset" class="btn btn-danger" value="<?php echo display('reset') ?>" tabindex="11"/>
+                                <input type="submit" class="btn btn-success" value="<?php echo display('save') ?>" tabindex="12"/>
                             </div>
                         </div>
                     </div>
@@ -119,5 +165,106 @@
                         phoneInput.value = phone;
                     }
                 });
+            })();
+
+            (function() {
+                var disbursementInput = document.getElementById('disbursement_date');
+                var periodInput = document.getElementById('repayment_period');
+                var startInput = document.getElementById('repayment_start_date');
+                var endInput = document.getElementById('repayment_end_date');
+                if (!disbursementInput || !periodInput || !startInput || !endInput) {
+                    return;
+                }
+
+                var startManual = false;
+                var suppressStartListener = false;
+
+                function parseDate(value) {
+                    if (!value) return null;
+                    var parts = value.split('-');
+                    if (parts.length !== 3) return null;
+                    var year = parseInt(parts[0], 10);
+                    var month = parseInt(parts[1], 10) - 1;
+                    var day = parseInt(parts[2], 10);
+                    if (isNaN(year) || isNaN(month) || isNaN(day)) {
+                        return null;
+                    }
+                    return new Date(year, month, day);
+                }
+
+                function formatDate(date) {
+                    if (!(date instanceof Date)) {
+                        return '';
+                    }
+                    var month = String(date.getMonth() + 1).padStart(2, '0');
+                    var day = String(date.getDate()).padStart(2, '0');
+                    return date.getFullYear() + '-' + month + '-' + day;
+                }
+
+                function addMonths(date, months) {
+                    var result = new Date(date.getTime());
+                    var targetDay = result.getDate();
+                    result.setMonth(result.getMonth() + months);
+                    if (result.getDate() !== targetDay) {
+                        result.setDate(0);
+                    }
+                    return result;
+                }
+
+                function setStartValue(value) {
+                    suppressStartListener = true;
+                    startInput.value = value;
+                    suppressStartListener = false;
+                }
+
+                function updateEndDate() {
+                    var period = parseInt(periodInput.value, 10);
+                    var startDate = parseDate(startInput.value);
+                    if (!period || period < 1 || !startDate) {
+                        endInput.value = '';
+                        return;
+                    }
+                    var endDate = addMonths(startDate, Math.max(period - 1, 0));
+                    endInput.value = formatDate(endDate);
+                }
+
+                function handleDisbursementChange() {
+                    var disbursementDate = parseDate(disbursementInput.value);
+                    if (!disbursementDate) {
+                        return;
+                    }
+                    if (!startManual) {
+                        var defaultStart = addMonths(disbursementDate, 1);
+                        setStartValue(formatDate(defaultStart));
+                    }
+                    updateEndDate();
+                }
+
+                function handlePeriodChange() {
+                    var period = parseInt(periodInput.value, 10);
+                    if (isNaN(period) || period < 1) {
+                        periodInput.value = 1;
+                        period = 1;
+                    }
+                    updateEndDate();
+                }
+
+                disbursementInput.addEventListener('change', handleDisbursementChange);
+                periodInput.addEventListener('change', handlePeriodChange);
+                periodInput.addEventListener('keyup', handlePeriodChange);
+
+                startInput.addEventListener('change', function() {
+                    if (!suppressStartListener) {
+                        startManual = true;
+                    }
+                    updateEndDate();
+                });
+
+                startInput.addEventListener('keyup', function() {
+                    updateEndDate();
+                });
+
+                handleDisbursementChange();
+                handlePeriodChange();
             })();
         </script>

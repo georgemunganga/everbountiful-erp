@@ -130,13 +130,27 @@
 
                     $curncy_symbol = '';
                     $social_security_tax_percnt = '';
-                    if(!empty($setting->currency_symbol)){
+                    if (!empty($setting->currency_symbol)) {
                         $curncy_symbol = $setting->currency_symbol;
                         $social_security_tax_percnt = $setting->soc_sec_npf_tax;
                     }
 
                     $total_benefits = 0.0;
                     $total_benefits = floatval($salary_info->medical_benefit) + floatval($salary_info->family_benefit) + floatval($salary_info->transportation_benefit) + floatval($salary_info->other_benefit);
+
+                    $component_breakdown = isset($component_breakdown) && is_array($component_breakdown) ? $component_breakdown : array('earnings' => array(), 'deductions' => array(), 'earning_total' => 0.0, 'deduction_total' => 0.0);
+                    $component_earnings = isset($component_breakdown['earnings']) && is_array($component_breakdown['earnings']) ? $component_breakdown['earnings'] : array();
+                    $component_deductions = isset($component_breakdown['deductions']) && is_array($component_breakdown['deductions']) ? $component_breakdown['deductions'] : array();
+                    $component_add_total = isset($component_add_total) ? (float) $component_add_total : (float) $component_breakdown['earning_total'];
+                    $component_ded_total = isset($component_ded_total) ? (float) $component_ded_total : (float) $component_breakdown['deduction_total'];
+                    $component_add_total_display = round($component_add_total, 2);
+                    $component_ded_total_display = round($component_ded_total, 2);
+                    $loan_total_display = isset($loan_total) ? (float) $loan_total : (isset($salary_info->loan_deduct) ? (float) $salary_info->loan_deduct : 0.0);
+                    $salary_advance_display = isset($salary_advance_total) ? (float) $salary_advance_total : (isset($salary_info->salary_advance) ? (float) $salary_info->salary_advance : 0.0);
+                    $net_salary_display = isset($net_salary_calculated) ? (float) $net_salary_calculated : (isset($salary_info->net_salary) ? (float) $salary_info->net_salary : 0.0);
+                    $post_gross_total_display = isset($post_gross_total) ? (float) $post_gross_total : ((isset($salary_info->gross_salary) ? (float) $salary_info->gross_salary : 0.0) + $component_add_total);
+                    $social_security_combined_display = isset($social_security_combined_total) ? (float) $social_security_combined_total : (floatval($salary_info->employer_contribution) + floatval($salary_info->soc_sec_npf_tax));
+                    $social_security_employee_display = isset($social_security_employee_total) ? (float) $social_security_employee_total : (float) $salary_info->soc_sec_npf_tax;
 
                     ?>
 
@@ -154,23 +168,16 @@
                             <tbody>
                                 <tr style="text-align: left !important;">
                                     <th>Basic Salary</th>
-                                    <td><?php echo $curncy_symbol.' '.$salary_info->basic;?></td>
+                                    <td><?php echo $curncy_symbol.' '.number_format($salary_info->basic,2);?></td>
                                     <td></td>
-                                    <td><?php echo $curncy_symbol.' '.$salary_info->basic_salary_pro_rated;?></td>
-                                    <td></td>
-                                </tr>
-                                <tr style="text-align: left !important;">
-                                    <th>Transpost allowance</th>
-                                    <td><?php echo $curncy_symbol.' '.$salary_info->transport;?></td>
-                                    <td></td>
-                                    <td><?php echo $curncy_symbol.' '.$salary_info->transport_allowance_pro_rated;?></td>
+                                    <td><?php echo $curncy_symbol.' '.number_format($salary_info->basic_salary_pro_rated,2);?></td>
                                     <td></td>
                                 </tr>
-                                 <tr style="text-align: left !important;">
+                                                                 <tr style="text-align: left !important;">
                                     <th>Total Benefit</th>
                                     <td></td>
                                     <td></td>
-                                    <td><?php echo $curncy_symbol.' '.$total_benefits;?></td>
+                                    <td><?php echo $curncy_symbol.' '.number_format($total_benefits,2);?></td>
                                     <td></td>
                                 </tr>
                                 <tr style="text-align: left !important;">
@@ -188,33 +195,64 @@
                                     <td></td>
 
                                 </tr>
+                                <?php if (!empty($component_earnings)) { ?>
+                                <?php foreach ($component_earnings as $earning) { ?>
                                 <tr style="text-align: left !important;">
-                                    <th style="text-align: left !important;">State Income Tax</th>
+                                    <td><?php echo html_escape($earning['name']);?></td>
                                     <td></td>
                                     <td></td>
+                                    <td><?php echo $curncy_symbol.' '.number_format($earning['amount'],2);?></td>
                                     <td></td>
-                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($salary_info->income_tax,2);?></td>
+                                </tr>
+                                <?php } ?>
+                                <tr style="text-align: left !important;">
+                                    <th>Component Additions Total</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th><?php echo $curncy_symbol.' '.number_format($component_add_total_display,2);?></th>
+                                    <th></th>
                                 </tr>
                                 <tr style="text-align: left !important;">
-                                    <th style="text-align: left !important;">Social Security</th>
-                                    <td></td>
-                                    <td><?php echo $setting->soc_sec_npf_tax.'%';?></td>
-                                    <td></td>
-                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($salary_info->soc_sec_npf_tax,2);?></td>
+                                    <th>Subtotal Before Deductions</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th><?php echo $curncy_symbol.' '.number_format($post_gross_total_display,2);?></th>
+                                    <th></th>
                                 </tr>
+                                <?php } ?>
+
+                                <?php if (!empty($component_deductions)) { ?>
+                                <?php foreach ($component_deductions as $deduction) { ?>
+                                <tr style="text-align: left !important;">
+                                    <td><?php echo html_escape($deduction['name']);?></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td><?php echo $curncy_symbol.' '.number_format($deduction['amount'],2);?></td>
+                                </tr>
+                                <?php } ?>
+                                <tr style="text-align: left !important;">
+                                    <th>Component Deductions Total</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th><?php echo $curncy_symbol.' '.number_format($component_ded_total_display,2);?></th>
+                                </tr>
+                                <?php } ?>
+
                                 <tr style="text-align: left !important;">
                                     <th style="text-align: left !important;">Loan Deduction</th>
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($salary_info->loan_deduct,2);?></td>
+                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($loan_total_display,2);?></td>
                                 </tr>
                                 <tr style="text-align: left !important;">
                                     <th style="text-align: left !important;">Salary Advance</th>
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($salary_info->salary_advance,2);?></td>
+                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($salary_advance_display,2);?></td>
                                 </tr>
                                 <tr style="text-align: left !important;">
                                     <th style="text-align: left !important;">Total Deductions</th>
@@ -235,14 +273,14 @@
                                     <th colspan="3" style="text-align: left !important;">Total Social Security</th>
 
                                     <td></td>
-                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' ';?><?php echo floatval($salary_info->employer_contribution) + floatval($salary_info->soc_sec_npf_tax);?></td>
+                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($social_security_combined_display,2);?></td>
                                 </tr>
 
                                 <tr style="text-align: left !important;">
                                     <th colspan="3"  style="text-align: left !important;">NET SALARY</th>
 
                                     <td></td>
-                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' ';?><?php echo number_format($salary_info->net_salary,2);?></td>
+                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($net_salary_display,2);?></td>
                                 </tr>
                             </tbody>
 

@@ -11,7 +11,14 @@ class Template_model extends CI_Model
 
     public function setting()
     {
-        return $this->db->get('web_setting')->row();
+        $setting = $this->db->get('web_setting')->row();
+        
+        // Add currency_symbol property for backward compatibility
+        if ($setting && isset($setting->currency)) {
+            $setting->currency_symbol = $setting->currency;
+        }
+        
+        return $setting;
     }
 
     public function bdtask_company_info()

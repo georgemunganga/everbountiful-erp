@@ -29,9 +29,10 @@
                     <select class="form-control" id="componentAmountType" name="amount_type" required>
                         <option value="fixed">Fixed Amount</option>
                         <option value="percentage">Percentage</option>
+                        <option value="tax_slab">Tax Slab</option>
                     </select>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="amountValueWrapper">
                     <label for="componentAmount">Amount Value <span class="text-danger">*</span></label>
                     <input type="number" step="0.01" min="0" class="form-control" id="componentAmount" name="amount_value" required>
                 </div>
@@ -44,6 +45,34 @@
                         <option value="net">Net Pay</option>
                     </select>
                 </div>
+                <div class="form-group" id="taxSlabWrapper" style="display:none;">
+                    <label for="componentTaxSlabs">Tax Slabs <span class="text-danger">*</span></label>
+                    <select class="form-control" id="componentTaxSlabs" name="tax_slab_ids[]" multiple="multiple" size="5">
+                        <?php if (!empty($tax_slabs)) { ?>
+                            <?php foreach ($tax_slabs as $slab) { ?>
+                                <?php
+                                    $slab_id = isset($slab->id) ? $slab->id : null;
+                                    $min_amount = isset($slab->min_amount) ? $slab->min_amount : 0;
+                                    $max_amount = isset($slab->max_amount) ? $slab->max_amount : null;
+                                    $rate_percent = isset($slab->rate_percent) ? $slab->rate_percent : 0;
+                                    $status_raw = isset($slab->status) ? $slab->status : 1;
+                                    $min_label = number_format((float)$min_amount, 2);
+                                    $max_label = ($max_amount !== null) ? number_format((float)$max_amount, 2) : 'No limit';
+                                    $rate_label = number_format((float)$rate_percent, 2);
+                                    $option_label = $min_label . ' - ' . $max_label . ' @ ' . $rate_label . '%';
+                                    if ((string)$status_raw !== '1') {
+                                        $option_label .= ' (Inactive)';
+                                    }
+                                ?>
+                                <option value="<?php echo html_escape($slab_id); ?>"><?php echo html_escape($option_label); ?></option>
+                            <?php } ?>
+                        <?php } else { ?>
+                            <option value=""><?php echo display('no_data_found') ? display('no_data_found') : 'No tax slabs available.'; ?></option>
+                        <?php } ?>
+                    </select>
+                    <small class="text-muted">Hold Ctrl (Windows) or Command (macOS) to select multiple slabs.</small>
+                </div>
+
                 <div class="form-group">
                     <label for="componentTaxable">Is Taxable?</label>
                     <select class="form-control" id="componentTaxable" name="is_taxable">
@@ -108,6 +137,15 @@
                                     $status_raw = isset($component->status) ? $component->status : (isset($component->is_active) ? $component->is_active : 1);
                                     $description = isset($component->description) ? $component->description : (isset($component->note) ? $component->note : '');
 
+                                    $selected_tax_slabs = array();
+                                    if (!empty($component->tax_slabs) && is_array($component->tax_slabs)) {
+                                        foreach ($component->tax_slabs as $slab_info) {
+                                            if (is_array($slab_info) && isset($slab_info['id'])) {
+                                                $selected_tax_slabs[] = (int) $slab_info['id'];
+                                            }
+                                        }
+                                    }
+
                                     $type_label = 'Addition';
                                     $type_class = 'label label-info';
                                     if (strtolower((string)$type_raw) === 'deduction' || (string)$type_raw === '0') {
@@ -115,19 +153,35 @@
                                         $type_class = 'label label-warning';
                                     }
 
-                                    $amount_display = is_numeric($amount_value) ? number_format((float)$amount_value, 2) : html_escape($amount_value);
-                                    $base_label = '';
-                                    if ($amount_type === 'percentage') {
-                                        $base_label = $percentage_base ? ucwords($percentage_base) : '';
-                                        $amount_display = number_format((float)$amount_value, 2) . '%';
-                                        if ($base_label !== '') {
-                                            $amount_display .= ' of ' . $base_label;
+                                    $amount_display = '';
+                                    if ($amount_type === 'tax_slab') {
+                                        $amount_display = 'Tax Slab';
+                                        if (!empty($component->tax_slabs) && is_array($component->tax_slabs)) {
+                                            $slab_labels = array();
+                                            foreach ($component->tax_slabs as $slab_row) {
+                                                if (is_array($slab_row) && isset($slab_row['label'])) {
+                                                    $slab_labels[] = html_escape($slab_row['label']);
+                                                }
+                                            }
+                                            if (!empty($slab_labels)) {
+                                                $amount_display .= '<div class="text-muted small">' . implode('<br>', $slab_labels) . '</div>';
+                                            }
+                                        }
+                                    } else {
+                                        $amount_display = is_numeric($amount_value) ? number_format((float)$amount_value, 2) : html_escape($amount_value);
+                                        if ($amount_type === 'percentage') {
+                                            $base_label = $percentage_base ? ucwords($percentage_base) : '';
+                                            $amount_display = number_format((float)$amount_value, 2) . '%';
+                                            if ($base_label !== '') {
+                                                $amount_display .= ' of ' . $base_label;
+                                            }
                                         }
                                     }
 
                                     $taxable_text = ((string)$is_taxable === '1') ? display('yes') : display('no');
                                     $status_text = ((string)$status_raw === '1') ? 'Active' : 'Inactive';
                                     $status_class = ((string)$status_raw === '1') ? 'label label-success' : 'label label-default';
+                                    $tax_slab_ids_json = html_escape(json_encode($selected_tax_slabs));
                                 ?>
                                 <tr class="<?php echo ($sl & 1) ? 'odd gradeX' : 'even gradeC'; ?>">
                                     <td><?php echo $sl++; ?></td>
@@ -152,6 +206,7 @@
                                             data-amount="<?php echo html_escape($amount_value); ?>"
                                             data-amount-type="<?php echo html_escape($amount_type); ?>"
                                             data-base="<?php echo html_escape($percentage_base); ?>"
+                                            data-tax-slabs='<?php echo $tax_slab_ids_json; ?>'
                                             data-taxable="<?php echo html_escape($is_taxable); ?>"
                                             data-status="<?php echo html_escape($status_raw); ?>"
                                             data-description="<?php echo html_escape($description); ?>">
@@ -214,18 +269,45 @@
         var $amountType = $('#componentAmountType');
         var $percentageWrapper = $('#percentageBaseWrapper');
         var $percentageBase = $('#componentPercentageBase');
+        var $amountWrapper = $('#amountValueWrapper');
         var $amountInput = $('#componentAmount');
+        var $taxSlabWrapper = $('#taxSlabWrapper');
+        var $taxSlabSelect = $('#componentTaxSlabs');
 
-        function togglePercentageBase(type) {
+        function handleAmountTypeChange(type) {
+            type = (type || '').toString().toLowerCase();
+
             if (type === 'percentage') {
+                $amountWrapper.show();
+                $amountInput.prop('required', true);
                 $percentageWrapper.show();
                 $percentageBase.prop('required', true);
                 $amountInput.attr('max', 100);
-            } else {
+                $taxSlabWrapper.hide();
+                $taxSlabSelect.prop('required', false);
+                $taxSlabSelect.val([]);
+            } else if (type === 'tax_slab') {
+                $amountWrapper.hide();
+                $amountInput.prop('required', false).val('');
                 $percentageWrapper.hide();
                 $percentageBase.prop('required', false).val('');
                 $amountInput.removeAttr('max');
+                $taxSlabWrapper.show();
+                $taxSlabSelect.prop('required', true);
+            } else {
+                $amountWrapper.show();
+                $amountInput.prop('required', true);
+                $percentageWrapper.hide();
+                $percentageBase.prop('required', false).val('');
+                $amountInput.removeAttr('max');
+                $taxSlabWrapper.hide();
+                $taxSlabSelect.prop('required', false);
+                $taxSlabSelect.val([]);
             }
+        }
+
+        function resetTaxSlabSelect() {
+            $taxSlabSelect.find('option').prop('selected', false);
         }
 
         function resetComponentForm() {
@@ -236,15 +318,17 @@
             $componentSubmit.text('<?php echo display('save'); ?>');
             $('#componentType').val('earning');
             $amountType.val('fixed');
-            togglePercentageBase('fixed');
+            resetTaxSlabSelect();
+            handleAmountTypeChange('fixed');
             $('#componentTaxable').val('1');
             $('#componentStatus').val('1');
+            $('#componentDescription').val('');
         }
 
         resetComponentForm();
 
         $amountType.on('change', function () {
-            togglePercentageBase($(this).val());
+            handleAmountTypeChange($(this).val());
         });
 
         $('#componentFormCancel').on('click', function () {
@@ -262,6 +346,19 @@
             }
 
             var amountType = ($btn.data('amount-type') || 'fixed').toString().toLowerCase();
+
+            var slabData = $btn.data('tax-slabs');
+            var slabIds = [];
+            if ($.isArray(slabData)) {
+                slabIds = slabData;
+            } else if (typeof slabData === 'string') {
+                try {
+                    slabIds = JSON.parse(slabData);
+                } catch (err) {
+                    slabIds = [];
+                }
+            }
+
             var taxableValue = $btn.data('taxable');
             if (taxableValue === true) {
                 taxableValue = '1';
@@ -276,6 +373,8 @@
                 statusValue = '0';
             }
 
+            resetTaxSlabSelect();
+
             $componentForm.attr('data-mode', 'edit');
             $componentTitle.text('Update Salary Component');
             $componentSubmit.text('Update');
@@ -285,12 +384,19 @@
             $componentForm.find('[name="component_code"]').val($btn.data('code') || '');
             $('#componentType').val(typeValue);
             $amountType.val(amountType);
-            togglePercentageBase(amountType);
+            handleAmountTypeChange(amountType);
             $amountInput.val($btn.data('amount') || '');
             $percentageBase.val($btn.data('base') || '');
             $('#componentTaxable').val(taxableValue);
             $('#componentStatus').val(statusValue);
             $('#componentDescription').val($btn.data('description') || '');
+
+            if (amountType === 'tax_slab' && slabIds.length) {
+                var normalizedIds = $.map(slabIds, function (value) {
+                    return value !== null && value !== undefined ? value.toString() : null;
+                });
+                $taxSlabSelect.val(normalizedIds);
+            }
 
             $('html, body').animate({ scrollTop: $componentForm.offset().top - 60 }, 400);
         });

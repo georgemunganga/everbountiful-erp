@@ -2225,9 +2225,23 @@ public function journal()
     }
 // get old all financial Year
     public function get_old_financialyear(){
-       return $oldyear = $this->db->select('id,yearName')
-                       ->from('financial_year')->where('status',0)->order_by('endDate','DESC')->get()->result();
+        $result = $this->db->select('id,yearName')
+            ->from('financial_year')
+            ->where('status', 0)
+            ->order_by('endDate', 'DESC')
+            ->get()
+            ->result();
 
+        if (!empty($result)) {
+            return $result;
+        }
+
+        return $this->db->select('id,yearName')
+            ->from('financial_year')
+            ->where_in('status', array(1, 2))
+            ->order_by('endDate', 'DESC')
+            ->get()
+            ->result();
     }
 
     public function general_led_report_headname($cmbGLCode){
@@ -4018,7 +4032,14 @@ public function software_setting_info(){
 
 public function setting()
   {
-    return $this->db->get('web_setting')->row();
+    $setting = $this->db->get('web_setting')->row();
+    
+    // Add currency_symbol property for backward compatibility
+    if ($setting && isset($setting->currency)) {
+        $setting->currency_symbol = $setting->currency;
+    }
+    
+    return $setting;
   }
 
     public function paymentparentcode(){

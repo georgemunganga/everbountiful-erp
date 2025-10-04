@@ -22,10 +22,12 @@
                             <table id="dataTableExample3" class="table table-bordered table-striped table-hover">
                                 <thead>
                                     <tr>
-                                        <th><?php echo display('date') ?></th>
-                                        <th><?php echo display('name') ?></th>
-                                        <th><?php echo display('phone') ?></th>
-                                        <th class="text-right"><?php echo display('ammount') ?></th>
+                                        <th><?php echo display('disbursement_date'); ?></th>
+                                        <th><?php echo display('employee_name'); ?></th>
+                                        <th><?php echo display('phone'); ?></th>
+                                        <th class="text-right"><?php echo display('loan_amount'); ?></th>
+                                        <th class="text-right"><?php echo display('paid'); ?></th>
+                                        <th class="text-right"><?php echo display('outstanding'); ?></th>
                                         <th><?php echo display('details') ?></th>
                                         <th><?php echo display('action') ?></th>
                                     </tr>
@@ -37,8 +39,14 @@
                                                 <td><?php echo html_escape($loan['date']); ?></td>
                                                 <td>
                                                     <a href="<?php echo base_url('office_loan_person_ledger/' . $loan['person_id']); ?>">
-                                                        <?php echo html_escape($loan['person_name']); ?>
+                                                        <?php echo html_escape($loan['employee_display_name']); ?>
                                                     </a>
+                                                    <?php if (!empty($loan['person_name']) && $loan['person_name'] !== $loan['employee_display_name']) { ?>
+                                                        <div><small class="text-muted"><?php echo html_escape($loan['person_name']); ?></small></div>
+                                                    <?php } ?>
+                                                    <?php if (!empty($loan['person_id'])) { ?>
+                                                        <div><small class="text-muted"><?php echo html_escape($loan['person_id']); ?></small></div>
+                                                    <?php } ?>
                                                 </td>
                                                 <td><?php echo html_escape($loan['person_phone']); ?></td>
                                                 <td class="text-right">
@@ -51,8 +59,51 @@
                                                         }
                                                     ?>
                                                 </td>
-                                                <td><?php echo html_escape($loan['details']); ?></td>
+                                                <td class="text-right">
+                                                    <?php
+                                                        $formatted_paid = number_format((float) $loan['total_credit'], 2, '.', ',');
+                                                        if ($position == 0) {
+                                                            echo $currency . ' ' . $formatted_paid;
+                                                        } else {
+                                                            echo $formatted_paid . ' ' . $currency;
+                                                        }
+                                                    ?>
+                                                </td>
+                                                <td class="text-right">
+                                                    <?php
+                                                        $formatted_outstanding = number_format((float) $loan['outstanding'], 2, '.', ',');
+                                                        if ($position == 0) {
+                                                            echo $currency . ' ' . $formatted_outstanding;
+                                                        } else {
+                                                            echo $formatted_outstanding . ' ' . $currency;
+                                                        }
+                                                    ?>
+                                                </td>
                                                 <td>
+                                                    <?php echo html_escape($loan['details']); ?>
+                                                    <?php if (!empty($loan['disbursement_date']) || !empty($loan['repayment_start_date']) || !empty($loan['repayment_end_date']) || !empty($loan['repayment_period'])) { ?>
+                                                        <div class="small text-muted m-t-5">
+                                                            <?php if (!empty($loan['disbursement_date'])) { ?>
+                                                                <div><?php echo display('disbursement_date'); ?>: <?php echo html_escape($loan['disbursement_date']); ?></div>
+                                                            <?php } ?>
+                                                            <?php if (!empty($loan['repayment_start_date'])) { ?>
+                                                                <div><?php echo display('repayment_start_date'); ?>: <?php echo html_escape($loan['repayment_start_date']); ?></div>
+                                                            <?php } ?>
+                                                            <?php if (!empty($loan['repayment_end_date'])) { ?>
+                                                                <div><?php echo display('repayment_end_date'); ?>: <?php echo html_escape($loan['repayment_end_date']); ?></div>
+                                                            <?php } ?>
+                                                            <?php if (!empty($loan['repayment_period'])) { ?>
+                                                                <div><?php echo display('repayment_period'); ?>: <?php echo html_escape($loan['repayment_period']); ?> <?php echo display('months'); ?></div>
+                                                            <?php } ?>
+                                                        </div>
+                                                    <?php } ?>
+                                                </td>
+                                                <td>
+                                                    <?php if($this->permission1->method('manage_office_loan_person','read')->access()){ ?>
+                                                        <a href="<?php echo base_url('office_loan_overview/' . $loan['person_id']); ?>" class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="left" title="<?php echo display('view'); ?>">
+                                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                                        </a>
+                                                    <?php } ?>
                                                     <?php if($this->permission1->method('manage_office_loan_person','update')->access()){ ?>
                                                         <a href="<?php echo base_url('bdtask_edit_office_loan/' . $loan['transaction_id']); ?>" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="left" title="<?php echo display('update'); ?>">
                                                             <i class="fa fa-pencil" aria-hidden="true"></i>
@@ -68,7 +119,7 @@
                                         <?php } ?>
                                     <?php } else { ?>
                                         <tr>
-                                            <td colspan="6" class="text-center"><?php echo display('no_data_found'); ?></td>
+                                            <td colspan="8" class="text-center"><?php echo display('no_data_found'); ?></td>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
@@ -85,6 +136,8 @@
                                                 }
                                             ?>
                                         </th>
+                                        <th class="text-right"></th>
+                                        <th class="text-right"></th>
                                         <th colspan="2"></th>
                                     </tr>
                                 </tfoot>

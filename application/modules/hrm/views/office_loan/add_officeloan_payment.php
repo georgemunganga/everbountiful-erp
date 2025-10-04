@@ -1,17 +1,12 @@
 
-        <div class="row">
+                <div class="row">
             <div class="col-sm-12">
-               
-                  <?php if($this->permission1->method('add_ofloan_person','create')->access()){ ?>
-                   <a href="<?php echo base_url('add_officeloan_person')?>" class="btn btn-success m-b-5 m-r-2"><i class="ti-plus"> </i> <?php echo display('add_person')?> </a>
-               <?php }?>
-             <?php if($this->permission1->method('add_office_loan','create')->access()){ ?>
-                  <a href="<?php echo base_url('add_office_loan')?>" class="btn btn-success m-b-5 m-r-2"><i class="ti-plus"> </i> <?php echo display('add_loan')?> </a>
-               <?php }?>
-                  <?php if($this->permission1->method('manage_ofln_person','read')->access()){ ?>
-                  <a href="<?php echo base_url('manage_office_loans')?>" class="btn btn-primary m-b-5 m-r-2"><i class="ti-plus"> </i> <?php echo display('manage_loan')?> </a>
-                  <?php }?>
-                
+                <?php if($this->permission1->method('add_office_loan','create')->access()){ ?>
+                    <a href="<?php echo base_url('add_office_loan')?>" class="btn btn-success m-b-5 m-r-2"><i class="ti-plus"> </i> <?php echo display('add_loan')?> </a>
+                <?php }?>
+                <?php if($this->permission1->method('manage_ofln_person','read')->access()){ ?>
+                    <a href="<?php echo base_url('manage_office_loans')?>" class="btn btn-primary m-b-5 m-r-2"><i class="ti-plus"> </i> <?php echo display('manage_loan')?> </a>
+                <?php }?>
             </div>
         </div>
 

@@ -3,7 +3,6 @@
             <div class="col-sm-12">
                 
 
-                    <a href="<?php echo base_url('add_officeloan_person') ?>" class="btn btn-warning m-b-5 m-r-2"><i class="ti-plus"> </i> <?php echo display('add_person') ?> </a>
                     <a href="<?php echo base_url('manage_office_loans') ?>" class="btn btn-primary m-b-5 m-r-2"><i class="ti-align-justify"> </i> <?php echo display('manage_loan') ?> </a>
                 
             </div>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
  #------------------------------------    
     # Author: Bdtask Ltd
@@ -17,7 +17,9 @@ class Loan extends MX_Controller {
             'loan_model')); 
         if (! $this->session->userdata('isLogIn'))
             redirect('login');
-          
+
+        $this->ensure_office_loan_details_table();
+        $this->ensure_office_loan_language();
     }
    
 
@@ -35,6 +37,7 @@ class Loan extends MX_Controller {
         $person_name    = $this->input->post('name', TRUE);
         $person_phone   = $this->input->post('phone', TRUE);
         $person_address = $this->input->post('address', TRUE);
+        $employee_link_id = null;
 
         if (!empty($employee_id)) {
             $employee = $this->db->select('id, first_name, last_name, phone, address_line_1')
@@ -48,6 +51,7 @@ class Loan extends MX_Controller {
                 $person_name    = trim($employee->first_name . ' ' . $employee->last_name);
                 $person_phone   = !empty($employee->phone) ? $employee->phone : $person_phone;
                 $person_address = !empty($employee->address_line_1) ? $employee->address_line_1 : $person_address;
+                $employee_link_id = (int) $employee->id;
             }
         }
 
@@ -58,6 +62,10 @@ class Loan extends MX_Controller {
             'person_address' => $person_address,
             'status'         => 1
         );
+
+        if ($employee_link_id !== null) {
+            $data['employee_id'] = $employee_link_id;
+        }
 
         $existing_person = $this->db->select('person_id, person_name')
             ->from('person_information')
@@ -116,7 +124,7 @@ class Loan extends MX_Controller {
             redirect(base_url('manage_office_loans'));
         } else {
             $this->session->set_flashdata(array('exception' => display('not_added')));
-            redirect(base_url('add_officeloan_person'));
+            redirect(base_url('manage_office_loans'));
         }
     }
 
@@ -124,6 +132,149 @@ class Loan extends MX_Controller {
         $query=$this->db->query("SELECT MAX(HeadCode) as HeadCode FROM acc_coa WHERE HeadLevel='4' And HeadCode LIKE '1020302000%'");
         return $query->row();
 
+    }
+
+    private function ensure_office_loan_details_table()
+    {
+        if (! $this->db->table_exists('office_loan_details')) {
+            $this->db->query("CREATE TABLE IF NOT EXISTS `office_loan_details` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `transaction_id` varchar(50) NOT NULL,
+                `person_id` varchar(50) NOT NULL,
+                `disbursement_date` date NOT NULL,
+                `repayment_period` int(11) NOT NULL,
+                `repayment_start_date` date NOT NULL,
+                `repayment_end_date` date NOT NULL,
+                `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `transaction_id_unique` (`transaction_id`),
+                KEY `person_id_idx` (`person_id`),
+                CONSTRAINT `fk_office_loan_details_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `person_ledger` (`transaction_id`) ON DELETE CASCADE ON UPDATE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+        }
+
+        $this->ensure_office_loan_detail_columns();
+    }
+
+    private function ensure_office_loan_detail_columns()
+    {
+        $table = 'office_loan_details';
+
+        if (! $this->db->field_exists('principal_amount', $table)) {
+            $this->db->query("ALTER TABLE `office_loan_details` ADD COLUMN `principal_amount` decimal(14,2) DEFAULT NULL AFTER `repayment_end_date`");
+        }
+
+        if (! $this->db->field_exists('monthly_installment', $table)) {
+            $this->db->query("ALTER TABLE `office_loan_details` ADD COLUMN `monthly_installment` decimal(14,2) DEFAULT NULL AFTER `principal_amount`");
+        }
+
+        if (! $this->db->field_exists('total_paid', $table)) {
+            $this->db->query("ALTER TABLE `office_loan_details` ADD COLUMN `total_paid` decimal(14,2) NOT NULL DEFAULT 0 AFTER `monthly_installment`");
+        }
+
+        if (! $this->db->field_exists('last_deduction_date', $table)) {
+            $this->db->query("ALTER TABLE `office_loan_details` ADD COLUMN `last_deduction_date` date DEFAULT NULL AFTER `total_paid`");
+        }
+
+        if (! $this->db->field_exists('next_due_date', $table)) {
+            $this->db->query("ALTER TABLE `office_loan_details` ADD COLUMN `next_due_date` date DEFAULT NULL AFTER `last_deduction_date`");
+        }
+
+        // Backfill principal amount from ledger where missing
+        $this->db->query("UPDATE `office_loan_details` old
+            JOIN person_ledger pl ON pl.transaction_id = old.transaction_id AND pl.debit > 0
+            SET old.principal_amount = pl.debit
+            WHERE (old.principal_amount IS NULL OR old.principal_amount = 0)");
+
+        // Ensure monthly installment is available when possible
+        $this->db->query("UPDATE `office_loan_details`
+            SET monthly_installment = ROUND(principal_amount / NULLIF(repayment_period, 0), 2)
+            WHERE (monthly_installment IS NULL OR monthly_installment = 0)
+              AND principal_amount IS NOT NULL
+              AND repayment_period > 0");
+
+        // Normalise totals and next due dates
+        $this->db->query("UPDATE `office_loan_details`
+            SET total_paid = 0
+            WHERE total_paid IS NULL");
+
+        $this->db->query("UPDATE `office_loan_details`
+            SET next_due_date = repayment_start_date
+            WHERE (next_due_date IS NULL OR next_due_date = '' OR next_due_date = '0000-00-00')
+              AND repayment_start_date IS NOT NULL");
+    }
+
+    private function sanitize_date($value, $fallback = null)
+    {
+        if (empty($value)) {
+            return $fallback;
+        }
+
+        $timestamp = strtotime($value);
+        if ($timestamp === false) {
+            return $fallback;
+        }
+
+        return date('Y-m-d', $timestamp);
+    }
+
+    private function generate_office_headcode($employee_id = null)
+    {
+        $base = 1020302000;
+        $max  = 2147483647;
+
+        if (!empty($employee_id) && ctype_digit((string) $employee_id)) {
+            $candidate = $base + (int) $employee_id;
+            if ($candidate <= $max && !$this->headcode_exists($candidate)) {
+                return $candidate;
+            }
+        }
+
+        $candidate = $base + 1;
+        while ($candidate <= $max) {
+            if (!$this->headcode_exists($candidate)) {
+                return $candidate;
+            }
+            $candidate++;
+        }
+
+        throw new Exception('No available headcode slot for office loans under INT limit.');
+    }
+
+    private function headcode_exists($headcode)
+    {
+        return $this->db->select('HeadCode')
+            ->from('acc_coa')
+            ->where('HeadCode', $headcode)
+            ->get()
+            ->num_rows() > 0;
+    }
+
+    private function ensure_office_loan_language()
+    {
+        $phrases = array(
+            'disbursement_date'     => 'Disbursement Date',
+            'repayment_period'      => 'Repayment Period',
+            'repayment_start_date'  => 'Repayment Start Date',
+            'repayment_end_date'    => 'Repayment End Date',
+            'months'                => 'months',
+        );
+
+        foreach ($phrases as $phrase => $english) {
+            $exists = $this->db->select('phrase')
+                ->from('language')
+                ->where('phrase', $phrase)
+                ->get()
+                ->row();
+
+            if (!$exists) {
+                $this->db->insert('language', array(
+                    'phrase'  => $phrase,
+                    'english' => $english,
+                ));
+            }
+        }
     }
 
     private function ensure_person_for_employee($employee_id)
@@ -147,7 +298,7 @@ class Loan extends MX_Controller {
         $person_phone   = !empty($employee->phone) ? $employee->phone : '';
         $person_address = !empty($employee->address_line_1) ? $employee->address_line_1 : '';
 
-        $existing_person = $this->db->select('person_id, person_name, person_phone, person_address')
+        $existing_person = $this->db->select('person_id, person_name, person_phone, person_address, employee_id')
             ->from('person_information')
             ->where('person_id', $person_id)
             ->get()
@@ -158,6 +309,7 @@ class Loan extends MX_Controller {
                 'person_name'    => $person_name,
                 'person_phone'   => !empty($person_phone) ? $person_phone : $existing_person->person_phone,
                 'person_address' => !empty($person_address) ? $person_address : $existing_person->person_address,
+                'employee_id'    => (int) $employee->id,
                 'status'         => 1,
             );
             $this->loan_model->update_person($update_data, $person_id);
@@ -178,16 +330,13 @@ class Loan extends MX_Controller {
                 'person_name'    => $person_name,
                 'person_phone'   => $person_phone,
                 'person_address' => $person_address,
+                'employee_id'    => (int) $employee->id,
                 'status'         => 1,
             );
 
             $this->loan_model->submit_officeloan_person($data);
 
-            $loan_head_code = '10203020001';
-            $coa            = $this->loanheadcode();
-            if ($coa && $coa->HeadCode != null) {
-                $loan_head_code = $coa->HeadCode + 1;
-            }
+            $loan_head_code = $this->generate_office_headcode($employee->id);
 
             $loan_coa = array(
                 'HeadCode'         => $loan_head_code,
@@ -260,6 +409,14 @@ class Loan extends MX_Controller {
             foreach ($loan_list as $key => $loan) {
                 $loan_list[$key]['date'] = $this->occational->dateConvert($loan['date']);
                 $loan_list[$key]['debit'] = (float) $loan['debit'];
+                $loan_list[$key]['disbursement_date'] = !empty($loan['disbursement_date']) ? $this->occational->dateConvert($loan['disbursement_date']) : '';
+                $loan_list[$key]['repayment_period'] = isset($loan['repayment_period']) ? (int) $loan['repayment_period'] : null;
+                $loan_list[$key]['repayment_start_date'] = !empty($loan['repayment_start_date']) ? $this->occational->dateConvert($loan['repayment_start_date']) : '';
+                $loan_list[$key]['repayment_end_date'] = !empty($loan['repayment_end_date']) ? $this->occational->dateConvert($loan['repayment_end_date']) : '';
+                $loan_list[$key]['total_debit'] = isset($loan['total_debit']) ? (float) $loan['total_debit'] : (float) $loan['debit'];
+                $loan_list[$key]['total_credit'] = isset($loan['total_credit']) ? (float) $loan['total_credit'] : 0.0;
+                $loan_list[$key]['outstanding'] = $loan_list[$key]['total_debit'] - $loan_list[$key]['total_credit'];
+                $loan_list[$key]['employee_display_name'] = !empty($loan['employee_full_name']) ? trim($loan['employee_full_name']) : $loan['person_name'];
                 $total_amount += $loan_list[$key]['debit'];
             }
         }
@@ -271,6 +428,86 @@ class Loan extends MX_Controller {
         echo Modules::run('template/layout', $data);
     }
 
+
+    public function office_loan_overview($person_id) {
+        $person_details = $this->loan_model->select_person_by_id($person_id);
+        if (empty($person_details)) {
+            $this->session->set_flashdata(array('exception' => display('not_found')));
+            redirect(base_url('manage_office_loans'));
+        }
+
+        $person = $person_details[0];
+        $employee = null;
+        if (!empty($person['employee_id'])) {
+            $employee = $this->db->select('e.id, e.first_name, e.last_name, e.phone, e.address_line_1, d.designation')
+                ->from('employee_history e')
+                ->join('designation d', 'd.id = e.designation', 'left')
+                ->where('e.id', $person['employee_id'])
+                ->get()
+                ->row_array();
+        }
+
+        $ledger = $this->loan_model->personledger_tradational($person_id);
+        $balance = 0.0;
+        $total_credit = 0.0;
+        $total_debit = 0.0;
+        $primary_detail = array();
+
+        if (!empty($ledger)) {
+            foreach ($ledger as $key => $entry) {
+                if (empty($primary_detail) && (float) $entry['debit'] > 0) {
+                    $detail_candidate = $this->loan_model->get_office_loan_detail($entry['transaction_id']);
+                    if (!empty($detail_candidate)) {
+                        $primary_detail = $detail_candidate;
+                    }
+                }
+                $ledger[$key]['date'] = $this->occational->dateConvert($entry['date']);
+                $ledger[$key]['balance'] = ($entry['debit'] - $entry['credit']) + $balance;
+                $balance = $ledger[$key]['balance'];
+                $total_debit += (float) $entry['debit'];
+                $total_credit += (float) $entry['credit'];
+            }
+        }
+
+        $outstanding = $total_debit - $total_credit;
+
+        $deductions = array();
+        if (!empty($ledger)) {
+            foreach ($ledger as $entry) {
+                if ((float) $entry['credit'] > 0) {
+                    $deductions[] = $entry;
+                }
+            }
+        }
+
+        // Get payroll deduction history for this employee
+        $payroll_deductions = array();
+        if (!empty($person['employee_id'])) {
+            $payroll_deductions = $this->db->select('sal_month_year, office_loan_deduct, createDate')
+                ->from('gmb_salary_generate')
+                ->where('employee_id', $person['employee_id'])
+                ->where('office_loan_deduct >', 0)
+                ->order_by('createDate', 'desc')
+                ->get()
+                ->result_array();
+        }
+
+        $data = array(
+            'title'              => display('loan_overview'),
+            'person'             => $person,
+            'employee'           => $employee,
+            'ledger'             => $ledger,
+            'deductions'         => $deductions,
+            'payroll_deductions' => $payroll_deductions,
+            'loan_details'       => $primary_detail,
+            'total_debit'        => $total_debit,
+            'total_credit'       => $total_credit,
+            'outstanding'        => $outstanding,
+        );
+        $data['module'] = "hrm";
+        $data['page']   = "office_loan/loan_ledger";
+        echo modules::run('template/layout', $data);
+    }
 
     public function office_loan_person_ledger($person_id){
         $person_details_all = $this->loan_model->office_loan_persons();
@@ -390,15 +627,41 @@ class Loan extends MX_Controller {
 
 
      public function bdtask_insert_office_loan() {
+        log_message('error', 'bdtask_insert_office_loan payload: ' . json_encode($this->input->post(NULL, TRUE)));
         $employee_id = $this->input->post('employee_id', TRUE);
         $amount      = (float) $this->input->post('ammount', TRUE);
-        $date        = $this->input->post('date', TRUE);
+        $date_input  = $this->input->post('date', TRUE);
+        $entry_date  = $this->sanitize_date($date_input, date('Y-m-d'));
         $details     = $this->input->post('details', TRUE);
         $paytype     = (int) $this->input->post('paytype', TRUE);
         $bank_id     = $this->input->post('bank_id', TRUE);
 
-        if (empty($date)) {
-            $date = date('Y-m-d');
+        $disbursement_date = $this->sanitize_date($this->input->post('disbursement_date', TRUE), $entry_date);
+        if (empty($disbursement_date)) {
+            $disbursement_date = $entry_date;
+        }
+
+        $repayment_period = (int) $this->input->post('repayment_period', TRUE);
+        if ($repayment_period < 1) {
+            $repayment_period = 1;
+        }
+
+        $monthly_installment = round($amount / max(1, $repayment_period), 2);
+        $default_start_date = date('Y-m-d', strtotime('+1 month', strtotime($disbursement_date)));
+        $repayment_start_date = $this->sanitize_date($this->input->post('repayment_start_date', TRUE), $default_start_date);
+        if (strtotime($repayment_start_date) === false) {
+            $repayment_start_date = $default_start_date;
+        }
+        if (strtotime($repayment_start_date) < strtotime($disbursement_date)) {
+            $repayment_start_date = $default_start_date;
+        }
+
+        $calculated_end_date = date('Y-m-d', strtotime('+' . ($repayment_period - 1) . ' month', strtotime($repayment_start_date)));
+        $repayment_end_date_input = $this->sanitize_date($this->input->post('repayment_end_date', TRUE), $calculated_end_date);
+        $repayment_end_date = ($repayment_end_date_input === $calculated_end_date) ? $repayment_end_date_input : $calculated_end_date;
+
+        if (empty($entry_date)) {
+            $entry_date = date('Y-m-d');
         }
         $details = !empty($details) ? $details : '';
         if ($paytype !== 2) {
@@ -435,12 +698,7 @@ class Loan extends MX_Controller {
         if ($head) {
             $headcode = $head->HeadCode;
         } else {
-            $loan_head_code = '10203020001';
-            $coa            = $this->loanheadcode();
-            if ($coa && $coa->HeadCode != null) {
-                $loan_head_code = $coa->HeadCode + 1;
-            }
-            $headcode = $loan_head_code;
+            $headcode = $this->generate_office_headcode($employee_id);
             $loan_coa = array(
                 'HeadCode'         => $headcode,
                 'HeadName'         => $headname,
@@ -497,7 +755,7 @@ class Loan extends MX_Controller {
             'transaction_id' => $transaction_id,
             'person_id'      => $personinfo->person_id,
             'debit'          => $amount,
-            'date'           => $date,
+            'date'           => $entry_date,
             'details'        => $details,
             'status'         => 1
         );
@@ -505,7 +763,7 @@ class Loan extends MX_Controller {
         $loan = array(
           'VNo'            =>  $transaction_id,
           'Vtype'          =>  'LNR',
-          'VDate'          =>  $date,
+          'VDate'          =>  $entry_date,
           'COAID'          =>  $headcode,
           'Narration'      =>  'Loan for .'.$personinfo->person_name,
           'Debit'          =>  $amount,
@@ -519,7 +777,7 @@ class Loan extends MX_Controller {
         $credit_entry = array(
           'VNo'            =>  $transaction_id,
           'Vtype'          =>  'LNR',
-          'VDate'          =>  $date,
+          'VDate'          =>  $entry_date,
           'COAID'          =>  $paytype === 2 ? $bankcoaid : 111000002,
           'Narration'      =>  ($paytype === 2 ? 'Loan for .' : 'Cash in Hand Credit For ').$personinfo->person_name,
           'Debit'          =>  0,
@@ -531,7 +789,21 @@ class Loan extends MX_Controller {
         );
 
         $result = $this->loan_model->submit_payment($ledger_data);
+        log_message('error', 'bdtask_insert_office_loan submit_payment result: ' . ($result ? 'success' : 'fail'));
         if ($result) {
+            $this->loan_model->upsert_office_loan_detail(array(
+                'transaction_id'       => $transaction_id,
+                'person_id'            => $personinfo->person_id,
+                'disbursement_date'    => $disbursement_date,
+                'repayment_period'     => $repayment_period,
+                'repayment_start_date' => $repayment_start_date,
+                'repayment_end_date'   => $repayment_end_date,
+                'principal_amount'     => $amount,
+                'monthly_installment'  => $monthly_installment,
+                'total_paid'           => 0.0,
+                'next_due_date'        => $repayment_start_date,
+            ));
+
             $this->db->insert('acc_transaction',$loan);
             $this->db->insert('acc_transaction',$credit_entry);
             $this->session->set_flashdata(array('message' => display('successfully_added')));
@@ -550,6 +822,7 @@ class Loan extends MX_Controller {
         }
 
         $loan = $this->loan_model->get_office_loan_by_transaction($transaction_id);
+        $loan_details = $this->loan_model->get_office_loan_detail($transaction_id);
 
         if (empty($loan)) {
             $this->session->set_flashdata(array('exception' => display('not_found')));
@@ -604,6 +877,7 @@ class Loan extends MX_Controller {
         $data['module']       = "hrm";
         $data['page']         = "office_loan/edit_office_loan";
         $data['loan']         = $loan;
+        $data['loan_details'] = $loan_details;
         $data['paytype']      = $paytype;
         $data['bank_id']      = $bank_id;
         $data['employees']    = $employees;
@@ -618,13 +892,38 @@ class Loan extends MX_Controller {
         $transaction_id = $this->input->post('transaction_id', TRUE);
         $employee_id    = $this->input->post('employee_id', TRUE);
         $amount         = (float) $this->input->post('ammount', TRUE);
-        $date           = $this->input->post('date', TRUE);
+        $date_input     = $this->input->post('date', TRUE);
+        $entry_date     = $this->sanitize_date($date_input, date('Y-m-d'));
         $details        = $this->input->post('details', TRUE);
         $paytype        = (int) $this->input->post('paytype', TRUE);
         $bank_id        = $this->input->post('bank_id', TRUE);
 
-        if (empty($date)) {
-            $date = date('Y-m-d');
+        $disbursement_date = $this->sanitize_date($this->input->post('disbursement_date', TRUE), $entry_date);
+        if (empty($disbursement_date)) {
+            $disbursement_date = $entry_date;
+        }
+
+        $repayment_period = (int) $this->input->post('repayment_period', TRUE);
+        if ($repayment_period < 1) {
+            $repayment_period = 1;
+        }
+
+        $monthly_installment = round($amount / max(1, $repayment_period), 2);
+        $default_start_date = date('Y-m-d', strtotime('+1 month', strtotime($disbursement_date)));
+        $repayment_start_date = $this->sanitize_date($this->input->post('repayment_start_date', TRUE), $default_start_date);
+        if (strtotime($repayment_start_date) === false) {
+            $repayment_start_date = $default_start_date;
+        }
+        if (strtotime($repayment_start_date) < strtotime($disbursement_date)) {
+            $repayment_start_date = $default_start_date;
+        }
+
+        $calculated_end_date = date('Y-m-d', strtotime('+' . ($repayment_period - 1) . ' month', strtotime($repayment_start_date)));
+        $repayment_end_date_input = $this->sanitize_date($this->input->post('repayment_end_date', TRUE), $calculated_end_date);
+        $repayment_end_date = ($repayment_end_date_input === $calculated_end_date) ? $repayment_end_date_input : $calculated_end_date;
+
+        if (empty($entry_date)) {
+            $entry_date = date('Y-m-d');
         }
         $details = !empty($details) ? $details : '';
         if ($paytype !== 2) {
@@ -660,12 +959,7 @@ class Loan extends MX_Controller {
         if ($head) {
             $headcode = $head->HeadCode;
         } else {
-            $loan_head_code = '10203020001';
-            $coa            = $this->loanheadcode();
-            if ($coa && $coa->HeadCode != null) {
-                $loan_head_code = $coa->HeadCode + 1;
-            }
-            $headcode = $loan_head_code;
+            $headcode = $this->generate_office_headcode($employee_id);
             $loan_coa = array(
                 'HeadCode'         => $headcode,
                 'HeadName'         => $headname,
@@ -719,17 +1013,28 @@ class Loan extends MX_Controller {
         $ledger_update = array(
             'person_id' => $personinfo->person_id,
             'debit'     => $amount,
-            'date'      => $date,
+            'date'      => $entry_date,
             'details'   => $details,
         );
 
         $this->db->where('transaction_id', $transaction_id)
             ->update('person_ledger', $ledger_update);
 
+        $this->loan_model->upsert_office_loan_detail(array(
+            'transaction_id'       => $transaction_id,
+            'person_id'            => $personinfo->person_id,
+            'disbursement_date'    => $disbursement_date,
+            'repayment_period'     => $repayment_period,
+            'repayment_start_date' => $repayment_start_date,
+            'repayment_end_date'   => $repayment_end_date,
+        'principal_amount'     => $amount,
+        'monthly_installment'  => $monthly_installment,
+        ));
+
         $loan = array(
           'VNo'            =>  $transaction_id,
           'Vtype'          =>  'LNR',
-          'VDate'          =>  $date,
+          'VDate'          =>  $entry_date,
           'COAID'          =>  $headcode,
           'Narration'      =>  'Loan for .'.$personinfo->person_name,
           'Debit'          =>  $amount,
@@ -743,7 +1048,7 @@ class Loan extends MX_Controller {
         $credit_entry = array(
           'VNo'            =>  $transaction_id,
           'Vtype'          =>  'LNR',
-          'VDate'          =>  $date,
+          'VDate'          =>  $entry_date,
           'COAID'          =>  $paytype === 2 ? $bankcoaid : 111000002,
           'Narration'      =>  ($paytype === 2 ? 'Loan for .' : 'Cash in Hand Credit For ').$personinfo->person_name,
           'Debit'          =>  0,
@@ -771,10 +1076,16 @@ class Loan extends MX_Controller {
 
         $this->db->where('transaction_id', $transaction_id)
             ->delete('person_ledger');
+        $ledger_deleted = $this->db->affected_rows() > 0;
+
         $this->db->where('VNo', $transaction_id)
             ->delete('acc_transaction');
 
-        if ($this->db->affected_rows()) {
+        $this->db->where('transaction_id', $transaction_id)
+            ->delete('office_loan_details');
+        $detail_deleted = $this->db->affected_rows() > 0;
+
+        if ($ledger_deleted || $detail_deleted) {
             $this->session->set_flashdata(array('message' => display('successfully_deleted')));
         } else {
             $this->session->set_flashdata(array('exception' => display('not_found')));

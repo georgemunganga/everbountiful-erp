@@ -26,9 +26,16 @@ class Loan_model extends CI_Model {
      */
     public function office_loan_entries($per_page, $limit)
     {
-        return $this->db->select('pl.*, pi.person_name, pi.person_phone, pi.person_address')
+        return $this->db
+            ->select('pl.*, pi.person_name, pi.person_phone, pi.person_address, pi.employee_id')
+            ->select("CONCAT_WS(' ', eh.first_name, eh.last_name) AS employee_full_name", false)
+            ->select('(SELECT IFNULL(SUM(debit), 0) FROM person_ledger WHERE person_id = pl.person_id) AS total_debit', false)
+            ->select('(SELECT IFNULL(SUM(credit), 0) FROM person_ledger WHERE person_id = pl.person_id) AS total_credit', false)
+            ->select('old.disbursement_date, old.repayment_period, old.repayment_start_date, old.repayment_end_date')
             ->from('person_ledger pl')
             ->join('person_information pi', 'pi.person_id = pl.person_id', 'left')
+            ->join('employee_history eh', 'eh.id = pi.employee_id', 'left')
+            ->join('office_loan_details old', 'old.transaction_id = pl.transaction_id', 'left')
             ->where('pl.debit >', 0)
             ->order_by('pl.date', 'desc')
             ->limit($per_page, $limit)
@@ -46,6 +53,98 @@ class Loan_model extends CI_Model {
             ->count_all_results();
     }
 
+
+    public function upsert_office_loan_detail($data)
+    {
+        if (empty($data['transaction_id'])) {
+            return false;
+        }
+
+        $transaction_id = $data['transaction_id'];
+        $existing = $this->db->select('*')
+            ->from('office_loan_details')
+            ->where('transaction_id', $transaction_id)
+            ->get()
+            ->row_array();
+
+        $timestamp = date('Y-m-d H:i:s');
+        $base_update = array(
+            'person_id'             => isset($data['person_id']) ? $data['person_id'] : null,
+            'disbursement_date'    => isset($data['disbursement_date']) ? $data['disbursement_date'] : null,
+            'repayment_period'     => isset($data['repayment_period']) ? $data['repayment_period'] : null,
+            'repayment_start_date' => isset($data['repayment_start_date']) ? $data['repayment_start_date'] : null,
+            'repayment_end_date'   => isset($data['repayment_end_date']) ? $data['repayment_end_date'] : null,
+            'updated_at'           => $timestamp,
+        );
+
+        $principal_amount    = isset($data['principal_amount']) ? (float) $data['principal_amount'] : null;
+        $monthly_installment = isset($data['monthly_installment']) ? (float) $data['monthly_installment'] : null;
+        $next_due_date       = isset($data['next_due_date']) ? $data['next_due_date'] : null;
+        $total_paid          = isset($data['total_paid']) ? (float) $data['total_paid'] : null;
+
+        if ($existing) {
+            if ($principal_amount !== null) {
+                $paid_so_far = isset($existing['total_paid']) ? (float) $existing['total_paid'] : 0.0;
+                $base_update['principal_amount'] = max($principal_amount, $paid_so_far);
+            }
+            if ($monthly_installment !== null) {
+                $base_update['monthly_installment'] = $monthly_installment;
+            }
+            if ($next_due_date !== null) {
+                $base_update['next_due_date'] = $next_due_date;
+            }
+
+            $base_update = array_filter($base_update, function ($value) {
+                return $value !== null;
+            });
+
+            if (!isset($base_update['monthly_installment']) && !empty($base_update['repayment_period'])) {
+                $principal_source = isset($base_update['principal_amount']) ? $base_update['principal_amount'] : (isset($existing['principal_amount']) ? (float) $existing['principal_amount'] : 0.0);
+                if ($principal_source > 0) {
+                    $base_update['monthly_installment'] = round($principal_source / max(1, (int) $base_update['repayment_period']), 2);
+                }
+            }
+
+            $updated = $this->db->where('transaction_id', $transaction_id)
+                ->update('office_loan_details', $base_update);
+            if (!$updated) {
+                $error = json_encode($this->db->error());
+                log_message('error', 'Failed to update office_loan_details: ' . $error . ' data=' . json_encode($base_update));
+                error_log('[Loan_model::upsert_office_loan_detail][update] ' . $error . ' data=' . json_encode($base_update));
+            }
+            return $updated;
+        }
+
+        $insert = array_merge($base_update, array(
+            'transaction_id'      => $transaction_id,
+            'created_at'          => $timestamp,
+            'principal_amount'    => $principal_amount !== null ? $principal_amount : (isset($data['amount']) ? (float) $data['amount'] : null),
+            'monthly_installment' => $monthly_installment,
+            'total_paid'          => $total_paid !== null ? $total_paid : 0.0,
+            'next_due_date'       => $next_due_date !== null ? $next_due_date : (isset($data['repayment_start_date']) ? $data['repayment_start_date'] : null),
+        ));
+
+        if (empty($insert['monthly_installment']) && !empty($insert['principal_amount']) && !empty($insert['repayment_period'])) {
+            $insert['monthly_installment'] = round($insert['principal_amount'] / max(1, (int) $insert['repayment_period']), 2);
+        }
+
+        $inserted = $this->db->insert('office_loan_details', $insert);
+        if (!$inserted) {
+            $error = json_encode($this->db->error());
+            log_message('error', 'Failed to insert office_loan_details: ' . $error . ' data=' . json_encode($insert));
+            error_log('[Loan_model::upsert_office_loan_detail][insert] ' . $error . ' data=' . json_encode($insert));
+        }
+        return $inserted;
+    }
+
+    public function get_office_loan_detail($transaction_id)
+    {
+        return $this->db->select('*')
+            ->from('office_loan_details')
+            ->where('transaction_id', $transaction_id)
+            ->get()
+            ->row_array();
+    }
 
         public function office_person_list_count() {
         $this->db->select('*');
@@ -137,6 +236,9 @@ class Loan_model extends CI_Model {
         if ($result) {
             return true;
         } else {
+            $error = json_encode($this->db->error());
+            log_message('error', 'Failed to insert person_ledger record: ' . $error);
+            error_log('[Loan_model::submit_payment] ' . $error);
             return false;
         }
     }
@@ -209,9 +311,10 @@ class Loan_model extends CI_Model {
      */
     public function get_office_loan_by_transaction($transaction_id)
     {
-        return $this->db->select('pl.*, pi.person_name, pi.person_phone, pi.person_address')
+        return $this->db->select('pl.*, pi.person_name, pi.person_phone, pi.person_address, old.disbursement_date, old.repayment_period, old.repayment_start_date, old.repayment_end_date')
             ->from('person_ledger pl')
             ->join('person_information pi', 'pi.person_id = pl.person_id', 'left')
+            ->join('office_loan_details old', 'old.transaction_id = pl.transaction_id', 'left')
             ->where('pl.transaction_id', $transaction_id)
             ->get()
             ->row_array();

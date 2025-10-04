@@ -9,7 +9,6 @@ class Payroll extends MX_Controller {
 		$this->db->query('SET SESSION sql_mode = ""');
 		$this->load->model(array(
 			'Payroll_model',
-			
 			'account/Accounts_model',
 		));	
 		$this->load->library('numbertowords');
@@ -19,7 +18,7 @@ class Payroll extends MX_Controller {
 	}
 
 	public function emp_salary_setup_view(){   
-		$this->permission->module('payroll','read')->redirect();
+		$this->permission1->method('payroll','read')->access();
 		$data['title']    = display('view_salary_setup');  ;
 		$data['emp_sl']   = $this->Payroll_model->salary_setupView();
 		$data['module']   = "payroll";
@@ -58,7 +57,7 @@ class Payroll extends MX_Controller {
 		}   
 	}
 	public function delete_emp_salarysetup($id = null){ 
-		$this->permission->module('payroll','delete')->redirect();
+		$this->permission1->method('payroll','delete')->access();
 
 		if ($this->Payroll_model->emp_salstup_delete($id)) {
 			#set success message
@@ -1121,10 +1120,22 @@ class Payroll extends MX_Controller {
 							$loan_id = $loan_installment_respo->loan_id;
 						}
 
+						// Office loan deduction
+						$office_loan_deduct = 0.0;
+						$office_loan_transaction_id = null;
+						// Convert salary month to proper date format for loan deduction check
+						$salary_month = $this->input->post('name',true);
+						$current_date = date('Y-m-d', strtotime($salary_month . '-01'));
+						$office_loan_respo = $this->Payroll_model->office_loan_installment_deduction($emp_id, $current_date);
+						if($office_loan_respo){
+							$office_loan_deduct = floatval($office_loan_respo->monthly_installment);
+							$office_loan_transaction_id = $office_loan_respo->transaction_id;
+						}
+
 						/*Net salary calculation*/
 						$net_salary = 0.0;
 						$total_deductions =  0.0;
-						$total_deductions = ($state_income_tax + $soc_sec_npf_tax + $loan_deduct + $salary_advance);
+						$total_deductions = ($state_income_tax + $soc_sec_npf_tax + $loan_deduct + $salary_advance + $office_loan_deduct);
 						$net_salary = ($gross_salary - $total_deductions);
 
 						/*Ends*/
@@ -1144,6 +1155,8 @@ class Payroll extends MX_Controller {
 							'icf_amount'    		          => $icf_amount,
 							'loan_deduct'                     => $loan_deduct,
 							'loan_id'                         => $loan_id,
+							'office_loan_deduct'              => $office_loan_deduct,
+							'office_loan_transaction_id'      => $office_loan_transaction_id,
 							'salary_advance'                  => $salary_advance,
 							'salary_adv_id'                   => $salary_advance_id,
 							'net_salary'                      => $net_salary,
@@ -1197,6 +1210,17 @@ class Payroll extends MX_Controller {
 								);
 
 								$loan_installmnt_paid_respo = $this->Payroll_model->update_loan_installment($loan_installment_data);
+							}
+
+							// Update office loan after applying deduction
+							if($office_loan_respo && $office_loan_deduct > 0){
+								$office_loan_deduction_data = array(
+									'transaction_id'   => $office_loan_transaction_id,
+									'deduction_amount' => $office_loan_deduct,
+									'deduction_date'   => date('Y-m-d')
+								);
+
+								$office_loan_deduction_respo = $this->Payroll_model->update_office_loan_deduction($office_loan_deduction_data);
 							}
 						}
 
@@ -1359,10 +1383,13 @@ class Payroll extends MX_Controller {
     {
         $this->permission1->method('manage_salary_setup','read')->access();
 
+        $this->Payroll_model->ensure_tax_slab_support();
+
         $data['title']       = 'Salary Components';
         $data['module']      = 'hrm';
         $data['page']        = 'payroll/salary_components';
         $data['components']  = $this->db->table_exists('hrm_salary_components') ? $this->Payroll_model->get_salary_components() : array();
+        $data['tax_slabs']   = $this->db->table_exists('hrm_tax_slabs') ? $this->Payroll_model->get_tax_slabs() : array();
 
         echo Modules::run('template/layout', $data);
     }
@@ -1374,14 +1401,24 @@ class Payroll extends MX_Controller {
 
         $this->permission1->method('manage_salary_setup', $is_update ? 'update' : 'create')->access();
 
+        $this->Payroll_model->ensure_tax_slab_support();
+
         $this->form_validation->set_rules('component_name', 'Component Name', 'required|max_length[100]');
         $this->form_validation->set_rules('component_type', 'Component Type', 'required|in_list[earning,deduction]');
-        $this->form_validation->set_rules('amount_type', 'Amount Type', 'required|in_list[fixed,percentage]');
-        $this->form_validation->set_rules('amount_value', 'Amount Value', 'required|numeric');
+        $this->form_validation->set_rules('amount_type', 'Amount Type', 'required|in_list[fixed,percentage,tax_slab]');
+        $amount_type_input = $this->input->post('amount_type', true);
+
+        if ($amount_type_input === 'tax_slab') {
+            $this->form_validation->set_rules('amount_value', 'Amount Value', 'numeric');
+            $this->form_validation->set_rules('tax_slab_ids[]', 'Tax Slabs', 'required');
+        } else {
+            $this->form_validation->set_rules('amount_value', 'Amount Value', 'required|numeric');
+        }
+
         $this->form_validation->set_rules('component_code', 'Component Code', 'max_length[50]');
         $this->form_validation->set_rules('description', 'Description', 'max_length[1000]');
 
-        if ($this->input->post('amount_type', true) === 'percentage') {
+        if ($amount_type_input === 'percentage') {
             $this->form_validation->set_rules('percentage_base', 'Percentage Base', 'required|in_list[gross,basic,net]');
         }
 
@@ -1392,6 +1429,13 @@ class Payroll extends MX_Controller {
 
         $amount_type  = $this->input->post('amount_type', true);
         $amount_value = floatval($this->input->post('amount_value', true));
+        $raw_tax_slabs = $this->input->post('tax_slab_ids', true);
+        $tax_slab_ids = array();
+
+        if ($amount_type === 'tax_slab') {
+            $amount_value = 0;
+            $tax_slab_ids = array_filter(array_map('intval', (array) $raw_tax_slabs));
+        }
 
         if ($amount_type === 'percentage' && ($amount_value < 0 || $amount_value > 100)) {
             $this->session->set_flashdata('exception', 'Percentage value must be between 0 and 100.');
@@ -1431,7 +1475,21 @@ class Payroll extends MX_Controller {
         }
 
         if ($success) {
-            $this->session->set_flashdata('message', $is_update ? display('successfully_updated') : display('successfully_saved'));
+            $component_ref_id = $is_update ? (int) $component_id : (int) $this->db->insert_id();
+            $mapping_saved = true;
+
+            if ($component_ref_id > 0) {
+                $mapping_saved = $this->Payroll_model->replace_component_tax_slabs(
+                    $component_ref_id,
+                    $amount_type === 'tax_slab' ? $tax_slab_ids : array()
+                );
+            }
+
+            if ($mapping_saved) {
+                $this->session->set_flashdata('message', $is_update ? display('successfully_updated') : display('successfully_saved'));
+            } else {
+                $this->session->set_flashdata('exception', 'Unable to update tax slab assignments for this component.');
+            }
         } else {
             $db_error = $this->db->error();
             $message  = !empty($db_error['message']) ? $db_error['message'] : display('please_try_again');
@@ -1539,7 +1597,33 @@ class Payroll extends MX_Controller {
 
 		$data['salary_info'] =  $salary_info  = $this->Payroll_model->employee_salary_generate_info($id);
 
-		$data['total_deductions'] = (floatval($salary_info->income_tax) + floatval($salary_info->soc_sec_npf_tax) + floatval($salary_info->loan_deduct) + floatval($salary_info->salary_advance));
+		$component_breakdown = $this->Payroll_model->calculate_component_breakdown($salary_info);
+		$component_add_total = isset($component_breakdown['earning_total']) ? (float) $component_breakdown['earning_total'] : 0.0;
+		$component_ded_total = isset($component_breakdown['deduction_total']) ? (float) $component_breakdown['deduction_total'] : 0.0;
+		$loan_total = floatval($salary_info->loan_deduct);
+		$salary_advance_total = floatval($salary_info->salary_advance);
+
+		$data['component_breakdown'] = $component_breakdown;
+		$data['component_add_total'] = round($component_add_total, 2);
+		$data['component_ded_total'] = round($component_ded_total, 2);
+		$data['loan_total'] = round($loan_total, 2);
+		$data['salary_advance_total'] = round($salary_advance_total, 2);
+
+		$total_deductions = $component_ded_total + $loan_total + $salary_advance_total;
+		$data['total_deductions'] = round($total_deductions, 2);
+
+		$post_gross_total = isset($salary_info->gross_salary) ? ((float) $salary_info->gross_salary + $component_add_total) : $component_add_total;
+		$data['post_gross_total'] = round($post_gross_total, 2);
+
+		$net_salary_calc = $post_gross_total - $total_deductions;
+		if ($net_salary_calc < 0) {
+			$net_salary_calc = 0.0;
+		}
+		$data['net_salary_calculated'] = round($net_salary_calc, 2);
+
+		$social_security_employee = $this->resolve_social_security_component_total($component_breakdown, $salary_info);
+		$data['social_security_employee_total'] = $social_security_employee;
+		$data['social_security_combined_total'] = round($social_security_employee + floatval($salary_info->employer_contribution), 2);
 
 		list($month,$year) = explode(' ',$salary_info->sal_month_year);
 		$data['month_name']  = $month;
@@ -1969,6 +2053,26 @@ class Payroll extends MX_Controller {
 	}
 
 	/* Calculate state income tax*/
+	protected function resolve_social_security_component_total($component_breakdown, $salary_info)
+	{
+		$total = 0.0;
+		if (!empty($component_breakdown['deductions']) && is_array($component_breakdown['deductions'])) {
+			foreach ($component_breakdown['deductions'] as $deduction) {
+				$name = strtolower(isset($deduction['name']) ? $deduction['name'] : '');
+				$code = strtolower(isset($deduction['code']) ? $deduction['code'] : '');
+				if (strpos($name, 'social') !== false || strpos($name, 'napsa') !== false || strpos($code, 'napsa') !== false) {
+					$total += isset($deduction['amount']) ? (float) $deduction['amount'] : 0.0;
+				}
+			}
+		}
+
+		if ($total <= 0 && isset($salary_info->soc_sec_npf_tax)) {
+			$total = (float) $salary_info->soc_sec_npf_tax;
+		}
+
+		return round($total, 2);
+	}
+
 	public function state_income_tax($gross_salary){
 
 		$tax_calculations = $this->db->select('*')
