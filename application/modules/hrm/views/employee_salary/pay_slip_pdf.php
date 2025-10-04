@@ -147,6 +147,7 @@
                     $component_ded_total_display = round($component_ded_total, 2);
                     $loan_total_display = isset($loan_total) ? (float) $loan_total : (isset($salary_info->loan_deduct) ? (float) $salary_info->loan_deduct : 0.0);
                     $salary_advance_display = isset($salary_advance_total) ? (float) $salary_advance_total : (isset($salary_info->salary_advance) ? (float) $salary_info->salary_advance : 0.0);
+                    $office_loan_display = isset($office_loan_total) ? (float) $office_loan_total : (isset($salary_info->office_loan_deduct) ? (float) $salary_info->office_loan_deduct : 0.0);
                     $net_salary_display = isset($net_salary_calculated) ? (float) $net_salary_calculated : (isset($salary_info->net_salary) ? (float) $salary_info->net_salary : 0.0);
                     $post_gross_total_display = isset($post_gross_total) ? (float) $post_gross_total : ((isset($salary_info->gross_salary) ? (float) $salary_info->gross_salary : 0.0) + $component_add_total);
                     $social_security_combined_display = isset($social_security_combined_total) ? (float) $social_security_combined_total : (floatval($salary_info->employer_contribution) + floatval($salary_info->soc_sec_npf_tax));
@@ -247,6 +248,15 @@
                                     <td></td>
                                     <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($loan_total_display,2);?></td>
                                 </tr>
+                                <?php if ($office_loan_display > 0) { ?>
+                                <tr style="text-align: left !important;">
+                                    <th style="text-align: left !important;">Office Loan Deduction</th>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($office_loan_display,2);?></td>
+                                </tr>
+                                <?php } ?>
                                 <tr style="text-align: left !important;">
                                     <th style="text-align: left !important;">Salary Advance</th>
                                     <td></td>

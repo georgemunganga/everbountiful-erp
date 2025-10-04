@@ -1600,17 +1600,19 @@ class Payroll extends MX_Controller {
 		$component_breakdown = $this->Payroll_model->calculate_component_breakdown($salary_info);
 		$component_add_total = isset($component_breakdown['earning_total']) ? (float) $component_breakdown['earning_total'] : 0.0;
 		$component_ded_total = isset($component_breakdown['deduction_total']) ? (float) $component_breakdown['deduction_total'] : 0.0;
-		$loan_total = floatval($salary_info->loan_deduct);
-		$salary_advance_total = floatval($salary_info->salary_advance);
+                $loan_total = floatval($salary_info->loan_deduct);
+                $office_loan_total = floatval($salary_info->office_loan_deduct);
+                $salary_advance_total = floatval($salary_info->salary_advance);
 
 		$data['component_breakdown'] = $component_breakdown;
 		$data['component_add_total'] = round($component_add_total, 2);
 		$data['component_ded_total'] = round($component_ded_total, 2);
-		$data['loan_total'] = round($loan_total, 2);
-		$data['salary_advance_total'] = round($salary_advance_total, 2);
+                $data['loan_total'] = round($loan_total, 2);
+                $data['office_loan_total'] = round($office_loan_total, 2);
+                $data['salary_advance_total'] = round($salary_advance_total, 2);
 
-		$total_deductions = $component_ded_total + $loan_total + $salary_advance_total;
-		$data['total_deductions'] = round($total_deductions, 2);
+                $total_deductions = $component_ded_total + $loan_total + $office_loan_total + $salary_advance_total;
+                $data['total_deductions'] = round($total_deductions, 2);
 
 		$post_gross_total = isset($salary_info->gross_salary) ? ((float) $salary_info->gross_salary + $component_add_total) : $component_add_total;
 		$data['post_gross_total'] = round($post_gross_total, 2);
