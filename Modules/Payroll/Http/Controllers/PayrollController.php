@@ -32,6 +32,7 @@ use Modules\Payroll\Entities\EmployeeMonthlySalary;
 use Modules\Payroll\Entities\EmployeeVariableComponent;
 use Modules\Payroll\Entities\OvertimeRequest;
 use Modules\Payroll\Notifications\SalaryStatusEmail;
+use App\Services\Payroll\LoanRepaymentAllocator;
 
 class PayrollController extends AccountBaseController
 {
@@ -542,12 +543,15 @@ class PayrollController extends AccountBaseController
                 ->get();
         }
 
+        $loanRepaymentAllocator = app(LoanRepaymentAllocator::class);
+
         foreach ($users as $user) {
             $userId = $user->id;
             $employeeDetails = EmployeeDetails::where('user_id', $userId)->first();
             $joiningDate = Carbon::parse($employeeDetails->joining_date)->setTimezone($this->company->timezone);
             $exitDate = (!is_null($employeeDetails->last_date)) ? Carbon::parse($employeeDetails->last_date)->setTimezone($this->company->timezone) : null;
             $payDays = $daysInMonth;
+            $loanPaymentsToProcess = collect();
 
             if ($endDate->greaterThan($joiningDate)) {
                 $payDays = $this->countAttendace($startDate, $endDate, $userId, $daysInMonth, $useAttendance, $joiningDate, $exitDate);
@@ -739,6 +743,21 @@ class PayrollController extends AccountBaseController
                     }
                 }
 
+                $loanDeductions = $loanRepaymentAllocator->getDeductionsForPeriod($user, $startDate, $endDate);
+                $loanPaymentsToProcess = $loanDeductions['payments'];
+
+                $loanDeductionTotal = 0;
+
+                foreach ($loanDeductions['entries'] as $loanEntry) {
+                    $amount = round($loanEntry['amount'], 2);
+                    $deductions[$loanEntry['label']] = $amount;
+                    $loanDeductionTotal += $amount;
+                }
+
+                if ($loanDeductionTotal > 0) {
+                    $deductionsTotal += $loanDeductionTotal;
+                }
+
                 $salaryComponents = [
                     'earnings' => $earnings,
                     'deductions' => $deductions
@@ -784,7 +803,11 @@ class PayrollController extends AccountBaseController
 
                 // if (is_null($userSlip) || (!is_null($userSlip) && $userSlip->status != 'paid')) {
                 if (is_null($userSlip)) {
-                    SalarySlip::create($data);
+                    $salarySlip = SalarySlip::create($data);
+
+                    if ($loanPaymentsToProcess->isNotEmpty()) {
+                        $loanRepaymentAllocator->markProcessed($loanPaymentsToProcess, $salarySlip);
+                    }
                 }
 
             }
