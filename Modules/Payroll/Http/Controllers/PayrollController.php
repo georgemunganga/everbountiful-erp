@@ -16,6 +16,7 @@ use App\Models\ProjectTimeLog;
 use App\Models\EmployeeDetails;
 use App\Models\ExpensesCategory;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Modules\Payroll\Entities\SalaryTds;
 use Modules\Payroll\Entities\SalarySlip;
 use Modules\Payroll\Entities\PayrollCycle;
@@ -187,6 +188,8 @@ class PayrollController extends AccountBaseController
             $this->deductionsExtra = array();
         }
 
+        $this->prepareSalarySlipDeductionSummary();
+
         $this->payrollSetting = PayrollSetting::first();
         $this->extraFields = [];
 
@@ -270,6 +273,8 @@ class PayrollController extends AccountBaseController
         if ($this->deductionsExtra == '') {
             $this->deductionsExtra = array();
         }
+
+        $this->prepareSalarySlipDeductionSummary();
 
         if($this->salarySlip->payroll_cycle->cycle == 'monthly'){
             $this->basicSalary = $this->salarySlip->basic_salary;
@@ -1109,6 +1114,8 @@ class PayrollController extends AccountBaseController
             $this->deductionsExtra = array();
         }
 
+        $this->prepareSalarySlipDeductionSummary();
+
         $earn = [];
         $extraEarn = [];
 
@@ -1170,6 +1177,31 @@ class PayrollController extends AccountBaseController
             'fileName' => $filename
         ];
 
+    }
+
+    private function prepareSalarySlipDeductionSummary(): void
+    {
+        $deductions = collect($this->deductions ?? [])->mapWithKeys(function ($value, $key) {
+            return [$key => round(floatval($value), 2)];
+        });
+
+        $extraDeductions = collect($this->deductionsExtra ?? [])->mapWithKeys(function ($value, $key) {
+            return [$key => round(floatval($value), 2)];
+        });
+
+        $this->deductions = $deductions->toArray();
+        $this->deductionsExtra = $extraDeductions->toArray();
+
+        $allDeductions = $deductions->merge($extraDeductions);
+
+        $this->loanDeductions = $allDeductions
+            ->filter(function ($value, $key) {
+                return Str::of($key)->lower()->contains('loan');
+            })
+            ->toArray();
+
+        $this->loanDeductionTotal = round(array_sum($this->loanDeductions), 2);
+        $this->deductionTotal = round((float) ($this->salarySlip->total_deductions ?? $allDeductions->sum()), 2);
     }
 
     public function getCycleData(Request $request)
