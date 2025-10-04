@@ -18,12 +18,9 @@ class LoanRepaymentAllocator
                 $query->where('user_id', $user->id)
                     ->where('status', EmployeeLoan::STATUS_ACTIVE);
             })
-            ->where(function ($query) {
-                $query->whereIn('status', [EmployeeLoanPayment::STATUS_PENDING, EmployeeLoanPayment::STATUS_PARTIAL])
-                    ->orWhereColumn('amount_paid', '<', 'amount_due');
-            })
             ->whereNull('salary_slip_id')
-            ->whereBetween('due_date', [$periodStart->toDateString(), $periodEnd->toDateString()])
+            ->whereDate('due_date', '>=', $periodStart->toDateString())
+            ->whereDate('due_date', '<=', $periodEnd->toDateString())
             ->orderBy('due_date')
             ->get();
 
@@ -72,20 +69,10 @@ class LoanRepaymentAllocator
                 return;
             }
 
-            $currentPaid = $payment->amount_paid ?? 0;
-
-            $payment->amount_paid = round($currentPaid + $outstanding, 2);
+            $payment->amount_paid = round($payment->amount_paid + $outstanding, 2);
             $payment->salary_slip_id = $salarySlip->id;
             $payment->markPaid($salarySlip->salary_to ?? now());
             $payment->save();
         });
-
-        $payments
-            ->pluck('loan')
-            ->filter()
-            ->unique('id')
-            ->each(function (EmployeeLoan $loan) {
-                $loan->refreshStatus();
-            });
     }
 }

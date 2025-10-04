@@ -118,6 +118,10 @@
     </style>
 </head>
 <body>
+@php
+    $pdfCurrencyId = $payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id;
+    $pdfCurrencyCode = $payrollSetting->currency ? $payrollSetting->currency->currency_code : company()->currency->currency_code;
+@endphp
 <table class="logo">
     <tr>
         <td>
@@ -223,7 +227,7 @@
                 <tr>
                     <td>@lang('payroll::modules.payroll.basicPay')</td>
                     <td align="right"
-                        class="text-uppercase">{{ currency_format((float)$salarySlip->basic_salary, ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false)}} {!! htmlentities($payrollSetting->currency ? $payrollSetting->currency->currency_code : company()->currency->currency_code) !!}
+                        class="text-uppercase">{{ currency_format((float)$salarySlip->basic_salary, $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}
                     </td>
                 </tr>
                 @foreach ($earnings as $key=>$item)
@@ -233,12 +237,12 @@
                                 @if(array_key_exists("Total Hours",$earnings))
                                     ( @lang('payroll::modules.payroll.totalHours') {{$earnings['Total Hours']}} )
                                 @endif</td>
-                            <td align="right">{{ currency_format((float)$item,  ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false) }}</td>
+                            <td align="right">{{ currency_format((float)$item,  $pdfCurrencyId, false) }}</td>
                         </tr>
                     @elseif($key != 'Total Hours')
                         <tr>
                             <td>{{ ($key) }}</td>
-                            <td align="right">{{ currency_format((float)$item,  ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false) }}</td>
+                            <td align="right">{{ currency_format((float)$item,  $pdfCurrencyId, false) }}</td>
                         </tr>
                     @endif
                 @endforeach
@@ -246,7 +250,7 @@
                 @forelse ($earningsExtra as $key=>$item)
                     <tr>
                         <td>{{ $key }}</td>
-                        <td align="right">{{ currency_format((float)$item, ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false)}} {!! htmlentities($payrollSetting->currency ? $payrollSetting->currency->currency_code : company()->currency->currency_code) !!}</td>
+                        <td align="right">{{ currency_format((float)$item, $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}</td>
                     </tr>
 
                 @endforeach
@@ -254,14 +258,14 @@
                 @if($fixedAllowance > 0)
                 <tr>
                     <td>@lang('payroll::modules.payroll.fixedAllowance')</td>
-                    <td align="right">{{ currency_format((float)$fixedAllowance, ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false)}} {!! htmlentities($payrollSetting->currency ? $payrollSetting->currency->currency_code : company()->currency->currency_code) !!}</td>
+                    <td align="right">{{ currency_format((float)$fixedAllowance, $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}</td>
                 </tr>
                 @endif
 
                 @forelse ($earningsAdditional as $key=>$item)
                     <tr>
                         <td>{{ $key }}</td>
-                        <td align="right">{{ currency_format((float)$item, ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false)}} {!! htmlentities($payrollSetting->currency ? $payrollSetting->currency->currency_code : company()->currency->currency_code) !!}</td>
+                        <td align="right">{{ currency_format((float)$item, $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}</td>
                     </tr>
 
                 @endforeach
@@ -285,19 +289,42 @@
                 @foreach ($deductions as $key=>$item)
                     <tr>
                         <td>{{ $key }}</td>
-                        <td align="right">{{ currency_format((float)$item, ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false)}} {!! htmlentities($payrollSetting->currency ? $payrollSetting->currency->currency_code : company()->currency->currency_code) !!}</td>
+                        <td align="right">{{ currency_format((float)$item, $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}</td>
                     </tr>
                 @endforeach
                 @foreach ($deductionsExtra as $key=>$item)
                     <tr>
                         <td>{{ $key }}</td>
-                        <td align="right">{{ currency_format((float)$item, ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false)}} {!! htmlentities($payrollSetting->currency ? $payrollSetting->currency->currency_code : company()->currency->currency_code) !!}</td>
+                        <td align="right">{{ currency_format((float)$item, $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}</td>
                     </tr>
                 @endforeach
 
                 </tbody>
 
             </table>
+
+            @if($loanDeductionTotal > 0)
+                <table class="payment_details" style="margin-top: 15px;">
+                    <thead>
+                    <tr class="active">
+                        <th class="text-uppercase">{{ __('Loans Deducted') }}</th>
+                        <th align="right" class="text-uppercase">@lang('app.amount')</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach ($loanDeductions as $label => $amount)
+                        <tr>
+                            <td>{{ $label }}</td>
+                            <td align="right">{{ currency_format($amount, $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}</td>
+                        </tr>
+                    @endforeach
+                    <tr>
+                        <td><strong>{{ __('Total Loan Deductions') }}</strong></td>
+                        <td align="right"><strong>{{ currency_format($loanDeductionTotal, $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}</strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+            @endif
         </td>
         <!--  Deductions End-->
     </tr>
@@ -308,7 +335,7 @@
 
                     <td><strong>@lang('payroll::modules.payroll.grossEarning')</strong></td>
                     <td align="right">
-                        <strong>{{ currency_format((float)$salarySlip->gross_salary, ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false)}} {!! htmlentities($payrollSetting->currency ? $payrollSetting->currency->currency_code : company()->currency->currency_code) !!}</strong>
+                        <strong>{{ currency_format((float)$salarySlip->gross_salary, $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}</strong>
                     </td>
                 </tr>
             </table>
@@ -318,7 +345,7 @@
                 <tr>
                     <td><strong>@lang('payroll::modules.payroll.totalDeductions')</strong></td>
                     <td align="right">
-                        <strong>{{ currency_format((float)$salarySlip->total_deductions, ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false)}} {!! htmlentities($payrollSetting->currency ? $payrollSetting->currency->currency_code : company()->currency->currency_code) !!}</strong>
+                        <strong>{{ currency_format($deductionTotal, $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}</strong>
                     </td>
                 </tr>
             </table>
@@ -338,7 +365,7 @@
                 <tr>
                     <td>@lang('payroll::modules.payroll.expenseClaims')</td>
                     <td align="right">
-                        {{ currency_format((float)$salarySlip->expense_claims, ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false)}} {!! htmlentities($payrollSetting->currency ? $payrollSetting->currency->currency_code : company()->currency->currency_code) !!}
+                        {{ currency_format((float)$salarySlip->expense_claims, $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}
                     </td>
                 </tr>
             </table>
@@ -355,7 +382,7 @@
     <tr>
         <td class="netsalary-title">
             <strong style="margin-right: 20px;">@lang('payroll::modules.payroll.netSalary'):</strong>
-            {{ currency_format(sprintf('%0.2f', $salarySlip->net_salary), ($payrollSetting->currency ? $payrollSetting->currency->id : company()->currency->id), false)}} {!! htmlentities($payrollSetting->currency ? $payrollSetting->currency->currency_code : company()->currency->currency_code) !!}
+            {{ currency_format(sprintf('%0.2f', $salarySlip->net_salary), $pdfCurrencyId, false)}} {!! htmlentities($pdfCurrencyCode) !!}
         </td>
     </tr>
     <tr>

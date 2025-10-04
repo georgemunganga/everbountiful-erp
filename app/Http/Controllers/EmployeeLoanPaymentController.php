@@ -24,20 +24,7 @@ class EmployeeLoanPaymentController extends AccountBaseController
         $loanPayment = EmployeeLoanPayment::with('loan')->findOrFail($data['employee_loan_payment_id']);
 
         $amount = round($data['amount'], 2);
-        $outstanding = $loanPayment->outstanding_amount;
-
-        if ($outstanding <= 0) {
-            return Reply::error(__('payroll::messages.installmentAlreadySettled'));
-        }
-
-        $appliedAmount = min($amount, $outstanding);
-        $responseMessage = __('messages.recordSaved');
-
-        if ($amount > $outstanding) {
-            $responseMessage = __('payroll::messages.paymentAmountCapped');
-        }
-
-        $loanPayment->amount_paid = round(($loanPayment->amount_paid ?? 0) + $appliedAmount, 2);
+        $loanPayment->amount_paid = min($loanPayment->amount_due, round($loanPayment->amount_paid + $amount, 2));
         $loanPayment->salary_slip_id = null;
 
         if (!empty($data['notes'])) {
@@ -60,8 +47,6 @@ class EmployeeLoanPaymentController extends AccountBaseController
 
         $loanPayment->save();
 
-        $loanPayment->loan?->refreshStatus();
-
-        return Reply::success($responseMessage);
+        return Reply::success(__('messages.recordSaved'));
     }
 }
