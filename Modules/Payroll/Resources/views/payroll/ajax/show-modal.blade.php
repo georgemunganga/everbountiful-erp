@@ -32,6 +32,9 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    @php
+                        $salaryCurrencyId = $currency->currency ? $currency->currency->id : company()->currency->id;
+                    @endphp
                     <div class="row">
                         <div class="col-md-6">
                             <div class="col-12 px-0 pb-3 d-lg-flex">
@@ -83,7 +86,7 @@
                         <div class="col-md-2">
                             <div class="text-center border rounded p-20">
                                 <small>@lang('payroll::modules.payroll.employeeNetPay')</small>
-                                <h4 class="text-primary heading-h3 mt-1">{{ currency_format($salarySlip->net_salary, ($currency->currency ? $currency->currency->id : company()->currency->id )) }}</h4>
+                                <h4 class="text-primary heading-h3 mt-1">{{ currency_format($salarySlip->net_salary, $salaryCurrencyId) }}</h4>
                             </div>
                         </div>
                     </div>
@@ -103,7 +106,7 @@
                                     <tr>
                                         <td>@lang('payroll::modules.payroll.basicPay')</td>
                                         <td class="text-right text-uppercase">
-                                            {{ currency_format($basicSalary, ($currency->currency ? $currency->currency->id : company()->currency->id )) }}</td>
+                                            {{ currency_format($basicSalary, $salaryCurrencyId) }}</td>
                                     </tr>
                                     @foreach ($earnings as $key => $item)
                                         @if($key == 'Time Logs')
@@ -112,12 +115,12 @@
                                                     @if(array_key_exists("Total Hours",$earnings))
                                                         ( @lang('payroll::modules.payroll.totalHours') {{$earnings['Total Hours']}} )
                                                     @endif</td>
-                                                <td class="text-right">{{ currency_format($item, ($currency->currency ? $currency->currency->id : company()->currency->id ))  }}</td>
+                                                <td class="text-right">{{ currency_format($item, $salaryCurrencyId)  }}</td>
                                             </tr>
                                         @elseif($key != 'Total Hours')
                                         <tr>
                                             <td>{{ ($key) }}</td>
-                                            <td class="text-right">{{ currency_format($item, ($currency->currency ? $currency->currency->id : company()->currency->id ))  }}</td>
+                                            <td class="text-right">{{ currency_format($item, $salaryCurrencyId)  }}</td>
                                         </tr>
                                         @endif
                                     @endforeach
@@ -125,7 +128,7 @@
                                     @forelse ($earningsExtra as $key=>$item)
                                         <tr>
                                             <td>{{ ($key) }}</td>
-                                            <td class="text-right">{{ currency_format($item, ($currency->currency ? $currency->currency->id : company()->currency->id ))  }}</td>
+                                            <td class="text-right">{{ currency_format($item, $salaryCurrencyId)  }}</td>
                                         </tr>
                                     @endforeach
 
@@ -136,13 +139,13 @@
                                             @php
                                                 $fixedAllow = ($salarySlip->fixed_allowance > 0) ? $salarySlip->fixed_allowance : $fixedAllowance;
                                             @endphp
-                                            {{ currency_format($fixedAllow, ($currency->currency ? $currency->currency->id : company()->currency->id )) }}</td>
+                                            {{ currency_format($fixedAllow, $salaryCurrencyId) }}</td>
                                     </tr>
 
                                     @forelse ($earningsAdditional as $key=>$item)
                                         <tr>
                                             <td>{{ ($key) }}</td>
-                                            <td class="text-right">{{ currency_format($item, ($currency->currency ? $currency->currency->id : company()->currency->id ))  }}</td>
+                                            <td class="text-right">{{ currency_format($item, $salaryCurrencyId)  }}</td>
                                         </tr>
                                     @endforeach
 
@@ -162,35 +165,52 @@
                                     @foreach ($deductions as $key => $item)
                                         <tr>
                                             <td>{{ ($key) }}</td>
-                                            <td class="text-right">{{ currency_format($item, ($currency->currency ? $currency->currency->id : company()->currency->id ) ) }}</td>
+                                            <td class="text-right">{{ currency_format($item, $salaryCurrencyId ) }}</td>
                                         </tr>
                                     @endforeach
                                     @foreach ($deductionsExtra as $key => $item)
                                         <tr>
                                             <td>{{ ($key) }}</td>
-                                            <td class="text-right">{{ currency_format($item, ($currency->currency ? $currency->currency->id : company()->currency->id )) }}</td>
+                                            <td class="text-right">{{ currency_format($item, $salaryCurrencyId) }}</td>
                                         </tr>
                                     @endforeach
 
                                 </x-table>
+                          </div>
+                      </div>
+
+                        @if($loanDeductionTotal > 0)
+                            <div class="col-md-6 mt-3">
+                                <div class="bg-lightest border rounded p-3 h-100">
+                                    <h6 class="text-uppercase text-lightest f-12 mb-3">{{ __('Loans Deducted') }}</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        @foreach ($loanDeductions as $label => $amount)
+                                            <li class="d-flex justify-content-between text-dark-grey f-13 mb-2">
+                                                <span>{{ $label }}</span>
+                                                <span>{{ currency_format($amount, $salaryCurrencyId) }}</span>
+                                            </li>
+                                        @endforeach
+                                        <li class="d-flex justify-content-between font-weight-semibold border-top pt-2 mt-2">
+                                            <span>{{ __('Total Loan Deductions') }}</span>
+                                            <span>{{ currency_format($loanDeductionTotal, $salaryCurrencyId) }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
+                        @endif
 
                         <div class="col-md-3">
                             <h5 class="heading-h5 ml-3">@lang('payroll::modules.payroll.grossEarning')</h5>
                         </div>
                         <div class="col-md-3 text-right">
-                            <h5 class="heading-h5">{{ currency_format($salarySlip->gross_salary, ($currency->currency ? $currency->currency->id : company()->currency->id )) }}</h5>
+                            <h5 class="heading-h5">{{ currency_format($salarySlip->gross_salary, $salaryCurrencyId) }}</h5>
                         </div>
 
                         <div class="col-md-3">
                             <h5 class="heading-h5">@lang('payroll::modules.payroll.totalDeductions')</h5>
                         </div>
-                        @php
-                            $allDeduction = array_sum($deductions) + array_sum($deductionsExtra);
-                        @endphp
                         <div class="col-md-3 text-right">
-                            <h5 class="heading-h5">{{ currency_format($allDeduction, ($currency->currency ? $currency->currency->id : company()->currency->id )) }}</h5>
+                            <h5 class="heading-h5">{{ currency_format($deductionTotal, $salaryCurrencyId) }}</h5>
                         </div>
 
 
@@ -205,13 +225,13 @@
                                     <tr>
                                         <td>@lang('payroll::modules.payroll.expenseClaims')</td>
                                         <td class="text-right text-uppercase">
-                                            {{ currency_format($salarySlip->expense_claims, ($currency->currency ? $currency->currency->id : company()->currency->id )) }}</td>
+                                            {{ currency_format($salarySlip->expense_claims, $salaryCurrencyId) }}</td>
                                     </tr>
                                     <tr>
                                         <td><strong>@lang('app.total')
                                                 @lang('payroll::modules.payroll.reimbursement')</strong></td>
                                         <td class="text-right">
-                                            <strong>{{ currency_format($salarySlip->expense_claims, ($currency->currency ? $currency->currency->id : company()->currency->id )) }}</strong>
+                                            <strong>{{ currency_format($salarySlip->expense_claims, $salaryCurrencyId) }}</strong>
                                         </td>
                                     </tr>
                                 </x-table>
@@ -221,7 +241,7 @@
                         <div class="col-md-12 p-20 mt-3">
                             <h3 class="text-center heading-h3">
                                 <span class="text-uppercase mr-3">@lang('payroll::modules.payroll.netSalary'):</span>
-                                {{ currency_format(sprintf('%0.2f', $salarySlip->net_salary), ($currency->currency ? $currency->currency->id : company()->currency->id )) }}
+                                {{ currency_format(sprintf('%0.2f', $salarySlip->net_salary), $salaryCurrencyId) }}
                             </h3>
                             <h5 class="text-center text-lightest">@lang('payroll::modules.payroll.netSalary') =
                                 (@lang('payroll::modules.payroll.grossEarning') -
