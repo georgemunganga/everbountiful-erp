@@ -27,15 +27,14 @@
                                 		</tr>
                                 	</table>
                                 	<table>
-       <div id="details">
-		<div class="scope-entry">
-			<div class="title"><?php echo  display('employee_name')?> :<?php echo  $paymentdata[0]['first_name'].' '.$paymentdata[0]['last_name']?></div>
-			<div class="title"><?php echo  display('designation')?>   : <?php echo  $paymentdata[0]['position_name']?></div>
-			<div class="title"><?php echo  display('salary_date')?>   : <?php echo  $paymentdata[0]['payment_date']?></div>
-			
-		</div>
-		
-	</div>
+                                    <div id="details">
+                                        <div class="scope-entry">
+                                            <div class="title"><?php echo  display('employee_name')?> :<?php echo  $paymentdata[0]['first_name'].' '.$paymentdata[0]['last_name']?></div>
+                                            <div class="title"><?php echo  display('designation')?>   : <?php echo  $paymentdata[0]['position_name']?></div>
+                                            <div class="title"><?php echo  display('salary_date')?>   : <?php echo  $paymentdata[0]['payment_date']?></div>
+                                            
+                                        </div>
+                                    </div>
                                 	</table>
                                 
                                 </div>

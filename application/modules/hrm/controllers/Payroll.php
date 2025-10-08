@@ -1703,7 +1703,8 @@ class Payroll extends MX_Controller {
 
 			$gross_salary 			   = $gross_salary + floatval($value->gross_salary);
 			$net_salary   			   = $net_salary + floatval($value->net_salary);
-			$loans   				   = $loans + floatval($value->loan_deduct);
+			$loan_deduction_total      = floatval($value->loan_deduct) + (isset($value->office_loan_deduct) ? floatval($value->office_loan_deduct) : 0.0);
+			$loans   				   = $loans + $loan_deduction_total;
 			$salary_advance            = $salary_advance + floatval($value->salary_advance);
 			$state_income_tax          = $state_income_tax + floatval($value->income_tax);
 			$employee_npf_contribution = $employee_npf_contribution + floatval($value->soc_sec_npf_tax);

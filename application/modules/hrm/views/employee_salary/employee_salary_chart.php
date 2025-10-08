@@ -113,7 +113,9 @@ table.payrollDatatableReport td.noborder {
 
                                     $total_benefits = floatval($row->medical_benefit) + floatval($row->family_benefit) + floatval($row->transportation_benefit) + floatval($row->other_benefit);
 
-                                    $total_deductions = floatval($row->income_tax) + floatval($row->soc_sec_npf_tax) + floatval($row->loan_deduct) + floatval($row->salary_advance);
+                                    $office_loan_deduct = isset($row->office_loan_deduct) ? floatval($row->office_loan_deduct) : 0.0;
+                                    $loan_deduction_total = floatval($row->loan_deduct) + $office_loan_deduct;
+                                    $total_deductions = floatval($row->income_tax) + floatval($row->soc_sec_npf_tax) + $loan_deduction_total + floatval($row->salary_advance);
 
                                 ?>
 
@@ -130,7 +132,7 @@ table.payrollDatatableReport td.noborder {
                                     <td class="text-left"><?php echo $currency . ' ' . $row->soc_sec_npf_tax; ?></td>
                                     <td class="text-left">
                                         <?php echo $currency . ' ' . floatval($row->employer_contribution); ?></td>
-                                    <td class="text-left"><?php echo $currency . ' ' . $row->loan_deduct; ?></td>
+                                    <td class="text-left"><?php echo $currency . ' ' . $loan_deduction_total; ?></td>
                                     <td class="text-left"><?php echo $currency . ' ' . $row->salary_advance; ?></td>
 
                                     <td class="text-left"><?php echo $currency . ' ' . $total_deductions; ?></td>
