@@ -26,7 +26,7 @@
             </a>
         </li>
 
-        <li class="treeview <?php echo in_array($this->uri->segment(1), array('sheds', 'livestock-groups', 'livestocks', 'productions', 'feeds', 'feed-usages')) ? "active" : null; ?>">
+        <li class="treeview <?php echo in_array($this->uri->segment(1), array('sheds', 'livestock-groups', 'livestocks', 'productions', 'feeds', 'feed-usages', 'vaccines', 'vaccine-usages', 'farm-reports')) ? "active" : null; ?>">
             <a href="#">
                 <i class="fa fa-paw"></i>
                 <span><?php echo display('livestock_management') ?: 'Livestock Management'; ?></span>
@@ -52,6 +52,15 @@
                 </li>
                 <li class="<?php echo ($this->uri->segment(1) == 'feed-usages') ? 'active' : null; ?>">
                     <a href="<?php echo base_url('feed-usages'); ?>"><?php echo display('feed_usages') ?: 'Feed Usages'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'vaccines') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('vaccines'); ?>"><?php echo display('vaccines') ?: 'Vaccines'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'vaccine-usages') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('vaccine-usages'); ?>"><?php echo display('vaccine_usages') ?: 'Vaccine Usages'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'farm-reports') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('farm-reports'); ?>"><?php echo display('farm_reports') ?: 'Farm Reports'; ?></a>
                 </li>
             </ul>
         </li>

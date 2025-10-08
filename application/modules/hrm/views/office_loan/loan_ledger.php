@@ -87,6 +87,7 @@
                         <h5><strong><?php echo display('balance'); ?>:</strong> <?php echo number_format($outstanding_balance, 2); ?></h5>
                     </div>
                 </div>
+                
                 <div class="table-responsive">
                     <table id="dataTableExample2" class="table table-bordered table-striped table-hover">
                         <thead>

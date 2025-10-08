@@ -67,6 +67,28 @@ class Livestock extends MX_Controller
             'used_total'              => 'Used Total',
             'total_wasted'            => 'Total Wasted',
             'total_instock'           => 'Total In Stock',
+            'vaccines'                => 'Vaccines',
+            'vaccine'                 => 'Vaccine',
+            'add_vaccine'             => 'Add Vaccine',
+            'edit_vaccine'            => 'Edit Vaccine',
+            'manufacturer'            => 'Manufacturer',
+            'disease_target'          => 'Disease Target',
+            'vaccine_usages'          => 'Vaccine Usages',
+            'vaccine_usage'           => 'Vaccine Usage',
+            'add_vaccine_usage'       => 'Add Vaccine Usage',
+            'edit_vaccine_usage'      => 'Edit Vaccine Usage',
+            'usage_date'              => 'Usage Date',
+            'notes'                   => 'Notes',
+            'farm_reports'            => 'Farm Reports',
+            'daily'                   => 'Daily',
+            'weekly'                  => 'Weekly',
+            'monthly'                 => 'Monthly',
+            'extras'                  => 'Extras',
+            'interval'                => 'Interval',
+            'filter'                  => 'Filter',
+            'period'                  => 'Period',
+            'from'                    => 'From',
+            'to'                      => 'To',
             'mortality'               => 'Mortality',
         );
 
@@ -525,7 +547,229 @@ class Livestock extends MX_Controller
         $this->flash_and_redirect($message, 'feed-usages', $success ? 'message' : 'exception');
     }
 
+    /* ------------------------------ Vaccines --------------------------- */
+
+    public function vaccines()
+    {
+        $data['title']    = $this->phrase('vaccines', 'Vaccines');
+        $data['vaccines'] = $this->livestock_model->get_vaccines();
+        $this->render('vaccines/index', $data);
+    }
+
+    public function vaccine_form($id = null)
+    {
+        $vaccine = null;
+        if (!empty($id)) {
+            $vaccine = $this->livestock_model->get_vaccine($id);
+            if (!$vaccine) {
+                $this->flash_and_redirect('not_found', 'vaccines', 'exception');
+            }
+        }
+
+        $this->form_validation->set_rules('name', $this->phrase('vaccine', 'Vaccine') . ' ' . strtolower($this->phrase('name', 'Name')), 'required|max_length[255]');
+        $this->form_validation->set_rules('manufacturer', $this->phrase('manufacturer', 'Manufacturer'), 'max_length[255]');
+        $this->form_validation->set_rules('disease_target', $this->phrase('disease_target', 'Disease Target'), 'max_length[255]');
+        $this->form_validation->set_rules('unit_type_id', $this->phrase('purchase_unit', 'Unit'), 'integer');
+        $this->form_validation->set_rules('description', $this->phrase('description', 'Description'), 'max_length[1000]');
+
+        if ($this->form_validation->run() === true) {
+            $unitTypeId = $this->input->post('unit_type_id', true);
+            $payload = array(
+                'name'           => $this->input->post('name', true),
+                'manufacturer'   => $this->input->post('manufacturer', true),
+                'disease_target' => $this->input->post('disease_target', true),
+                'unit_type_id'   => $unitTypeId !== '' ? (int) $unitTypeId : null,
+                'description'    => $this->input->post('description', true),
+            );
+
+            if ($vaccine) {
+                $success = $this->livestock_model->update_vaccine($vaccine['id'], $payload);
+                $message = $success ? 'successfully_updated' : 'please_try_again';
+            } else {
+                $success = $this->livestock_model->create_vaccine($payload);
+                $message = $success ? 'save_successfully' : 'please_try_again';
+            }
+
+            $this->flash_and_redirect($message, 'vaccines', $success ? 'message' : 'exception');
+        }
+
+        $data['title'] = $vaccine ? $this->phrase('edit_vaccine', 'Edit Vaccine') : $this->phrase('add_vaccine', 'Add Vaccine');
+        $data['vaccine'] = (object) array(
+            'id'             => $vaccine ? $vaccine['id'] : null,
+            'name'           => set_value('name', $vaccine ? $vaccine['name'] : ''),
+            'manufacturer'   => set_value('manufacturer', $vaccine ? $vaccine['manufacturer'] : ''),
+            'disease_target' => set_value('disease_target', $vaccine ? $vaccine['disease_target'] : ''),
+            'unit_type_id'   => set_value('unit_type_id', $vaccine ? $vaccine['unit_type_id'] : ''),
+            'description'    => set_value('description', $vaccine ? $vaccine['description'] : ''),
+        );
+        $data['units'] = $this->livestock_model->get_units();
+
+        $this->render('vaccines/form', $data);
+    }
+
+    public function vaccine_delete($id = null)
+    {
+        if (empty($id)) {
+            $this->flash_and_redirect('not_found', 'vaccines', 'exception');
+        }
+
+        $success = $this->livestock_model->delete_vaccine($id);
+        $message = $success ? 'successfully_deleted' : 'please_try_again';
+        $this->flash_and_redirect($message, 'vaccines', $success ? 'message' : 'exception');
+    }
+
+    /* ---------------------------- Vaccine Usages ----------------------- */
+
+    public function vaccine_usages()
+    {
+        $data['title']          = $this->phrase('vaccine_usages', 'Vaccine Usages');
+        $data['vaccine_usages'] = $this->livestock_model->get_vaccine_usages();
+        $this->render('vaccine_usages/index', $data);
+    }
+
+    public function vaccine_usage_form($id = null)
+    {
+        $vaccine_usage = null;
+        if (!empty($id)) {
+            $vaccine_usage = $this->livestock_model->get_vaccine_usage($id);
+            if (!$vaccine_usage) {
+                $this->flash_and_redirect('not_found', 'vaccine-usages', 'exception');
+            }
+        }
+
+        $this->form_validation->set_rules('vaccine_id', $this->phrase('vaccine', 'Vaccine'), 'required|integer');
+        $this->form_validation->set_rules('shed_id', $this->phrase('shed', 'Shed'), 'integer');
+        $this->form_validation->set_rules('usage_date', $this->phrase('usage_date', 'Usage Date'), 'required');
+        $this->form_validation->set_rules('total_purchased_qty', $this->phrase('total_purchased', 'Total Purchased'), 'numeric');
+        $this->form_validation->set_rules('used_total_qty', $this->phrase('used_total', 'Used Total'), 'numeric');
+        $this->form_validation->set_rules('total_wasted_qty', $this->phrase('total_wasted', 'Total Wasted'), 'numeric');
+        $this->form_validation->set_rules('notes', $this->phrase('notes', 'Notes'), 'max_length[2000]');
+
+        if ($this->form_validation->run() === true) {
+            $total_purchased = $this->decimal_input('total_purchased_qty');
+            $total_used      = $this->decimal_input('used_total_qty');
+            $total_wasted    = $this->decimal_input('total_wasted_qty');
+            $total_instock   = max(0, $total_purchased - $total_used - $total_wasted);
+            $usage_date      = $this->input->post('usage_date', true);
+            $usage_date      = $usage_date ? date('Y-m-d', strtotime($usage_date)) : date('Y-m-d');
+            $shed_id         = $this->input->post('shed_id', true);
+
+            $payload = array(
+                'vaccine_id'           => (int) $this->input->post('vaccine_id', true),
+                'shed_id'              => ($shed_id !== '') ? (int) $shed_id : null,
+                'usage_date'           => $usage_date,
+                'total_purchased_qty'  => $this->format_decimal($total_purchased),
+                'used_total_qty'       => $this->format_decimal($total_used),
+                'total_wasted_qty'     => $this->format_decimal($total_wasted),
+                'total_instock_qty'    => $this->format_decimal($total_instock),
+                'notes'                => $this->input->post('notes', true),
+            );
+
+            if ($vaccine_usage) {
+                $success = $this->livestock_model->update_vaccine_usage($vaccine_usage['id'], $payload);
+                $message = $success ? 'successfully_updated' : 'please_try_again';
+            } else {
+                $success = $this->livestock_model->create_vaccine_usage($payload);
+                $message = $success ? 'save_successfully' : 'please_try_again';
+            }
+
+            $this->flash_and_redirect($message, 'vaccine-usages', $success ? 'message' : 'exception');
+        }
+
+        $data['title'] = $vaccine_usage ? $this->phrase('edit_vaccine_usage', 'Edit Vaccine Usage') : $this->phrase('add_vaccine_usage', 'Add Vaccine Usage');
+        $data['vaccine_usage'] = (object) array(
+            'id'                   => $vaccine_usage ? $vaccine_usage['id'] : null,
+            'vaccine_id'           => set_value('vaccine_id', $vaccine_usage ? $vaccine_usage['vaccine_id'] : ''),
+            'shed_id'              => set_value('shed_id', $vaccine_usage ? $vaccine_usage['shed_id'] : ''),
+            'usage_date'           => set_value('usage_date', $vaccine_usage ? $vaccine_usage['usage_date'] : date('Y-m-d')),
+            'total_purchased_qty'  => set_value('total_purchased_qty', $vaccine_usage ? $vaccine_usage['total_purchased_qty'] : '0.00'),
+            'used_total_qty'       => set_value('used_total_qty', $vaccine_usage ? $vaccine_usage['used_total_qty'] : '0.00'),
+            'total_wasted_qty'     => set_value('total_wasted_qty', $vaccine_usage ? $vaccine_usage['total_wasted_qty'] : '0.00'),
+            'total_instock_qty'    => set_value('total_instock_qty', $vaccine_usage ? $vaccine_usage['total_instock_qty'] : '0.00'),
+            'notes'                => set_value('notes', $vaccine_usage ? $vaccine_usage['notes'] : ''),
+        );
+        $data['vaccines'] = $this->livestock_model->get_vaccines_dropdown();
+        $data['sheds']    = $this->livestock_model->get_sheds();
+
+        $this->render('vaccine_usages/form', $data);
+    }
+
+    public function vaccine_usage_delete($id = null)
+    {
+        if (empty($id)) {
+            $this->flash_and_redirect('not_found', 'vaccine-usages', 'exception');
+        }
+
+        $success = $this->livestock_model->delete_vaccine_usage($id);
+        $message = $success ? 'successfully_deleted' : 'please_try_again';
+        $this->flash_and_redirect($message, 'vaccine-usages', $success ? 'message' : 'exception');
+    }
+
+    /* ------------------------------ Farm Reports ----------------------- */
+
+    public function farm_reports()
+    {
+        $filters = $this->normalize_report_filters(
+            $this->input->get('start_date', true),
+            $this->input->get('end_date', true),
+            $this->input->get('interval', true)
+        );
+
+        $data['title']     = $this->phrase('farm_reports', 'Farm Reports');
+        $data['filters']   = $filters;
+        $data['summary']   = $this->livestock_model->get_farm_report_summary($filters['start_date'], $filters['end_date']);
+        $data['timeseries'] = $this->livestock_model->get_farm_report_timeseries($filters['start_date'], $filters['end_date'], $filters['interval']);
+
+        $this->render('reports/farm_reports', $data);
+    }
+
+    public function farm_reports_data()
+    {
+        $filters = $this->normalize_report_filters(
+            $this->input->post('start_date', true),
+            $this->input->post('end_date', true),
+            $this->input->post('interval', true)
+        );
+
+        $summary   = $this->livestock_model->get_farm_report_summary($filters['start_date'], $filters['end_date']);
+        $timeseries = $this->livestock_model->get_farm_report_timeseries($filters['start_date'], $filters['end_date'], $filters['interval']);
+
+        $response = array(
+            'success'    => true,
+            'filters'    => $filters,
+            'summary'    => $summary,
+            'timeseries' => $timeseries,
+        );
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($response));
+    }
+
     /* ----------------------------- Helpers ------------------------------- */
+
+    private function normalize_report_filters($start_date, $end_date, $interval)
+    {
+        $default_end = date('Y-m-d');
+        $sanitized_end = (!empty($end_date) && strtotime($end_date)) ? date('Y-m-d', strtotime($end_date)) : $default_end;
+        $default_start = date('Y-m-d', strtotime('-29 days', strtotime($sanitized_end)));
+        $sanitized_start = (!empty($start_date) && strtotime($start_date)) ? date('Y-m-d', strtotime($start_date)) : $default_start;
+
+        if ($sanitized_start > $sanitized_end) {
+            $temp = $sanitized_start;
+            $sanitized_start = $sanitized_end;
+            $sanitized_end = $temp;
+        }
+
+        $allowed_intervals = array('daily', 'weekly', 'monthly');
+        $sanitized_interval = in_array($interval, $allowed_intervals, true) ? $interval : 'daily';
+
+        return array(
+            'start_date' => $sanitized_start,
+            'end_date'   => $sanitized_end,
+            'interval'   => $sanitized_interval,
+        );
+    }
 
     private function decimal_input($field)
     {

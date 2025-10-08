@@ -533,25 +533,28 @@ public function create_employee_payment($data = array())
 			pl.transaction_id,
 			pi.person_id,
 			pi.employee_id,
-			(old.principal_amount - IFNULL(old.total_paid, 0)) as remaining_balance,
+			(old.principal_amount - IFNULL(old.total_paid, 0)) AS remaining_balance,
+			LEAST(old.monthly_installment, (old.principal_amount - IFNULL(old.total_paid, 0))) AS payable_amount,
 			CASE 
 				WHEN old.next_due_date IS NULL THEN old.repayment_start_date
 				ELSE old.next_due_date
-			END as next_payment_date
+			END AS next_payment_date
 		FROM office_loan_details old
 		JOIN person_ledger pl ON pl.transaction_id = old.transaction_id
 		JOIN person_information pi ON pi.person_id = pl.person_id
 		WHERE pi.employee_id = ? 
 		AND old.monthly_installment > 0
 		AND (old.principal_amount - IFNULL(old.total_paid, 0)) > 0
+		AND (old.repayment_start_date IS NULL OR old.repayment_start_date <= ?)
+		AND (old.repayment_end_date IS NULL OR old.repayment_end_date >= ?)
 		AND (
 			old.next_due_date IS NULL 
 			OR old.next_due_date <= ?
 		)
-		ORDER BY old.disbursement_date ASC
+		ORDER BY old.next_due_date IS NULL ASC, old.next_due_date ASC, old.disbursement_date ASC
 		LIMIT 1";
 
-		return $this->db->query($query, array($emp_id, $current_date))->row();
+		return $this->db->query($query, array($emp_id, $current_date, $current_date, $current_date))->row();
 	}
 
 	// Update office loan payment after deduction
@@ -1001,11 +1004,15 @@ public function get_tax_slabs($only_active = false)
 
 		// Update office_loan_details
 		$this->db->query("UPDATE office_loan_details 
-			SET total_paid = IFNULL(total_paid, 0) + ?,
+			SET total_paid = LEAST(principal_amount, IFNULL(total_paid, 0) + ?),
 				last_deduction_date = ?,
-				next_due_date = DATE_ADD(?, INTERVAL 1 MONTH)
+				next_due_date = CASE 
+					WHEN repayment_end_date IS NOT NULL AND DATE_ADD(?, INTERVAL 1 MONTH) > repayment_end_date 
+						THEN repayment_end_date
+					ELSE DATE_ADD(?, INTERVAL 1 MONTH)
+				END
 			WHERE transaction_id = ?", 
-			array($deduction_amount, $deduction_date, $deduction_date, $transaction_id));
+			array($deduction_amount, $deduction_date, $deduction_date, $deduction_date, $transaction_id));
 
 		// Get person_id for this transaction
 		$person_query = $this->db->select('pl.person_id')

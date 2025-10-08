@@ -1128,7 +1128,9 @@ class Payroll extends MX_Controller {
 						$current_date = date('Y-m-d', strtotime($salary_month . '-01'));
 						$office_loan_respo = $this->Payroll_model->office_loan_installment_deduction($emp_id, $current_date);
 						if($office_loan_respo){
-							$office_loan_deduct = floatval($office_loan_respo->monthly_installment);
+							$remaining_office_balance = max(0.0, floatval($office_loan_respo->remaining_balance));
+							$office_loan_deduct = floatval(isset($office_loan_respo->payable_amount) ? $office_loan_respo->payable_amount : $office_loan_respo->monthly_installment);
+							$office_loan_deduct = max(0.0, min($office_loan_deduct, $remaining_office_balance));
 							$office_loan_transaction_id = $office_loan_respo->transaction_id;
 						}
 
@@ -1217,7 +1219,7 @@ class Payroll extends MX_Controller {
 								$office_loan_deduction_data = array(
 									'transaction_id'   => $office_loan_transaction_id,
 									'deduction_amount' => $office_loan_deduct,
-									'deduction_date'   => date('Y-m-d')
+									'deduction_date'   => $current_date
 								);
 
 								$office_loan_deduction_respo = $this->Payroll_model->update_office_loan_deduction($office_loan_deduction_data);

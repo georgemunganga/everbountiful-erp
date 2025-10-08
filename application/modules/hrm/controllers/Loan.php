@@ -527,6 +527,22 @@ class Loan extends MX_Controller {
         }
     }
 
+    private function normalize_amount_input($value)
+    {
+        if (is_array($value)) {
+            $value = reset($value);
+        }
+        if ($value === null) {
+            return 0.0;
+        }
+        $normalized = preg_replace('/[^0-9\.\-]/', '', str_replace(',', '', (string) $value));
+        if ($normalized === '' || $normalized === '-' || $normalized === '.'
+            || $normalized === '-.' || $normalized === '.-') {
+            return 0.0;
+        }
+        return round((float) $normalized, 2);
+    }
+
     private function ensure_person_for_employee($employee_id)
     {
         if (empty($employee_id)) {
@@ -659,8 +675,12 @@ class Loan extends MX_Controller {
         if (!empty($loan_list)) {
             foreach ($loan_list as $key => $loan) {
                 $loan_list[$key]['date'] = $this->occational->dateConvert($loan['date']);
-                $loan_list[$key]['debit'] = (float) $loan['debit'];
-                $total_amount += $loan_list[$key]['debit'];
+                $principal_amount = isset($loan['principal_amount']) ? (float) $loan['principal_amount'] : (float) $loan['debit'];
+                $loan_list[$key]['debit'] = $principal_amount;
+                $loan_list[$key]['total_credit'] = (float) $loan['total_credit'];
+                $loan_list[$key]['outstanding'] = max(0, round($principal_amount - $loan_list[$key]['total_credit'], 2));
+                $loan_list[$key]['employee_display_name'] = !empty($loan['employee_full_name']) ? $loan['employee_full_name'] : $loan['person_name'];
+                $total_amount += $principal_amount;
             }
         }
 
@@ -888,12 +908,7 @@ class Loan extends MX_Controller {
     public function bdtask_add_office_loan()
     {
         $data['title']            = display('add_office_loan');
-        $data['employees']        = $this->db->select('id, first_name, last_name, phone, address_line_1')
-            ->from('employee_history')
-            ->order_by('first_name', 'asc')
-            ->order_by('last_name', 'asc')
-            ->get()
-            ->result();
+        $data['employees']        = $this->loan_model->employees_without_open_office_loan();
         $data['payment_channels'] = $this->get_payment_channel_options();
         $data['schedule']         = $this->build_schedule_payload();
         $data['module']           = "hrm";
@@ -906,7 +921,8 @@ class Loan extends MX_Controller {
      public function bdtask_insert_office_loan() {
         log_message('error', 'bdtask_insert_office_loan payload: ' . json_encode($this->input->post(NULL, TRUE)));
         $employee_id = $this->input->post('employee_id', TRUE);
-        $amount      = (float) $this->input->post('ammount', TRUE);
+        $amount      = $this->normalize_amount_input($this->input->post('ammount', TRUE));
+        $amount_formatted = number_format($amount, 2, '.', '');
         $date        = $this->input->post('date', TRUE);
         $details     = $this->input->post('details', TRUE);
         $selected_channel_raw = $this->input->post('paytype', TRUE);
@@ -925,6 +941,9 @@ class Loan extends MX_Controller {
         }
 
         $monthly_installment = round($amount / max(1, $repayment_period), 2);
+        $amount_formatted = number_format($amount, 2, '.', '');
+        $monthly_installment_formatted = number_format($monthly_installment, 2, '.', '');
+        $monthly_installment_formatted = number_format($monthly_installment, 2, '.', '');
         $default_start_date = date('Y-m-d', strtotime('+1 month', strtotime($disbursement_date)));
         $repayment_start_date = $this->sanitize_date($this->input->post('repayment_start_date', TRUE), $default_start_date);
         if (strtotime($repayment_start_date) === false) {
@@ -955,6 +974,11 @@ class Loan extends MX_Controller {
 
         if (empty($person_context) || empty($person_context['person'])) {
             $this->session->set_flashdata(array('exception' => display('not_added')));
+            redirect(base_url('add_office_loan'));
+        }
+
+        if ($this->loan_model->employee_has_open_office_loan($employee_id)) {
+            $this->session->set_flashdata(array('exception' => 'Employee already has an active office loan.'));
             redirect(base_url('add_office_loan'));
         }
 
@@ -1051,7 +1075,7 @@ class Loan extends MX_Controller {
         $ledger_data = array(
             'transaction_id' => $transaction_id,
             'person_id'      => $personinfo->person_id,
-            'debit'          => $amount,
+            'debit'          => $amount_formatted,
             'date'           => $date,
             'details'        => $details_with_schedule,
 
@@ -1064,7 +1088,7 @@ class Loan extends MX_Controller {
           'VDate'          =>  $entry_date,
           'COAID'          =>  $headcode,
           'Narration'      =>  'Loan for .'.$personinfo->person_name,
-          'Debit'          =>  $amount,
+          'Debit'          =>  $amount_formatted,
           'Credit'         =>  0,
           'IsPosted'       =>  1,
           'CreateBy'       =>  $this->session->userdata('id'),
@@ -1083,7 +1107,7 @@ class Loan extends MX_Controller {
           'Narration'      =>  $credit_narration,
 
           'Debit'          =>  0,
-          'Credit'         =>  $amount,
+          'Credit'         =>  $amount_formatted,
           'IsPosted'       =>  1,
           'CreateBy'       =>  $this->session->userdata('id'),
           'CreateDate'     =>  date('Y-m-d H:i:s'),
@@ -1100,8 +1124,8 @@ class Loan extends MX_Controller {
                 'repayment_period'     => $repayment_period,
                 'repayment_start_date' => $repayment_start_date,
                 'repayment_end_date'   => $repayment_end_date,
-                'principal_amount'     => $amount,
-                'monthly_installment'  => $monthly_installment,
+                'principal_amount'     => $amount_formatted,
+                'monthly_installment'  => $monthly_installment_formatted,
                 'total_paid'           => 0.0,
                 'next_due_date'        => $repayment_start_date,
             ));
@@ -1109,7 +1133,7 @@ class Loan extends MX_Controller {
             $this->db->insert('acc_transaction',$loan);
             $this->db->insert('acc_transaction',$credit_entry);
             $this->session->set_flashdata(array('message' => display('successfully_added')));
-            redirect(base_url('add_office_loan'));
+            redirect(base_url('manage_office_loans'));
         } else {
             $this->session->set_flashdata(array('exception' => display('not_added')));
             redirect(base_url('add_office_loan'));
@@ -1193,7 +1217,7 @@ class Loan extends MX_Controller {
     {
         $transaction_id = $this->input->post('transaction_id', TRUE);
         $employee_id    = $this->input->post('employee_id', TRUE);
-        $amount         = (float) $this->input->post('ammount', TRUE);
+        $amount         = $this->normalize_amount_input($this->input->post('ammount', TRUE));
         $date           = $this->input->post('date', TRUE);
         $details        = $this->input->post('details', TRUE);
         $selected_channel_raw = $this->input->post('paytype', TRUE);
@@ -1336,7 +1360,7 @@ class Loan extends MX_Controller {
 
         $ledger_update = array(
             'person_id' => $personinfo->person_id,
-            'debit'     => $amount,
+            'debit'     => $amount_formatted,
             'date'      => $date,
             'details'   => $details_with_schedule,
 
@@ -1352,8 +1376,8 @@ class Loan extends MX_Controller {
             'repayment_period'     => $repayment_period,
             'repayment_start_date' => $repayment_start_date,
             'repayment_end_date'   => $repayment_end_date,
-            'principal_amount'     => $amount,
-            'monthly_installment'  => $monthly_installment,
+            'principal_amount'     => $amount_formatted,
+            'monthly_installment'  => $monthly_installment_formatted,
             'next_due_date'        => $repayment_start_date,
         ));
 
@@ -1363,7 +1387,7 @@ class Loan extends MX_Controller {
           'VDate'          =>  $entry_date,
           'COAID'          =>  $headcode,
           'Narration'      =>  'Loan for .'.$personinfo->person_name,
-          'Debit'          =>  $amount,
+          'Debit'          =>  $amount_formatted,
           'Credit'         =>  0,
           'IsPosted'       =>  1,
           'CreateBy'       =>  $this->session->userdata('id'),
@@ -1382,7 +1406,7 @@ class Loan extends MX_Controller {
           'Narration'      =>  $credit_narration,
 
           'Debit'          =>  0,
-          'Credit'         =>  $amount,
+          'Credit'         =>  $amount_formatted,
           'IsPosted'       =>  1,
           'CreateBy'       =>  $this->session->userdata('id'),
           'CreateDate'     =>  date('Y-m-d H:i:s'),
@@ -1440,6 +1464,13 @@ class Loan extends MX_Controller {
         $headname       = $personid.'-'.$personinfo->person_name;
         $headcid        = $this->db->select('HeadCode')->from('acc_coa')->where('HeadName',$headname)->get()->row()->HeadCode;
         $transaction_id = $this->occational->generator(10);
+        $amount         = $this->normalize_amount_input($this->input->post('ammount', TRUE));
+        $amount_formatted = number_format($amount, 2, '.', '');
+
+        if ($amount <= 0) {
+            $this->session->set_flashdata(array('exception' => display('not_added')));
+            redirect(base_url('add_office_loan_payment'));
+        }
 
    $bank_id = $this->input->post('bank_id',TRUE);
         if(!empty($bank_id)){
@@ -1453,7 +1484,7 @@ class Loan extends MX_Controller {
         $data = array(
             'transaction_id' => $transaction_id,
             'person_id'      => $this->input->post('person_id',TRUE),
-            'credit'         => $this->input->post('ammount',TRUE),
+            'credit'         => $amount_formatted,
             'date'           => $this->input->post('date',TRUE),
             'details'        => $this->input->post('details',TRUE),
             'status'         => 2
@@ -1465,7 +1496,7 @@ class Loan extends MX_Controller {
           'COAID'          =>  $headcid,
           'Narration'      =>  'Loan Payment from .'.$personinfo->person_name,
           'Debit'          =>  0,
-          'Credit'         =>  $this->input->post('ammount',TRUE),
+          'Credit'         =>  $amount_formatted,
           'IsPosted'       =>  1,
           'CreateBy'       =>  $this->session->userdata('id'),
           'CreateDate'     =>  date('Y-m-d H:i:s'),
@@ -1477,7 +1508,7 @@ class Loan extends MX_Controller {
       'VDate'          =>  $this->input->post('date',TRUE),
       'COAID'          =>  111000002,
       'Narration'      =>  'Cash in Hand Debit For '.$personinfo->person_name,
-      'Debit'          =>  $this->input->post('ammount',TRUE),
+      'Debit'          =>  $amount_formatted,
       'Credit'         =>  0,
       'IsPosted'       =>  1,
       'CreateBy'       =>  $this->session->userdata('id'),
@@ -1493,7 +1524,7 @@ class Loan extends MX_Controller {
       'VDate'          =>  $this->input->post('date',TRUE),
       'COAID'          =>  $bankcoaid,
       'Narration'      =>  'Loan for .'.$personinfo->person_name,
-      'Debit'          =>  $this->input->post('ammount',TRUE),
+      'Debit'          =>  $amount_formatted,
       'Credit'         =>  0,
       'IsPosted'       =>  1,
       'CreateBy'       =>  $this->session->userdata('id'),

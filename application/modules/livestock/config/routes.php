@@ -30,3 +30,16 @@ $route['feed-usages']                  = "livestock/livestock/feed_usages";
 $route['feed-usages/create']           = "livestock/livestock/feed_usage_form";
 $route['feed-usages/edit/(:num)']      = "livestock/livestock/feed_usage_form/$1";
 $route['feed-usages/delete/(:num)']    = "livestock/livestock/feed_usage_delete/$1";
+
+$route['vaccines']                  = "livestock/livestock/vaccines";
+$route['vaccines/create']           = "livestock/livestock/vaccine_form";
+$route['vaccines/edit/(:num)']      = "livestock/livestock/vaccine_form/$1";
+$route['vaccines/delete/(:num)']    = "livestock/livestock/vaccine_delete/$1";
+
+$route['vaccine-usages']                  = "livestock/livestock/vaccine_usages";
+$route['vaccine-usages/create']           = "livestock/livestock/vaccine_usage_form";
+$route['vaccine-usages/edit/(:num)']      = "livestock/livestock/vaccine_usage_form/$1";
+$route['vaccine-usages/delete/(:num)']    = "livestock/livestock/vaccine_usage_delete/$1";
+
+$route['farm-reports']       = "livestock/livestock/farm_reports";
+$route['farm-reports/data']  = "livestock/livestock/farm_reports_data";

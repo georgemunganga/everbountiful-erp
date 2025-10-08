@@ -29,6 +29,8 @@ class Loan_model extends CI_Model {
         return $this->db
             ->select('pl.*, pi.person_name, pi.person_phone, pi.person_address, pi.employee_id')
             ->select("CONCAT_WS(' ', eh.first_name, eh.last_name) AS employee_full_name", false)
+            ->select('IFNULL(old.principal_amount, pl.debit) AS principal_amount', false)
+            ->select('IFNULL(old.total_paid, 0) AS total_paid_amount', false)
             ->select('(SELECT IFNULL(SUM(debit), 0) FROM person_ledger WHERE person_id = pl.person_id) AS total_debit', false)
             ->select('(SELECT IFNULL(SUM(credit), 0) FROM person_ledger WHERE person_id = pl.person_id) AS total_credit', false)
             ->select('old.disbursement_date, old.repayment_period, old.repayment_start_date, old.repayment_end_date')
@@ -51,6 +53,69 @@ class Loan_model extends CI_Model {
         return $this->db->where('debit >', 0)
             ->from('person_ledger')
             ->count_all_results();
+    }
+
+    public function employees_without_open_office_loan()
+    {
+        return $this->db->select('eh.id, eh.first_name, eh.last_name, eh.phone, eh.address_line_1')
+            ->from('employee_history eh')
+            ->join('person_information pi', 'pi.employee_id = eh.id', 'left')
+            ->join('office_loan_details old', '(old.person_id = pi.person_id AND (old.principal_amount - IFNULL(old.total_paid, 0)) > 0)', 'left', false)
+            ->join('(SELECT person_id, SUM(debit) AS total_debit, SUM(credit) AS total_credit FROM person_ledger GROUP BY person_id) pls', 'pls.person_id = pi.person_id', 'left', false)
+            ->where('old.id IS NULL')
+            ->group_start()
+                ->where('pls.person_id IS NULL')
+                ->or_where('(IFNULL(pls.total_debit, 0) - IFNULL(pls.total_credit, 0)) <=', 0, false)
+            ->group_end()
+            ->order_by('eh.first_name', 'asc')
+            ->order_by('eh.last_name', 'asc')
+            ->group_by('eh.id')
+            ->get()
+            ->result();
+    }
+
+    public function employee_has_open_office_loan($employee_id)
+    {
+        if (empty($employee_id)) {
+            return false;
+        }
+
+        $person = $this->db->select('person_id')
+            ->from('person_information')
+            ->where('employee_id', $employee_id)
+            ->get()
+            ->row();
+
+        if (!$person) {
+            return false;
+        }
+
+        $open_detail = $this->db->select('id')
+            ->from('office_loan_details')
+            ->where('person_id', $person->person_id)
+            ->where('(principal_amount - IFNULL(total_paid, 0)) >', 0, false)
+            ->limit(1)
+            ->get()
+            ->num_rows() > 0;
+
+        if ($open_detail) {
+            return true;
+        }
+
+        $ledger_totals = $this->db->select('IFNULL(SUM(debit), 0) AS total_debit, IFNULL(SUM(credit), 0) AS total_credit', false)
+            ->from('person_ledger')
+            ->where('person_id', $person->person_id)
+            ->get()
+            ->row();
+
+        if ($ledger_totals) {
+            $outstanding = (float) $ledger_totals->total_debit - (float) $ledger_totals->total_credit;
+            if ($outstanding > 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 

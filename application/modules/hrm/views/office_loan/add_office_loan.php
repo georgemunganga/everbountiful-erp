@@ -27,6 +27,11 @@
                     </div>
                    <?php echo form_open_multipart('hrm/loan/bdtask_insert_office_loan',array('class' => 'form-vertical','id' => 'inflow_entry' ))?>
                     <div class="panel-body">
+                        <?php if (empty($employees)) { ?>
+                            <div class="alert alert-warning">
+                                <?php echo html_escape('All employees already have an active office loan or none are eligible for a new loan.'); ?>
+                            </div>
+                        <?php } ?>
                         <?php
                             $selected_channel = isset($schedule['payment_channel']) ? $schedule['payment_channel'] : 'cash';
                             $is_bank_channel  = (strpos($selected_channel, 'bank:') === 0);
@@ -35,7 +40,7 @@
                         <div class="form-group row">
                             <label for="employee_id" class="col-sm-3 col-form-label"><?php echo display('name') ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
-                                <select class="form-control" required name="employee_id" id="employee_id" tabindex="1">
+                                <select class="form-control" name="employee_id" id="employee_id" tabindex="1" <?php echo empty($employees) ? 'disabled' : 'required'; ?>>
                                     <option value=''><?php echo display('select_one')?></option>
                                   <?php if(!empty($employees)){foreach($employees as $employee){?>
                                     <option value="<?php echo $employee->id?>" data-phone="<?php echo html_escape($employee->phone);?>" data-address="<?php echo html_escape($employee->address_line_1);?>">
