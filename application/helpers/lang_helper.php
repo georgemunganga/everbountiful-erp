@@ -77,13 +77,6 @@ if (!function_exists('display')) {
  
 }
 
-function dd($array){
-    echo '<pre>';
-    print_r($array);
-    echo '</pre>';
-    exit;
-}
-
 if (!function_exists('addActivityLog')) {
 
     function addActivityLog($type, $action_name, $id, $table, $status=0, $data = null){

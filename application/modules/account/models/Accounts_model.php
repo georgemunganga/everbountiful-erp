@@ -4329,8 +4329,9 @@ public function fixed_assets()
             ->from('acc_coa')
             ->where('PHeadName','Cash at Bank')
             ->get()
-            ->result();   
+            ->result();
     }
+    
     public function pmethod_dropdown(){
         $data = $this->db->select('*')
                 ->from('acc_coa')

@@ -3708,101 +3708,113 @@ public function update_debit_voucher(){
 
     public function bdtask_payment_method_form($id = null)
     {
-       $data['title'] = display('add_payment_method');
-        #-------------------------------#
-        $this->form_validation->set_rules('HeadName',display('HeadName'),'required|max_length[200]');
+        $data['title'] = display('add_payment_method');
+        $this->form_validation->set_rules('HeadName', display('payment_method_name'), 'required|max_length[200]');
 
-  
+        $posted_head_name = trim($this->input->post('HeadName', true));
+        $posted_head_code = $this->input->post('HeadCode', true);
 
-            $data['pmethod'] = (object)$postData = [
-            'HeadName'     => $this->input->post('HeadName',TRUE),
-            'HeadCode'     => $this->input->post('HeadCode',TRUE),
-        ]; 
+        $current_method = null;
+        if (!empty($id)) {
+            $current_method = $this->accounts_model->payment_methoddata($id);
+        }
 
-              $coa = $this->payemntheadcode();
-           if($coa->HeadCode!=NULL){
-                $headcode=$coa->HeadCode+1;
-           }else{
-                $headcode="1020501";
-            }
+        $data['pmethod'] = (object) array(
+            'HeadName' => $posted_head_name,
+            'HeadCode' => $posted_head_code,
+        );
 
-            
-        $createby   = $this->session->userdata('id');
-        $createdate = date('Y-m-d H:i:s');
+        if (!$this->input->post() && $current_method) {
+            $data['pmethod'] = $current_method;
+        } elseif ($current_method && empty($posted_head_code)) {
+            $data['pmethod']->HeadCode = $current_method->HeadCode;
+        }
 
-            $bank_coa = [
-             'HeadCode'         => $headcode,
-             'HeadName'         => $this->input->post('HeadName',TRUE),
-             'PHeadName'        => 'Cash at Bank',
-             'Pheadcode'        =>  10205,
-             'HeadLevel'        => 4,
-             'IsActive'         => 1,
-             'IsTransaction'    => 0,
-             'IsGL'             => 0,
-             'isCashNature'     => 0,
-             'isBankNature'     => 1,
-             'HeadType'         => 'A',
-             'IsBudget'         => 0,     
-             'IsDepreciation'   => 0,     
-             'customer_id'      => 0,     
-             'supplier_id'      => 0,     
-             'bank_id'          => 0,     
-             'service_id'       => 0,     
-             'DepreciationRate' => 0,
-             'CreateBy'         => $createby,
-             'CreateDate'       => $createdate,
-             'UpdateBy'         => 0,
-             'UpdateDate'       => 0,
-             'isSubType'        => 0,
-             'subType'          => 1,
-             'isStock'          => 0,
-             'isFixedAssetSch'  => 0,
-             'noteNo'           => 0, 
-             'assetCode'        => 0,
-             'depCode'          => 0,
-        ];
-        #-------------------------------#
         if ($this->form_validation->run() === true) {
-            if (empty($id)) {
-          $check_exist_bank = $this->db->select('*')->from('acc_coa')->where('HeadName',$this->input->post('HeadName',TRUE))->get()->num_rows();
-             if(empty($id)){
-             if($check_exist_bank > 0){
-              $this->session->set_flashdata('exception', display('already_exist'));
-              redirect("add_payment_method");
-             }  
-             } 
-           
-             
-                if ($this->accounts_model->create_method($bank_coa)) {
-                  
-                  $this->session->set_flashdata('message', display('save_successfully'));
-                } else {
-                  $this->session->set_flashdata('exception', display('please_try_again'));
-                }
-                
-                redirect("payment_method_list");
-            } else {
-                
-                $up_coa = array(
-                'HeadName' => $this->input->post('HeadName',TRUE),
-                );
-                $this->db->where('HeadName',$this->input->post('old_name',TRUE))
-                         ->update('acc_coa',$up_coa);
-       
-                   $this->session->set_flashdata('message', display('update_successfully'));
-               
+            $existing_query = $this->db->select('HeadCode')
+                ->from('acc_coa')
+                ->where('PHeadName', 'Cash at Bank')
+                ->where('LOWER(HeadName)', strtolower($posted_head_name));
 
-                redirect("payment_method_list");
+            if (!empty($id) && $current_method && !empty($current_method->HeadCode)) {
+                $existing_query->where('HeadCode !=', $current_method->HeadCode);
             }
-            } else { 
-              if(!empty($id)){
-              $data['title']    = display('edit_payment_method');
-              $data['pmethod']  = $this->accounts_model->payment_methoddata($id); }
-              $data['module']   = "account";  
-              $data['page']     = "payment_method_form";  
-              echo Modules::run('template/layout', $data); 
-           
-            } 
+
+            $duplicate_found = $existing_query->limit(1)->get()->num_rows() > 0;
+
+            if ($duplicate_found) {
+                $this->session->set_flashdata('exception', display('already_exist'));
+                $redirect_target = empty($id) ? 'add_payment_method' : 'add_payment_method/' . $id;
+                redirect($redirect_target);
+            }
+
+            if (empty($id)) {
+                $coa = $this->payemntheadcode();
+                $next_head_code = ($coa && !empty($coa->HeadCode)) ? $coa->HeadCode + 1 : '1020501';
+
+                $created_by = $this->session->userdata('id');
+                $timestamp  = date('Y-m-d H:i:s');
+
+                $bank_coa = array(
+                    'HeadCode'         => $next_head_code,
+                    'HeadName'         => $posted_head_name,
+                    'PHeadName'        => 'Cash at Bank',
+                    'Pheadcode'        => 10205,
+                    'HeadLevel'        => 4,
+                    'IsActive'         => 1,
+                    'IsTransaction'    => 0,
+                    'IsGL'             => 0,
+                    'isCashNature'     => 0,
+                    'isBankNature'     => 1,
+                    'HeadType'         => 'A',
+                    'IsBudget'         => 0,
+                    'IsDepreciation'   => 0,
+                    'customer_id'      => 0,
+                    'supplier_id'      => 0,
+                    'bank_id'          => 0,
+                    'service_id'       => 0,
+                    'DepreciationRate' => 0,
+                    'CreateBy'         => $created_by,
+                    'CreateDate'       => $timestamp,
+                    'UpdateBy'         => 0,
+                    'UpdateDate'       => 0,
+                    'isSubType'        => 0,
+                    'subType'          => 1,
+                    'isStock'          => 0,
+                    'isFixedAssetSch'  => 0,
+                    'noteNo'           => 0,
+                    'assetCode'        => 0,
+                    'depCode'          => 0,
+                );
+
+                if ($this->accounts_model->create_method($bank_coa)) {
+                    $this->session->set_flashdata('message', display('save_successfully'));
+                } else {
+                    $this->session->set_flashdata('exception', display('please_try_again'));
+                }
+
+                redirect('payment_method_list');
+            }
+
+            $update_payload = array(
+                'HeadName' => $posted_head_name,
+            );
+
+            $this->db->where('HeadName', $this->input->post('old_name', true))
+                ->update('acc_coa', $update_payload);
+
+            $this->session->set_flashdata('message', display('update_successfully'));
+            redirect('payment_method_list');
+        }
+
+        if (!empty($id) && $current_method) {
+            $data['title']   = display('edit_payment_method');
+            $data['pmethod'] = $current_method;
+        }
+
+        $data['module'] = "account";
+        $data['page']   = "payment_method_form";
+        echo Modules::run('template/layout', $data);
     }
 
     public function payment_method_list()

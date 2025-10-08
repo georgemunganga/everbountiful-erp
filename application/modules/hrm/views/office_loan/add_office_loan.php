@@ -1,10 +1,10 @@
 
-<?php
-$loan_today = date('Y-m-d');
-$default_period_months = 12;
-$default_start_date = date('Y-m-d', strtotime('+1 month', strtotime($loan_today)));
-$default_end_date = date('Y-m-d', strtotime('+' . ($default_period_months - 1) . ' month', strtotime($default_start_date)));
-?>
+    <?php
+        $loan_today = date('Y-m-d');
+        $default_period_months = 12;
+        $default_start_date = date('Y-m-d', strtotime('+1 month', strtotime($loan_today)));
+        $default_end_date = date('Y-m-d', strtotime('+' . ($default_period_months - 1) . ' month', strtotime($default_start_date)));
+    ?>
         <div class="row">
             <div class="col-sm-12">
         <?php if($this->permission1->method('add_loan_payment','create')->access()){ ?>
@@ -27,6 +27,10 @@ $default_end_date = date('Y-m-d', strtotime('+' . ($default_period_months - 1) .
                     </div>
                    <?php echo form_open_multipart('hrm/loan/bdtask_insert_office_loan',array('class' => 'form-vertical','id' => 'inflow_entry' ))?>
                     <div class="panel-body">
+                        <?php
+                            $selected_channel = isset($schedule['payment_channel']) ? $schedule['payment_channel'] : 'cash';
+                            $is_bank_channel  = (strpos($selected_channel, 'bank:') === 0);
+                        ?>
 
                         <div class="form-group row">
                             <label for="employee_id" class="col-sm-3 col-form-label"><?php echo display('name') ?> <i class="text-danger">*</i></label>
@@ -73,10 +77,10 @@ $default_end_date = date('Y-m-d', strtotime('+' . ($default_period_months - 1) .
                             </div>
                         </div>
 
-                        <div class="form-group row" id="bank_div" style="<?php echo (isset($schedule['payment_channel']) && $schedule['payment_channel'] === 'bank') ? '' : 'display:none;';?>">
+                        <div class="form-group row" id="bank_div" style="<?php echo $is_bank_channel ? '' : 'display:none;';?>">
                             <label for="bank_id" class="col-sm-3 col-form-label"><?php echo display('bank'); ?> <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
-                               <select name="bank_id" class="form-control" id="bank_id" <?php echo (isset($schedule['payment_channel']) && $schedule['payment_channel'] === 'bank') ? 'required' : ''; ?> tabindex="6">
+                               <select name="bank_id" class="form-control" id="bank_id" <?php echo $is_bank_channel ? 'required' : ''; ?> tabindex="6">
                                     <option value=""><?php echo display('select_one');?></option>
                                     <?php if (!empty($bank_list)) { foreach ($bank_list as $bank) { ?>
                                         <option value="<?php echo html_escape($bank['bank_id']);?>"><?php echo html_escape($bank['bank_name']);?></option>
@@ -97,6 +101,28 @@ $default_end_date = date('Y-m-d', strtotime('+' . ($default_period_months - 1) .
                             <div class="col-sm-6">
                                 <input type="text" class="form-control datepicker" name="repayment_start_date" id="repayment_start_date" value="<?php echo html_escape(isset($schedule['repayment_start_date']) ? $schedule['repayment_start_date'] : '');?>" placeholder="YYYY-MM-DD" required tabindex="8"/>
                                 <small class="text-muted">Auto-calculated from the disbursement date; adjust if payroll timing differs.</small>
+                            </div>
+                        </div>
+
+                        <div class="row m-t-20">
+                            <div class="col-sm-10 col-sm-offset-1">
+                                <div class="well repayment-preview">
+                                    <h5 class="text-semibold"><?php echo display('repayment_schedule'); ?> Preview</h5>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <p class="m-b-5"><strong>Monthly Repayment:</strong> <span id="loan-helper-amount">0.00</span></p>
+                                            <p class="m-b-5"><strong><?php echo display('total'); ?> payback:</strong> <span id="loan-helper-total-payback">0.00</span></p>
+                                            <p class="m-b-5"><strong><?php echo display('repayment_period'); ?>:</strong> <span id="loan-helper-total-deductions">0</span></p>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p class="m-b-5"><strong>Schedule:</strong> <span id="loan-helper-schedule">Enter amount and period to preview deductions.</span></p>
+                                            <div id="loan-helper-dates" style="display:none;">
+                                                <p class="m-b-5"><strong>First deduction:</strong> <span id="loan-helper-first-date"></span></p>
+                                                <p class="m-b-0"><strong>Final deduction:</strong> <span id="loan-helper-final-date"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -128,6 +154,22 @@ $default_end_date = date('Y-m-d', strtotime('+' . ($default_period_months - 1) .
         </div>
 
         <script type="text/javascript">
+            function bank_paymetExpense(value) {
+                var isBank = value && value.indexOf('bank:') === 0;
+                var bankDiv = document.getElementById('bank_div');
+                var bankSelect = document.getElementById('bank_id');
+                if (bankDiv) {
+                    bankDiv.style.display = isBank ? '' : 'none';
+                }
+                if (bankSelect) {
+                    bankSelect.required = !!isBank;
+                    bankSelect.disabled = !isBank;
+                    if (!isBank) {
+                        bankSelect.value = '';
+                    }
+                }
+            }
+
             (function() {
                 var employeeSelect = document.getElementById('employee_id');
                 var phoneInput = document.getElementById('phone');
@@ -254,6 +296,7 @@ $default_end_date = date('Y-m-d', strtotime('+' . ($default_period_months - 1) .
                 var endInput = document.getElementById('repayment_end_date');
                 var amountHelper = document.getElementById('loan-helper-amount');
                 var scheduleHelper = document.getElementById('loan-helper-schedule');
+                var totalPaybackElement = document.getElementById('loan-helper-total-payback');
                 if (!amountInput || !periodInput || !amountHelper || !scheduleHelper) {
                     return;
                 }
@@ -325,6 +368,9 @@ $default_end_date = date('Y-m-d', strtotime('+' . ($default_period_months - 1) .
                     var period = parseInt(periodInput.value, 10);
                     var monthly = (!isNaN(amount) && amount > 0 && !isNaN(period) && period > 0) ? amount / period : 0;
                     amountHelper.textContent = formatCurrency(monthly);
+                    if (totalPaybackElement) {
+                        totalPaybackElement.textContent = formatCurrency(!isNaN(amount) && amount > 0 ? amount : 0);
+                    }
 
                     // Update total deductions count
                     var totalDeductionsElement = document.getElementById('loan-helper-total-deductions');
@@ -367,6 +413,11 @@ $default_end_date = date('Y-m-d', strtotime('+' . ($default_period_months - 1) .
                 }
 
                 updateHelper();
+
+                var paymentTypeSelect = document.getElementById('payment_type');
+                if (paymentTypeSelect) {
+                    bank_paymetExpense(paymentTypeSelect.value);
+                }
             })();
         </script>
    

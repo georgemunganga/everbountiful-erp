@@ -26,6 +26,36 @@
             </a>
         </li>
 
+        <li class="treeview <?php echo in_array($this->uri->segment(1), array('sheds', 'livestock-groups', 'livestocks', 'productions', 'feeds', 'feed-usages')) ? "active" : null; ?>">
+            <a href="#">
+                <i class="fa fa-paw"></i>
+                <span><?php echo display('livestock_management') ?: 'Livestock Management'; ?></span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+            </a>
+            <ul class="treeview-menu">
+                <li class="<?php echo ($this->uri->segment(1) == 'sheds') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('sheds'); ?>"><?php echo display('sheds') ?: 'Sheds'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'productions') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('productions'); ?>"><?php echo display('productions') ?: 'Productions'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'livestock-groups') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('livestock-groups'); ?>"><?php echo display('livestock_groups') ?: 'Livestock Groups'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'livestocks') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('livestocks'); ?>"><?php echo display('livestocks') ?: 'Livestocks'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'feeds') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('feeds'); ?>"><?php echo display('feeds') ?: 'Feeds'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'feed-usages') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('feed-usages'); ?>"><?php echo display('feed_usages') ?: 'Feed Usages'; ?></a>
+                </li>
+            </ul>
+        </li>
+
         <!-- Invoice menu start -->
         <?php if ($this->permission1->method('new_invoice', 'create')->access() || $this->permission1->method('manage_invoice', 'read')->access() || $this->permission1->method('pos_invoice', 'create')->access() || $this->permission1->method('gui_pos', 'create')->access() || $this->permission1->method('terms_list', 'read')->access()  || $this->permission1->method('terms_add', 'read')->access()) { ?>
             <li class="treeview <?php

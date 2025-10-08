@@ -26,8 +26,8 @@
                                         <th><?php echo display('employee_name'); ?></th>
                                         <th><?php echo display('phone'); ?></th>
                                         <th class="text-right"><?php echo display('loan_amount'); ?></th>
-                                        <th class="text-right"><?php echo display('paid'); ?></th>
-                                        <th class="text-right"><?php echo display('outstanding'); ?></th>
+                                        <th class="text-right">Paid</th>
+                                        <th class="text-right">Outstanding</th>
                                         <th><?php echo display('details') ?></th>
                                         <th><?php echo display('action') ?></th>
                                     </tr>
