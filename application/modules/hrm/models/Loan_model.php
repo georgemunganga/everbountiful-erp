@@ -238,11 +238,69 @@ class Loan_model extends CI_Model {
     	$this->db->select('*');
         $this->db->from('person_information');
         $this->db->where('status', 1);
-        $query = $this->db->get();
-        if ($query->num_rows() > 0) {
-            return $query->result_array();
+        $this->db->where('employee_id IS NOT NULL', null, false);
+        return $this->db->order_by('person_name', 'asc')->get()->result_array();
+    }
+
+    public function get_person_active_office_loans($person_id)
+    {
+        if (empty($person_id)) {
+            return array();
         }
-        return false;
+
+        return $this->db->select('old.*, (old.principal_amount - IFNULL(old.total_paid, 0)) AS remaining_balance')
+            ->from('office_loan_details old')
+            ->where('old.person_id', $person_id)
+            ->where('(old.principal_amount - IFNULL(old.total_paid, 0)) >', 0)
+            ->order_by('old.next_due_date IS NULL', 'asc', false)
+            ->order_by('old.next_due_date', 'asc')
+            ->order_by('old.disbursement_date', 'asc')
+            ->get()
+            ->result();
+    }
+
+    public function apply_office_loan_payment($transaction_id, $amount, $payment_date)
+    {
+        if (empty($transaction_id) || $amount <= 0) {
+            return false;
+        }
+
+        $loan = $this->get_office_loan_detail($transaction_id);
+        if (!$loan) {
+            return false;
+        }
+
+        $remaining = max(0.0, floatval($loan->principal_amount) - floatval($loan->total_paid));
+        if ($remaining <= 0.0) {
+            return false;
+        }
+
+        $applied_amount = min($remaining, $amount);
+        $new_total_paid = floatval($loan->total_paid) + $applied_amount;
+        if ($new_total_paid > floatval($loan->principal_amount)) {
+            $new_total_paid = floatval($loan->principal_amount);
+        }
+
+        $next_due_date = null;
+        if ($new_total_paid < floatval($loan->principal_amount)) {
+            $base_date = $loan->next_due_date ? $loan->next_due_date : $loan->repayment_start_date;
+            if (empty($base_date) || strtotime($base_date) < strtotime($payment_date)) {
+                $base_date = $payment_date;
+            }
+            $candidate = date('Y-m-d', strtotime('+1 month', strtotime($base_date)));
+            if (!empty($loan->repayment_end_date) && strtotime($candidate) > strtotime($loan->repayment_end_date)) {
+                $candidate = $loan->repayment_end_date;
+            }
+            $next_due_date = $candidate;
+        }
+
+        $update = array(
+            'total_paid'          => number_format($new_total_paid, 2, '.', ''),
+            'last_deduction_date' => $payment_date,
+            'next_due_date'       => $next_due_date,
+        );
+
+        return $this->db->where('transaction_id', $transaction_id)->update('office_loan_details', $update);
     }
 
         public function select_person_by_id($person_id) {

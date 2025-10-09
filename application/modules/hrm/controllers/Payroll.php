@@ -738,255 +738,252 @@ class Payroll extends MX_Controller {
 		exit;
 	}
 
-	public function employee_salary_generate(){
-
+	public function employee_salary_generate()
+	{
 		$this->permission1->method('employee_salary_generate','read')->access();
-		
-		$data['title'] = display('selectionlist'); 
-		#-------------------------------# 
-		$this->form_validation->set_rules('name',display('salar_month'),'required|max_length[50]');
-		
-		#-------------------------------#
+
+		$this->Payroll_model->ensure_salary_group_support();
+
+		$data['title'] = display('selectionlist');
+		$this->form_validation->set_rules('salary_group_id', 'Salary Group', 'required|integer');
+		$this->form_validation->set_rules('name', display('salar_month'), 'required');
+
 		if ($this->form_validation->run() === true) {
-			$employee = $this->db->select('*')->from('employee_history')->get()->result();
-			list($month,$year) = explode(' ',$this->input->post('name',TRUE));
-			
-			$query =$this->db->select('*')->from('gmb_salary_sheet_generate')->where('name',$this->input->post('name',TRUE))->get()->num_rows();
-		
-			if ($query > 0) {
-				
-				$this->session->set_flashdata(array('exception' => 'The Salary of '.$month. ' Already Generated'));
-				
+			$salary_date_input = trim($this->input->post('name', true));
+			$group_id = (int) $this->input->post('salary_group_id', true);
+			$group_info = $this->Payroll_model->get_salary_group($group_id);
+
+			if (empty($group_info)) {
+				$this->session->set_flashdata('exception', 'Selected salary group was not found.');
 				redirect(base_url('employee_salary_generate'));
 			}
-			
-			
-			switch ($month)
-			{
-				case "January":
-					$month = '1';
-					break;
-				case "February":
-					$month = '2';
-					break;
-				case "March":
-					$month = '3';
-					break;
-				case "April":
-					$month = '4';
-					break;
-				case "May":
-					$month = '5';
-					break;
-				case "June":
-					$month = '6';
-					break;
-				case "July":
-					$month = '7';
-					break;
-				case "August":
-					$month = '8';
-					break;
-				case "September":
-					$month = '9';
-					break;
-				case "October":
-					$month = '10';
-					break;
-				case "November":
-					$month = '11';
-					break;
-				case "December":
-					$month = '12';
-					break;
+
+			$salary_date_obj = DateTime::createFromFormat('Y-m-d', $salary_date_input);
+			if ($salary_date_obj === false) {
+				$this->session->set_flashdata('exception', 'Please select a valid salary date.');
+				redirect(base_url('employee_salary_generate'));
 			}
-			$fdate = $year.'-'.$month.'-'.'1';
-			$lastday = date('t',strtotime($fdate));
-			$edate = $year.'-'.$month.'-'.$lastday;
-			$startd    = $fdate;
-			
-			$ab=date('Y-m-d');
-			$postData = [
-				'name'          =>  $this->input->post('name',true),
-				'gdate'         =>  $ab,
-				'start_date'    =>  $startd, 
-				'end_date' 	    =>  $edate, 
-				'generate_by'   =>  $this->session->userdata('id'), 
-			];
-			
+
+			$salary_month_raw = $salary_date_obj->format('F Y');
+			$pay_date = $salary_date_obj->format('Y-m-d');
+
+			$existing_sheet = $this->db->select('ssg_id')
+				->from('gmb_salary_sheet_generate')
+				->where('name', $salary_month_raw)
+				->where('salary_group_id', $group_id)
+				->limit(1)
+				->get()
+				->num_rows();
+
+			if ($existing_sheet > 0) {
+				$this->session->set_flashdata('exception', 'Salary for ' . $salary_month_raw . ' already generated for ' . $group_info->group_name . '.');
+				redirect(base_url('employee_salary_generate'));
+			}
+
+			$employees = $this->Payroll_model->get_salary_group_employees($group_id);
+			if (empty($employees)) {
+				$this->session->set_flashdata('exception', 'No employees assigned to the selected salary group.');
+				redirect(base_url('employee_salary_generate'));
+			}
+
+			$fdate = $salary_date_obj->format('Y-m-01');
+			$edate = $salary_date_obj->format('Y-m-t');
+
+			$postData = array(
+				'name'            => $salary_month_raw,
+				'salary_group_id' => $group_id,
+				'gdate'           => date('Y-m-d'),
+				'pay_date'        => $pay_date,
+				'start_date'      => $fdate,
+				'end_date'        => $edate,
+				'generate_by'     => $this->session->userdata('id'),
+			);
+
 			$this->db->insert('gmb_salary_sheet_generate', $postData);
 			$generate_id = $this->db->insert_id();
-			// keepting activity logs for salary generate
 			addActivityLog("salary generate", "create", $generate_id, "gmb_salary_sheet_generate", 2, $postData);
 
-			
-			if (sizeof($employee) > 0)
-			foreach($employee as $key=>$value)
-			{ 
-				$aAmount   = $this->db->select('hrate as gross_salary,rate_type as sal_type,id as employee_id')->from('employee_history')->where('id', $value->id)->get()->row();
-				$Amount    = $aAmount->gross_salary;
-				$startd    = $fdate;
-				$end       = $edate;
-				$times     = $this->db->select('SUM(TIME_TO_SEC(staytime)) AS staytime')->from('attendance')->where('date BETWEEN "'. date('Y-m-d', strtotime($startd)). '" and "'. date('Y-m-d', strtotime($end)).'"')->where("employee_id" ,$value->id )->get()->row()->staytime;
-				$wormin    = ($times/60);
-				$worhour   = $wormin/60;
-				if($aAmount->sal_type == 1){
-				$dStart    = new DateTime($startd);
-				$dEnd      = new DateTime($end);
-				$dDiff     = $dStart->diff($dEnd);
-				$numberofdays =  $dDiff->days+1;
-				$totamount = $Amount*$worhour;
-				$PYI       = ($totamount/$numberofdays)*365;
-				$PossibleYearlyIncome = round($PYI);
-				$this->db->select('*');
-				$this->db->from('payroll_tax_setup');
-				$this->db->where("start_amount <",$PossibleYearlyIncome);
-				$query = $this->db->get();
-				$taxrate = $query->result_array();
-				$TotalTax = 0;
-				foreach($taxrate as $row){
-				
-					if($PossibleYearlyIncome > $row['start_amount'] && $PossibleYearlyIncome > $row['end_amount']){
-						$diff=$row['end_amount']-$row['start_amount'];
+			$salary_generate_success = false;
+
+			foreach ($employees as $employee) {
+				$employee_id = isset($employee->id) ? $employee->id : (isset($employee->employee_id) ? $employee->employee_id : null);
+				if (empty($employee_id)) {
+					continue;
+				}
+
+				$aAmount = $this->db->select('hrate as gross_salary,rate_type as sal_type,id as employee_id')
+					->from('employee_history')
+					->where('id', $employee_id)
+					->get()
+					->row();
+
+				if (empty($aAmount)) {
+					continue;
+				}
+
+				$Amount = $aAmount->gross_salary;
+				$startd = $fdate;
+				$end = $edate;
+				$times = $this->db->select('SUM(TIME_TO_SEC(staytime)) AS staytime')
+					->from('attendance')
+					->where('date BETWEEN "' . date('Y-m-d', strtotime($startd)) . '" and "' . date('Y-m-d', strtotime($end)) . '"')
+					->where("employee_id", $employee_id)
+					->get()
+					->row()
+					->staytime;
+				$wormin = ($times / 60);
+				$worhour = $wormin / 60;
+				if ($aAmount->sal_type == 1) {
+					$dStart = new DateTime($startd);
+					$dEnd = new DateTime($end);
+					$dDiff = $dStart->diff($dEnd);
+					$numberofdays = $dDiff->days + 1;
+					$totamount = $Amount * $worhour;
+					$PYI = ($totamount / $numberofdays) * 365;
+					$PossibleYearlyIncome = round($PYI);
+					$this->db->select('*');
+					$this->db->from('payroll_tax_setup');
+					$this->db->where("start_amount <", $PossibleYearlyIncome);
+					$query = $this->db->get();
+					$taxrate = $query->result_array();
+					$TotalTax = 0;
+					foreach ($taxrate as $row) {
+						if ($PossibleYearlyIncome > $row['start_amount'] && $PossibleYearlyIncome > $row['end_amount']) {
+							$diff = $row['end_amount'] - $row['start_amount'];
+						}
+						if ($PossibleYearlyIncome > $row['start_amount'] && $PossibleYearlyIncome < $row['end_amount']) {
+							$diff = $PossibleYearlyIncome - $row['start_amount'];
+						}
+						$tax = (($row['rate'] / 100) * $diff);
+						$TotalTax += $tax;
 					}
-					if($PossibleYearlyIncome > $row['start_amount'] && $PossibleYearlyIncome < $row['end_amount']){
-						$diff=$PossibleYearlyIncome-$row['start_amount'];
-					}
-					$tax=(($row['rate']/100)*$diff);
-					$TotalTax += $tax;  
-				} 
-				$TaxAmount = ($TotalTax/365)*$numberofdays;
-		
-				$netAmount = $totamount;
-		
-				}else if($aAmount->sal_type == 2){
+					$TaxAmount = ($TotalTax / 365) * $numberofdays;
+					$netAmount = $totamount;
+				} elseif ($aAmount->sal_type == 2) {
+					$netAmount = $Amount;
+				} else {
 					$netAmount = $Amount;
 				}
 
-				/* Starts of loan and salary advance deduction*/
-				$salary_advance = 0.0;
-				$salary_advance_id = null;
-				$salary_advance_respo = $this->Payroll_model->salary_advance_deduction($value->id,$this->input->post('name',true));
-				if($salary_advance_respo){
-
-					$salary_advance = floatval($salary_advance_respo->amount);
-					$salary_advance_id = $salary_advance_respo->id;
+				$office_loan_deduct = 0.0;
+				$office_loan_transaction_id = null;
+				$office_loan_respo = $this->Payroll_model->office_loan_installment_deduction($employee_id, $pay_date);
+				if ($office_loan_respo) {
+					$remaining_office_balance = max(0.0, floatval($office_loan_respo->remaining_balance));
+					$office_installment = isset($office_loan_respo->payable_amount)
+						? floatval($office_loan_respo->payable_amount)
+						: floatval($office_loan_respo->monthly_installment);
+					$office_loan_deduct = max(0.0, min($office_installment, $remaining_office_balance));
+					$office_loan_transaction_id = $office_loan_respo->transaction_id;
 				}
 
-				$net_salary = ($netAmount - $salary_advance);
+				$available_for_deductions = max(0.0, $netAmount);
+				if ($office_loan_deduct > $available_for_deductions) {
+					$office_loan_deduct = $available_for_deductions;
+				}
 
-				$workingper   = $this->db->select('COUNT(date) AS date')->from('attendance')->where('date BETWEEN "'. date('Y-m-d', strtotime($startd)). '" and "'. date('Y-m-d', strtotime($end)).'"')->where("employee_id" ,$value->id )->get()->row()->date;
-				
+				$net_salary = $netAmount - $office_loan_deduct;
+				if ($net_salary < 0) {
+					$net_salary = 0.0;
+				}
+
 				$paymentData = array(
-					'sal_month_year'                  => $this->input->post('name',true),
-					'employee_id'                     => $value->id,
-					'tin_no'          		          => 0,
-					'total_attendance'                => 0, //tagret_hours / days
-					'total_count'          	          => $worhour?$worhour:0, //weorked_hours / days
-					'atten_allowance'          	      => 0,
-					'gross'                           => $value->hrate,
-					'basic'                           => $value->hrate,
-					'transport'                       => 0,
-					'house_rent'                      => 0,
-					'medical'                         => 0,
-					'other_allowance'                 => 0,
-					'gross_salary'                    => $netAmount,
-					'income_tax'                      => 0,
-					'soc_sec_npf_tax'                 => 0,
-					'employer_contribution'           => 0,
-					'icf_amount'    		          => 0,
-					'loan_deduct'                     => 0,
-					'loan_id'                         => 0,
-					'salary_advance'                  => $salary_advance,
-					'salary_adv_id'                   => $salary_advance_id,
-					'lwp'                   		  => 0,
-					'pf'                   			  => 0,
-					'stamp'                   		  => 0,
-					'net_salary'                      => $net_salary,
-					'createDate'                      => date('Y-m-d'),
-					'createBy'                        => $this->session->userdata('id'),
-					'medical_benefit'        		  => 0,
-					'family_benefit'        		  => 0,
-					'transportation_benefit'          => 0,
-					'other_benefit'        			  => 0,
-					'normal_working_hrs_month'        => 0,
-					'actual_working_hrs_month'        => 0,
-					'hourly_rate_basic' 	          => 0,
-					'hourly_rate_trasport_allowance'  => 0,
-					'basic_salary_pro_rated'   		  => 0,
-					'transport_allowance_pro_rated'   => 0,
-					'basic_transport_allowance'		  => 0,
+					'salary_group_id'               => $group_id,
+					'sal_month_year'                => $salary_month_raw,
+					'employee_id'                   => $employee_id,
+					'tin_no'                        => 0,
+					'total_attendance'              => 0,
+					'total_count'                   => $worhour ? $worhour : 0,
+					'atten_allowance'               => 0,
+					'gross'                         => isset($employee->hrate) ? $employee->hrate : $Amount,
+					'basic'                         => isset($employee->hrate) ? $employee->hrate : $Amount,
+					'transport'                     => 0,
+					'house_rent'                    => 0,
+					'medical'                       => 0,
+					'other_allowance'               => 0,
+					'gross_salary'                  => $netAmount,
+					'income_tax'                    => 0,
+					'soc_sec_npf_tax'               => 0,
+					'employer_contribution'         => 0,
+					'icf_amount'                    => 0,
+					'loan_deduct'                   => 0,
+					'loan_id'                       => 0,
+					'office_loan_deduct'            => $office_loan_deduct,
+					'office_loan_transaction_id'    => $office_loan_transaction_id,
+					'lwp'                           => 0,
+					'pf'                            => 0,
+					'stamp'                         => 0,
+					'net_salary'                    => $net_salary,
+					'createDate'                    => $pay_date,
+					'createBy'                      => $this->session->userdata('id'),
+					'medical_benefit'               => 0,
+					'family_benefit'                => 0,
+					'transportation_benefit'        => 0,
+					'other_benefit'                 => 0,
+					'normal_working_hrs_month'      => 0,
+					'actual_working_hrs_month'      => 0,
+					'hourly_rate_basic'             => 0,
+					'hourly_rate_trasport_allowance'=> 0,
+					'basic_salary_pro_rated'        => 0,
+					'transport_allowance_pro_rated' => 0,
+					'basic_transport_allowance'     => 0,
 				);
 
-				if($aAmount->employee_id){
-					
-					$this->db->insert('gmb_salary_generate', $paymentData);
-				
-					
-				}
+				$inserted = $this->db->insert('gmb_salary_generate', $paymentData);
+				if ($inserted) {
+					$salary_generate_success = true;
 
-				
-				if($salary_generate_respo){
-
-					// Update salary advance afetr applying it to salary generate
-					if($salary_advance_respo){
-
-						$sala_adv_data = array(
-							'id'              => $salary_advance_id,
-							'release_amount'  => $salary_advance,
-							'UpdateDate'      => date('Y-m-d'),
-							'UpdateBy'        => $this->session->userdata('id'),
-						);
-
-						$salary_advanc_paid_respo = $this->Payroll_model->update_sal_advance($sala_adv_data);
+					if ($office_loan_transaction_id && $office_loan_deduct > 0) {
+						$this->Payroll_model->update_office_loan_deduction(array(
+							'transaction_id'   => $office_loan_transaction_id,
+							'deduction_amount' => $office_loan_deduct,
+							'deduction_date'   => $pay_date,
+						));
 					}
 				}
-
-				
 			}
-			$this->session->set_flashdata('message', display('successfully_saved_saletup'));
-				redirect("employee_salary_generate");
-			
-		}else {
-			
-		
 
-		$data['title']  = display('create');
-		$config["base_url"] = base_url('hrm/Payroll/employee_salary_generate');
-		$config["total_rows"]  = $this->db->count_all('gmb_salary_sheet_generate');
-		$config["per_page"]    = 3;
-		$config["uri_segment"] = 4;
-		$config["last_link"] = "Last"; 
-		$config["first_link"] = "First"; 
-		$config['next_link'] = 'Next';
-		$config['prev_link'] = 'Prev';  
-		$config['full_tag_open'] = "<ul class='pagination col-xs pull-right'>";
-		$config['full_tag_close'] = "</ul>";
-		$config['num_tag_open'] = '<li>';
-		$config['num_tag_close'] = '</li>';
-		$config['cur_tag_open'] = "<li class='disabled'><li class='active'><a href='#'>";
-		$config['cur_tag_close'] = "<span class='sr-only'></span></a></li>";
-		$config['next_tag_open'] = "<li>";
-		$config['next_tag_close'] = "</li>";
-		$config['prev_tag_open'] = "<li>";
-		$config['prev_tagl_close'] = "</li>";
-		$config['first_tag_open'] = "<li>";
-		$config['first_tagl_close'] = "</li>";
-		$config['last_tag_open'] = "<li>";
-		$config['last_tagl_close'] = "</li>";
-		/* ends of bootstrap */
-		$this->pagination->initialize($config);
-		$page = ($this->uri->segment(4)) ? $this->uri->segment(4) : 0;
-		$data["links"] = $this->pagination->create_links();
-		$data['module'] = "hrm";
-		$data['page']   = "employee_salary/salary_gen_form"; 
-		
-		$data['salgen'] = $this->Payroll_model->gmb_salary_generateView($config["per_page"], $page);
-		
-		echo Modules::run('template/layout', $data);   
-        
+			if ($salary_generate_success) {
+				$this->session->set_flashdata('message', display('successfully_saved_saletup'));
+			} else {
+				$this->session->set_flashdata('exception', 'Salary sheet created, but no employee salaries were generated.');
+			}
+
+			redirect(base_url('employee_salary_generate'));
+		} else {
+			$data['title']  = display('create');
+			$config["base_url"] = base_url('hrm/Payroll/employee_salary_generate');
+			$config["total_rows"]  = $this->db->count_all('gmb_salary_sheet_generate');
+			$config["per_page"]    = 3;
+			$config["uri_segment"] = 4;
+			$config["last_link"] = "Last";
+			$config["first_link"] = "First";
+			$config['next_link'] = 'Next';
+			$config['prev_link'] = 'Prev';
+			$config['full_tag_open'] = "<ul class='pagination col-xs pull-right'>";
+			$config['full_tag_close'] = "</ul>";
+			$config['num_tag_open'] = '<li>';
+			$config['num_tag_close'] = '</li>';
+			$config['cur_tag_open'] = "<li class='disabled'><li class='active'><a href='#'>";
+			$config['cur_tag_close'] = "<span class='sr-only'></span></a></li>";
+			$config['next_tag_open'] = "<li>";
+			$config['next_tag_close'] = "</li>";
+			$config['prev_tag_open'] = "<li>";
+			$config['prev_tagl_close'] = "</li>";
+			$config['first_tag_open'] = "<li>";
+			$config['first_tagl_close'] = "</li>";
+			$config['last_tag_open'] = "<li>";
+			$config['last_tagl_close'] = "</li>";
+			$this->pagination->initialize($config);
+			$page = ($this->uri->segment(4)) ? $this->uri->segment(4) : 0;
+			$data["links"] = $this->pagination->create_links();
+			$data['module'] = "hrm";
+			$data['page']   = "employee_salary/salary_gen_form";
+			$data['salary_groups'] = $this->Payroll_model->get_salary_groups(true);
+			$data['salgen'] = $this->Payroll_model->gmb_salary_generateView($config["per_page"], $page);
+			echo Modules::run('template/layout', $data);
 		}
-    }
+	}
 	public function employee_salary_generate_misor()
 	{ 
 
@@ -1102,15 +1099,7 @@ class Payroll extends MX_Controller {
 						}
 						/* End  of tax calculation*/
 
-						/* Starts of loan and salary advance deduction*/
-						$salary_advance = 0.0;
-						$salary_advance_id = null;
-						$salary_advance_respo = $this->Payroll_model->salary_advance_deduction($emp_id,$this->input->post('name',true));
-						if($salary_advance_respo){
-
-							$salary_advance = floatval($salary_advance_respo->amount);
-							$salary_advance_id = $salary_advance_respo->id;
-						}
+						/* Starts of loan deduction*/
 						$loan_deduct = 0.0;
 						$loan_id = null;
 						$loan_installment_respo = $this->Payroll_model->loan_installment_deduction($emp_id);
@@ -1137,7 +1126,7 @@ class Payroll extends MX_Controller {
 						/*Net salary calculation*/
 						$net_salary = 0.0;
 						$total_deductions =  0.0;
-						$total_deductions = ($state_income_tax + $soc_sec_npf_tax + $loan_deduct + $salary_advance + $office_loan_deduct);
+						$total_deductions = ($state_income_tax + $soc_sec_npf_tax + $loan_deduct + $office_loan_deduct);
 						$net_salary = ($gross_salary - $total_deductions);
 
 						/*Ends*/
@@ -1159,8 +1148,6 @@ class Payroll extends MX_Controller {
 							'loan_id'                         => $loan_id,
 							'office_loan_deduct'              => $office_loan_deduct,
 							'office_loan_transaction_id'      => $office_loan_transaction_id,
-							'salary_advance'                  => $salary_advance,
-							'salary_adv_id'                   => $salary_advance_id,
 							'net_salary'                      => $net_salary,
 							'sal_month_year'                  => $this->input->post('name',true),
 							'createDate'                      => date('Y-m-d'),
@@ -1181,20 +1168,6 @@ class Payroll extends MX_Controller {
 						$salary_generate_respo = $this->db->insert('gmb_salary_generate', $paymentData);
 
 						if($salary_generate_respo){
-
-							// Update salary advance afetr applying it to salary generate
-							if($salary_advance_respo){
-
-								$sala_adv_data = array(
-									'id'              => $salary_advance_id,
-									'release_amount'  => $salary_advance,
-									'UpdateDate'      => date('Y-m-d'),
-									'UpdateBy'        => $this->session->userdata('id'),
-								);
-
-								$salary_advanc_paid_respo = $this->Payroll_model->update_sal_advance($sala_adv_data);
-							}
-
 							// Update loan afetr applying it to salary generate
 							if($loan_installment_respo){
 
@@ -1291,25 +1264,6 @@ class Payroll extends MX_Controller {
 
 			$this->session->set_flashdata('exception',"Can not be deleted as it's already approved !");
 			redirect(base_url('employee_salary_generate'));
-		}
-
-		// Start of revrsing loan and salary advance amount if applied for any employee salary...for the month
-		$salaries = $this->db->select('id,loan_deduct,loan_id,salary_advance,salary_adv_id')->from('gmb_salary_generate')->where('sal_month_year',$sal_name)->get()->result();
-
-		foreach ($salaries as $key => $row) {
-			
-			// Salary advance data
-			if(floatval($row->salary_advance) > 0){
-				// Get Salary advance data
-				$salary_adv_data = $this->db->select('*')->from('gmb_salary_advance')->where('id',$row->salary_adv_id)->get()->row();
-				// Deduction Salary advance data
-				$salary_advance = floatval($salary_adv_data->release_amount) - floatval($row->salary_advance);
-				$salary_advance_post_data = array(
-						'release_amount' => $salary_advance,
-				);
-				// Update Salary advance data
-				$this->db->where('id', $row->salary_adv_id)->update("gmb_salary_advance", $salary_advance_post_data);
-			}
 		}
 
 		// Finally delete all salaries from gmb_salary_generate table
@@ -1501,20 +1455,132 @@ class Payroll extends MX_Controller {
         redirect('salary_components');
     }
 
-    public function delete_salary_component($id = null)
-    {
-        $this->permission1->method('manage_salary_setup','delete')->access();
+	public function delete_salary_component($id = null)
+	{
+		$this->permission1->method('manage_salary_setup','delete')->access();
 
-        $component_id = $id ?: $this->input->post('component_id', true);
+		$component_id = $id ?: $this->input->post('component_id', true);
 
-        if (empty($component_id) || !$this->Payroll_model->delete_salary_component($component_id)) {
-            $this->session->set_flashdata('exception', display('please_try_again'));
-        } else {
-            $this->session->set_flashdata('message', display('delete_successfully'));
-        }
+		if (empty($component_id) || !$this->Payroll_model->delete_salary_component($component_id)) {
+			$this->session->set_flashdata('exception', display('please_try_again'));
+		} else {
+			$this->session->set_flashdata('message', display('delete_successfully'));
+		}
 
-        redirect('salary_components');
-    }
+		redirect('salary_components');
+	}
+
+	public function salary_groups()
+	{
+		$this->permission1->method('manage_salary_setup','read')->access();
+
+		$this->Payroll_model->ensure_salary_group_support();
+
+		$data['title'] = 'Salary Groups';
+		$data['module'] = 'hrm';
+		$data['page'] = 'payroll/salary_groups';
+
+		$groups = $this->Payroll_model->get_salary_groups();
+		$assignments = array();
+		if (!empty($groups)) {
+			foreach ($groups as $group) {
+				$assignments[$group->id] = $this->Payroll_model->get_salary_group_assignments($group->id);
+			}
+		}
+
+		$data['groups'] = $groups;
+		$data['group_assignments'] = $assignments;
+		$data['employees'] = $this->Payroll_model->get_all_employees_for_groups();
+		$data['components'] = $this->Payroll_model->get_salary_components(false);
+		$data['tax_slabs'] = $this->db->table_exists('hrm_tax_slabs') ? $this->Payroll_model->get_tax_slabs() : array();
+
+		echo Modules::run('template/layout', $data);
+	}
+
+	public function save_salary_group()
+	{
+		$group_id = $this->input->post('group_id', true);
+		$is_update = !empty($group_id);
+
+		$this->permission1->method('manage_salary_setup', $is_update ? 'update' : 'create')->access();
+		$this->Payroll_model->ensure_salary_group_support();
+
+		$this->form_validation->set_rules('group_name', 'Group Name', 'required|max_length[100]');
+		$this->form_validation->set_rules('status', 'Status', 'required|in_list[0,1]');
+		$this->form_validation->set_rules('description', 'Description', 'max_length[500]');
+
+		if ($this->form_validation->run() === false) {
+			$this->session->set_flashdata('exception', strip_tags(validation_errors()));
+			redirect('salary_groups');
+		}
+
+		$employee_ids = $this->normalize_ids($this->input->post('employee_ids', true));
+		if (empty($employee_ids)) {
+			$this->session->set_flashdata('exception', 'Please select at least one employee.');
+			redirect('salary_groups');
+		}
+
+		$component_ids = $this->normalize_ids($this->input->post('component_ids', true));
+		$tax_slab_ids = $this->normalize_ids($this->input->post('tax_slab_ids', true));
+
+		$group_data = array(
+			'group_name'  => $this->input->post('group_name', true),
+			'description' => $this->input->post('description', true),
+			'status'      => (int) $this->input->post('status', true),
+		);
+
+		$timestamp = date('Y-m-d H:i:s');
+		$user_id = $this->session->userdata('id');
+		$success = false;
+
+		if ($is_update) {
+			$group_data['updated_by'] = $user_id;
+			$group_data['updated_at'] = $timestamp;
+			$success = $this->Payroll_model->update_salary_group($group_id, $group_data, $employee_ids, $component_ids, $tax_slab_ids);
+		} else {
+			$group_data['created_by'] = $user_id;
+			$group_data['created_at'] = $timestamp;
+			$new_id = $this->Payroll_model->create_salary_group($group_data, $employee_ids, $component_ids, $tax_slab_ids);
+			$success = (bool) $new_id;
+		}
+
+		if ($success) {
+			$this->session->set_flashdata('message', $is_update ? display('successfully_updated') : display('successfully_saved'));
+		} else {
+			$this->session->set_flashdata('exception', display('please_try_again'));
+		}
+
+		redirect('salary_groups');
+	}
+
+	public function delete_salary_group($id = null)
+	{
+		$this->permission1->method('manage_salary_setup','delete')->access();
+
+		$group_id = $id ?: $this->input->post('group_id', true);
+		$group_id = (int) $group_id;
+
+		if ($group_id <= 0) {
+			$this->session->set_flashdata('exception', display('please_try_again'));
+			redirect('salary_groups');
+		}
+
+		$has_generate = $this->db->where('salary_group_id', $group_id)->limit(1)->get('gmb_salary_generate')->num_rows();
+		$has_sheet = $this->db->where('salary_group_id', $group_id)->limit(1)->get('gmb_salary_sheet_generate')->num_rows();
+
+		if ($has_generate > 0 || $has_sheet > 0) {
+			$this->session->set_flashdata('exception', 'Unable to delete the group because salary records exist for it.');
+			redirect('salary_groups');
+		}
+
+		if ($this->Payroll_model->delete_salary_group($group_id)) {
+			$this->session->set_flashdata('message', display('delete_successfully'));
+		} else {
+			$this->session->set_flashdata('exception', display('please_try_again'));
+		}
+
+		redirect('salary_groups');
+	}
 
     public function save_tax_slab()
     {
@@ -1604,16 +1670,14 @@ class Payroll extends MX_Controller {
 		$component_ded_total = isset($component_breakdown['deduction_total']) ? (float) $component_breakdown['deduction_total'] : 0.0;
                 $loan_total = floatval($salary_info->loan_deduct);
                 $office_loan_total = floatval($salary_info->office_loan_deduct);
-                $salary_advance_total = floatval($salary_info->salary_advance);
 
 		$data['component_breakdown'] = $component_breakdown;
 		$data['component_add_total'] = round($component_add_total, 2);
 		$data['component_ded_total'] = round($component_ded_total, 2);
                 $data['loan_total'] = round($loan_total, 2);
                 $data['office_loan_total'] = round($office_loan_total, 2);
-                $data['salary_advance_total'] = round($salary_advance_total, 2);
 
-                $total_deductions = $component_ded_total + $loan_total + $office_loan_total + $salary_advance_total;
+                $total_deductions = $component_ded_total + $loan_total + $office_loan_total;
                 $data['total_deductions'] = round($total_deductions, 2);
 
 		$post_gross_total = isset($salary_info->gross_salary) ? ((float) $salary_info->gross_salary + $component_add_total) : $component_add_total;
@@ -1663,7 +1727,15 @@ class Payroll extends MX_Controller {
 		$data['title']         = display('employee_salary_chart'); 
 		
 		$data['salary_sheet_generate_info'] = $this->Payroll_model->salary_sheet_generate_info($ssg_id);
-		$data['employee_salary_charts']     = $this->Payroll_model->employee_salary_charts($ssg_id);
+		$charts = $this->Payroll_model->employee_salary_charts($ssg_id);
+		if (!empty($charts)) {
+			foreach ($charts as $chart_index => $chart_row) {
+				$breakdown = $this->Payroll_model->calculate_component_breakdown($chart_row, isset($chart_row->salary_group_id) ? (int) $chart_row->salary_group_id : null);
+				$charts[$chart_index]->component_add_total = isset($breakdown['earning_total']) ? (float) $breakdown['earning_total'] : 0.0;
+				$charts[$chart_index]->component_ded_total = isset($breakdown['deduction_total']) ? (float) $breakdown['deduction_total'] : 0.0;
+			}
+		}
+		$data['employee_salary_charts']     = $charts;
 		
 		$data['setting'] = $this->db->get('web_setting')->row();
 		$data['user_info'] = $this->session->userdata();
@@ -1685,6 +1757,13 @@ class Payroll extends MX_Controller {
 
 		$data['salary_sheet_generate_info'] = $this->Payroll_model->salary_sheet_generate_info($ssg_id);
 		$employee_salary_charts  = $this->Payroll_model->employee_salary_charts($ssg_id);
+		if (!empty($employee_salary_charts)) {
+			foreach ($employee_salary_charts as $chart_index => $value) {
+				$breakdown = $this->Payroll_model->calculate_component_breakdown($value, isset($value->salary_group_id) ? (int) $value->salary_group_id : null);
+				$employee_salary_charts[$chart_index]->component_add_total = isset($breakdown['earning_total']) ? (float) $breakdown['earning_total'] : 0.0;
+				$employee_salary_charts[$chart_index]->component_ded_total = isset($breakdown['deduction_total']) ? (float) $breakdown['deduction_total'] : 0.0;
+			}
+		}
 		$data['module']    = "hrm";
 		$data['page']      = "employee_salary/employee_salary_approval";
 
@@ -1692,7 +1771,6 @@ class Payroll extends MX_Controller {
 		$gross_salary = 0.0;
 		$net_salary = 0.0;
 		$loans = 0.0;
-		$salary_advance = 0.0;
 		$state_income_tax = 0.0;
 		$employee_npf_contribution = 0.0; // It's indicates the social security tax(soc.sec.tax)...
 		$employer_npf_contribution = 0.0; // It's indicates the employeer contribution if social security tax(soc.sec.tax) available
@@ -1705,7 +1783,6 @@ class Payroll extends MX_Controller {
 			$net_salary   			   = $net_salary + floatval($value->net_salary);
 			$loan_deduction_total      = floatval($value->loan_deduct) + (isset($value->office_loan_deduct) ? floatval($value->office_loan_deduct) : 0.0);
 			$loans   				   = $loans + $loan_deduction_total;
-			$salary_advance            = $salary_advance + floatval($value->salary_advance);
 			$state_income_tax          = $state_income_tax + floatval($value->income_tax);
 			$employee_npf_contribution = $employee_npf_contribution + floatval($value->soc_sec_npf_tax);
 			$employer_npf_contribution = $employer_npf_contribution + floatval($value->employer_contribution);
@@ -1717,15 +1794,13 @@ class Payroll extends MX_Controller {
 		$data['gross_salary']  				= $gross_salary;
 		$data['net_salary']  			    = $net_salary;
 		$data['loans']  				    = $loans;
-		$data['salary_advance']  			= $salary_advance;
 		$data['state_income_tax']           = $state_income_tax;
 		$data['employee_npf_contribution']  = $employee_npf_contribution;
 		$data['employer_npf_contribution']  = $employer_npf_contribution;
 		$data['icf_amount']  			    = $icf_amount;
 		$data['total_npf_contribution']  	= $total_npf_contribution;
 
-		$credit_amount = 0.0;
-		$credit_amount = $net_salary+$loans+$salary_advance+$state_income_tax+$employee_npf_contribution;
+		$credit_amount = $net_salary + $loans + $state_income_tax + $employee_npf_contribution;
 		$data['credit_amount']  = $credit_amount;
 
 		// Get all payment natures from account COA(acc_coa) table
@@ -2185,6 +2260,16 @@ class Payroll extends MX_Controller {
 	    $display = $years.'.'.$months;
 
 		return $display;
+	}
+
+	private function normalize_ids($values = array())
+	{
+		$values = array_map('intval', (array) $values);
+		$values = array_filter($values, function ($value) {
+			return $value > 0;
+		});
+
+		return array_values(array_unique($values));
 	}
 
 }

@@ -76,16 +76,16 @@
 
                               <tr>
                                 <th class="text-left" width="2%">Sl</th>
-                                <th class="text-left" width="5%">Employee Name</th>
+                                <th class="text-left" width="6%">Employee Name</th>
                                 <th class="text-left" width="8%">Basic Salary<?php echo $curncy_symbol;?></th>
-                                <th class="text-left" width="8%">Total Benefit<?php echo $curncy_symbol;?></th>
-                                <th class="text-left" width="9%">Transport Allowance<?php echo $curncy_symbol;?></th>
+                                <th class="text-left" width="10%">Component Additions<?php echo $curncy_symbol;?></th>
                                 <th class="text-left" width="8%">Gross Salary<?php echo $curncy_symbol;?></th>
+                                <th class="text-left" width="10%">Component Deductions<?php echo $curncy_symbol;?></th>
                                 <th class="text-left" width="8%">State Income Tax<?php echo $curncy_symbol;?></th>
-                                <th class="text-left" width="9%">Soc.Sec.NPF<?php echo ' '.$social_security_tax_percnt.'%'.$curncy_symbol;?></th>
-                                <th class="text-left" width="9%">Employer Contribution 10%<?php echo $curncy_symbol;?></th>
+                                <th class="text-left" width="8%">Soc.Sec.NPF<?php echo $social_security_tax_percnt ? ' '.$social_security_tax_percnt.'%' : ''; ?><?php echo $curncy_symbol;?></th>
+                                <th class="text-left" width="9%">Employer Contribution<?php echo $curncy_symbol;?></th>
                                 <th class="text-left" width="8%">Loan Deduction<?php echo $curncy_symbol;?></th>
-                                <th class="text-left" width="8%">Salary Advance<?php echo $curncy_symbol;?></th>
+                                <th class="text-left" width="8%">Office Loan<?php echo $curncy_symbol;?></th>
                                 <th class="text-left" width="10%">Total Deductions<?php echo $curncy_symbol;?></th>
                                 <th class="text-left" width="8%">Net Salary<?php echo $curncy_symbol;?></th>
                               </tr>
@@ -97,16 +97,13 @@
                                <?php 
 
                               $i = 1;
-                              $total_benefits = 0.0;
-                              $total_deductions = 0.0;
-
                               foreach ($employee_salary_charts as $key => $row) {
 
-                                $total_benefits = floatval($row->medical_benefit) + floatval($row->family_benefit) + floatval($row->transportation_benefit) + floatval($row->other_benefit);
-
+                              $component_add_total_display = isset($row->component_add_total) ? (float) $row->component_add_total : 0.0;
+                              $component_ded_total_display = isset($row->component_ded_total) ? (float) $row->component_ded_total : 0.0;
                               $office_loan_deduct = isset($row->office_loan_deduct) ? floatval($row->office_loan_deduct) : 0.0;
-                              $loan_deduction_total = floatval($row->loan_deduct) + $office_loan_deduct;
-                              $total_deductions = floatval($row->income_tax) + floatval($row->soc_sec_npf_tax) + $loan_deduction_total + floatval($row->salary_advance);
+                              $loan_deduction_total = floatval($row->loan_deduct);
+                              $total_deductions = $component_ded_total_display + floatval($row->income_tax) + floatval($row->soc_sec_npf_tax) + $loan_deduction_total + $office_loan_deduct;
 
                               ?>
 
@@ -114,15 +111,15 @@
                                 <td class="text-left"><?php echo $i;?></td>
                                 <td class="text-left"><?php echo $row->first_name.' '.$row->last_name;?></td>
                                 <td class="text-left"><?php echo $setting->currency_symbol.' '.$row->basic_salary_pro_rated;?></td>
-                                <td class="text-left"><?php echo $setting->currency_symbol.' '.$total_benefits;?></td>
-                                <td class="text-left"><?php echo $setting->currency_symbol.' '.$row->transport_allowance_pro_rated;?></td>
+                                <td class="text-left"><?php echo $setting->currency_symbol.' '.number_format($component_add_total_display,2);?></td>
                                 <td class="text-left"><?php echo $setting->currency_symbol.' '.$row->gross_salary;?></td>
+                                <td class="text-left"><?php echo $setting->currency_symbol.' '.number_format($component_ded_total_display,2);?></td>
                                 <td class="text-left"><?php echo $setting->currency_symbol.' '.$row->income_tax;?></td>
                                 <td class="text-left"><?php echo $setting->currency_symbol.' '.$row->soc_sec_npf_tax;?></td>
                                 <td class="text-left"><?php echo $setting->currency_symbol.' '.floatval($row->employer_contribution);?></td>
                                 <td class="text-left"><?php echo $setting->currency_symbol.' '.$loan_deduction_total;?></td>
-                                <td class="text-left"><?php echo $setting->currency_symbol.' '.$row->salary_advance;?></td>
-                                
+                                <td class="text-left"><?php echo $setting->currency_symbol.' '.$office_loan_deduct;?></td>
+
                                 <td class="text-left"><?php echo $setting->currency_symbol.' '.$total_deductions;?></td>
 
                                 <td class="text-left"><?php echo $setting->currency_symbol.' '.$row->net_salary;?></td>
