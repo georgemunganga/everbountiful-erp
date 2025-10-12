@@ -12,6 +12,19 @@
 
                  <input type="hidden" name="customer_id" id="customer_id" value="<?php echo $customer->customer_id?>">
                  <div class="form-group row">
+                    <label for="group_id" class="col-sm-2 text-right col-form-label">Customer Group:</label>
+                    <div class="col-sm-4">
+                        <div class="">
+                            <select name="group_id" id="group_id" class="form-control">
+                                <?php if (!empty($groups)) { foreach ($groups as $gid => $gname) { ?>
+                                    <option value="<?php echo html_escape($gid); ?>" <?php echo (isset($customer->group_id) && (string)$customer->group_id === (string)$gid) ? 'selected' : ''; ?>>
+                                        <?php echo html_escape($gname); ?>
+                                    </option>
+                                <?php } } ?>
+                            </select>
+                        </div>
+                    </div>
+                  </div>
                      <label for="customer_name"
                          class="col-sm-2 text-right col-form-label"><?php echo display('customer_name')?> <i
                              class="text-danger"> * </i>:</label>
@@ -180,7 +193,7 @@
                          </div>
 
                      </div>
-                     <?php if(empty($customer->customer_id)){?>
+                 <?php if(empty($customer->customer_id)){?>
 
                      <!-- <label for="previous_balance"
                          class="col-sm-2 text-right col-form-label"><?php echo display('previous_balance')?>:</label>

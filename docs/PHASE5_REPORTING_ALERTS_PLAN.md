@@ -4,7 +4,7 @@ Objective: leverage the unified stock ledger to deliver actionable insights, pro
 
 ---
 
-### 5.1 Stock & Lot Reporting
+### 5.1 Stock  Reporting
 - [ ] Design SQL/views aggregating `stock_movements` into stock-on-hand snapshots by product, lot, location.
 - [ ] Define additional views for:
   - Lot aging (days on hand, expiry proximity).

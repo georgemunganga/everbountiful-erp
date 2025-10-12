@@ -78,6 +78,190 @@ class Customer_model extends CI_Model
     }
   }
 
+  // Invoices for a customer within date range
+  public function get_customer_invoices($customer_id, $from_date = null, $to_date = null)
+  {
+    $this->db->select('i.id, i.invoice_id, i.invoice as invoice_no, i.date, i.total_amount, i.paid_amount, i.due_amount');
+    $this->db->from('invoice i');
+    $this->db->where('i.customer_id', $customer_id);
+    if (!empty($from_date)) {
+      $this->db->where('DATE(i.date) >=', $from_date);
+    }
+    if (!empty($to_date)) {
+      $this->db->where('DATE(i.date) <=', $to_date);
+    }
+    $this->db->order_by('i.date', 'asc');
+    return $this->db->get()->result_array();
+  }
+
+  // Payments for a customer within date range (from acc_transaction via COA)
+  public function get_customer_payments($customer_id, $from_date = null, $to_date = null)
+  {
+    $head = $this->db->select('HeadCode')->from('acc_coa')->where('customer_id', $customer_id)->get()->row();
+    if (!$head) return [];
+    $this->db->select('VDate as date, VNo as voucher_no, Debit, Credit, Narration');
+    $this->db->from('acc_transaction');
+    $this->db->where('COAID', $head->HeadCode);
+    $this->db->where('IsAppove', 1);
+    if (!empty($from_date)) {
+      $this->db->where('DATE(VDate) >=', $from_date);
+    }
+    if (!empty($to_date)) {
+      $this->db->where('DATE(VDate) <=', $to_date);
+    }
+    $this->db->order_by('VDate', 'asc');
+    return $this->db->get()->result_array();
+  }
+
+  // Statement summary and lines
+  public function get_customer_statement($customer_id, $from_date, $to_date)
+  {
+    $head = $this->db->select('HeadCode')->from('acc_coa')->where('customer_id', $customer_id)->get()->row();
+    if (!$head) return ['summary' => [], 'lines' => []];
+
+    // Beginning balance: sum(debit-credit) before from_date
+    $begin_q = $this->db->select('IFNULL(SUM(Debit),0) AS deb, IFNULL(SUM(Credit),0) AS cred')
+      ->from('acc_transaction')
+      ->where('COAID', $head->HeadCode)
+      ->where('IsAppove', 1)
+      ->where('DATE(VDate) <', $from_date)
+      ->get()->row();
+    $beginning = (float)$begin_q->deb - (float)$begin_q->cred;
+
+    // Invoiced amount within range (sum invoice totals)
+    $inv_q = $this->db->select('IFNULL(SUM(total_amount),0) AS total')
+      ->from('invoice')
+      ->where('customer_id', $customer_id)
+      ->where('DATE(date) >=', $from_date)
+      ->where('DATE(date) <=', $to_date)
+      ->get()->row();
+    $invoiced = (float)$inv_q->total;
+
+    // Amount paid within range from transactions
+    $pay_q = $this->db->select('IFNULL(SUM(Credit),0) AS paid')
+      ->from('acc_transaction')
+      ->where('COAID', $head->HeadCode)
+      ->where('IsAppove', 1)
+      ->where('DATE(VDate) >=', $from_date)
+      ->where('DATE(VDate) <=', $to_date)
+      ->get()->row();
+    $paid = (float)$pay_q->paid;
+
+    $balance_due = $beginning + $invoiced - $paid;
+
+    // Lines: beginning, invoices, payments
+    $lines = [];
+    $lines[] = [
+      'date' => $from_date,
+      'details' => 'Beginning Balance',
+      'amount' => number_format($beginning, 2),
+      'payments' => '',
+      'balance' => number_format($beginning, 2)
+    ];
+    $invoices = $this->get_customer_invoices($customer_id, $from_date, $to_date);
+    $running = $beginning;
+    foreach ($invoices as $inv) {
+      $running += (float)$inv['total_amount'];
+      $lines[] = [
+        'date' => date('d-m-Y', strtotime($inv['date'])),
+        'details' => sprintf('Invoice %s - due on %s', $inv['invoice_id'], date('d-m-Y', strtotime('+30 days', strtotime($inv['date'])))),
+        'amount' => number_format($inv['total_amount'], 2),
+        'payments' => '',
+        'balance' => number_format($running, 2)
+      ];
+    }
+    $payments = $this->get_customer_payments($customer_id, $from_date, $to_date);
+    foreach ($payments as $p) {
+      $running -= (float)$p['Credit'];
+      $lines[] = [
+        'date' => date('d-m-Y', strtotime($p['date'])),
+        'details' => 'Payment ' . $p['voucher_no'],
+        'amount' => '',
+        'payments' => number_format($p['Credit'], 2),
+        'balance' => number_format($running, 2)
+      ];
+    }
+
+    return [
+      'summary' => [
+        'beginning' => $beginning,
+        'invoiced' => $invoiced,
+        'paid' => $paid,
+        'balance_due' => $balance_due,
+      ],
+      'lines' => $lines,
+    ];
+  }
+
+  // Notes CRUD
+  public function get_notes($customer_id)
+  {
+    if (!$this->db->table_exists('customer_notes')) {
+      return [];
+    }
+    return $this->db->select('*')->from('customer_notes')->where('customer_id', $customer_id)->order_by('created_at', 'desc')->get()->result_array();
+  }
+  public function add_note($customer_id, $text)
+  {
+    if (!$this->db->table_exists('customer_notes')) {
+      return false;
+    }
+    return $this->db->insert('customer_notes', ['customer_id' => $customer_id, 'note_text' => $text]);
+  }
+  public function delete_note($id, $customer_id)
+  {
+    if (!$this->db->table_exists('customer_notes')) {
+      return false;
+    }
+    return $this->db->where('id', $id)->where('customer_id', $customer_id)->delete('customer_notes');
+  }
+
+  // Reminders CRUD
+  public function get_reminders($customer_id)
+  {
+    if (!$this->db->table_exists('customer_reminders')) {
+      return [];
+    }
+    return $this->db->select('*')->from('customer_reminders')->where('customer_id', $customer_id)->order_by('remind_on', 'asc')->get()->result_array();
+  }
+  public function add_reminder($customer_id, $title, $remind_on)
+  {
+    if (!$this->db->table_exists('customer_reminders')) {
+      return false;
+    }
+    return $this->db->insert('customer_reminders', ['customer_id' => $customer_id, 'title' => $title, 'remind_on' => $remind_on, 'status' => 'pending']);
+  }
+  public function delete_reminder($id, $customer_id)
+  {
+    if (!$this->db->table_exists('customer_reminders')) {
+      return false;
+    }
+    return $this->db->where('id', $id)->where('customer_id', $customer_id)->delete('customer_reminders');
+  }
+
+  // Files list
+  public function get_files($customer_id)
+  {
+    if (!$this->db->table_exists('customer_files')) {
+      return [];
+    }
+    return $this->db->select('*')->from('customer_files')->where('customer_id', $customer_id)->order_by('uploaded_at', 'desc')->get()->result_array();
+  }
+  public function add_file_record($customer_id, $file_name, $file_path)
+  {
+    if (!$this->db->table_exists('customer_files')) {
+      return false;
+    }
+    return $this->db->insert('customer_files', ['customer_id' => $customer_id, 'file_name' => $file_name, 'file_path' => $file_path]);
+  }
+  public function delete_file($id, $customer_id)
+  {
+    if (!$this->db->table_exists('customer_files')) {
+      return false;
+    }
+    return $this->db->where('id', $id)->where('customer_id', $customer_id)->delete('customer_files');
+  }
+
   //credit customer dropdown
   public function bdtask_credit_customer_dropdown()
   {
@@ -224,6 +408,8 @@ class Customer_model extends CI_Model
       $button = '';
       $base_url = base_url();
 
+      // Details view link
+      $button .= ' <a href="' . $base_url . 'customer/customer_detail/' . $record->customer_id . '" class="btn btn-info btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Details"><i class="fa fa-user" aria-hidden="true"></i></a>';
       if ($this->permission1->method('manage_customer', 'update')->access()) {
         $button .= ' <a href="' . $base_url . 'edit_customer/' . $record->customer_id . '" class="btn btn-success btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Update"><i class="pe-7s-note" aria-hidden="true"></i></a>';
       }
@@ -236,7 +422,7 @@ class Customer_model extends CI_Model
 
       $data[] = array(
         'sl'               => $sl,
-        'customer_name'    => $record->customer_name,
+        'customer_name'    => '<a href="' . $base_url . 'customer/customer_detail//' . $record->customer_id . '" title="View Details">' . html_escape($record->customer_name) . '</a>',
         'address'          => $record->customer_address,
         'address2'         => $record->address2,
         'mobile'           => $record->customer_mobile,
@@ -354,6 +540,8 @@ class Customer_model extends CI_Model
       $button = '';
       $base_url = base_url();
 
+      // Details view link
+      $button .= ' <a href="' . $base_url . 'customer/customer_detail/' . $record->customer_id . '" class="btn btn-info btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Details"><i class="fa fa-user" aria-hidden="true"></i></a>';
       if ($this->permission1->method('credit_customer', 'update')->access()) {
         $button .= ' <a href="' . $base_url . 'edit_customer/' . $record->customer_id . '" class="btn btn-success btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Update"><i class="pe-7s-note" aria-hidden="true"></i></a>';
       }
@@ -484,6 +672,8 @@ class Customer_model extends CI_Model
       $button = '';
       $base_url = base_url();
 
+      // Details view link
+      $button .= ' <a href="' . $base_url . 'customer/customer_detail/' . $record->customer_id . '" class="btn btn-info btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Details"><i class="fa fa-user" aria-hidden="true"></i></a>';
       if ($this->permission1->method('paid_customer', 'update')->access()) {
         $button .= ' <a href="' . $base_url . 'edit_customer/' . $record->customer_id . '" class="btn btn-success btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Update"><i class="pe-7s-note" aria-hidden="true"></i></a>';
       }

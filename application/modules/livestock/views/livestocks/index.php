@@ -24,12 +24,18 @@
                         <?php echo $this->session->flashdata('exception'); ?>
                     </div>
                 <?php endif; ?>
+                <?php if (!empty($active_name_filter)): ?>
+                    <div class="alert alert-info" role="alert">
+                        <?php echo html_escape(sprintf((display('filtered_by_name') ?: 'Filtered by name: %s'), $active_name_filter)); ?>
+                    </div>
+                <?php endif; ?>
 
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped table-hover">
                         <thead>
                             <tr>
                                 <th>#</th>
+                                <th><?php echo html_escape(display('name') ?: 'Name'); ?></th>
                                 <th><?php echo html_escape(display('shed') ?: 'Shed'); ?></th>
                                 <th><?php echo html_escape(display('livestock_group') ?: 'Group'); ?></th>
                                 <th><?php echo html_escape(display('livestock_total_qty') ?: 'Total Qty'); ?></th>
@@ -46,6 +52,7 @@
                                 <?php foreach ($livestocks as $index => $livestock): ?>
                                     <tr>
                                         <td><?php echo $index + 1; ?></td>
+                                        <td><?php echo html_escape($livestock['name']); ?></td>
                                         <td><?php echo html_escape($livestock['shed_name']); ?></td>
                                         <td><?php echo html_escape($livestock['group_name']); ?></td>
                                         <td><?php echo html_escape($livestock['livestock_total_qty']); ?></td>
@@ -66,7 +73,7 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="10" class="text-center text-muted">
+                                    <td colspan="11" class="text-center text-muted">
                                         <?php echo html_escape(display('no_data_found') ?: 'No data found'); ?>
                                     </td>
                                 </tr>

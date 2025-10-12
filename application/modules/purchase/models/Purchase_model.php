@@ -15,6 +15,7 @@ class Purchase_model extends CI_Model
         parent::__construct();
 
         $this->load->model(array('account/Accounts_model'));
+        $this->load->library('InventoryLedger');
     }
 
     public function supplier_list()
@@ -326,172 +327,199 @@ class Purchase_model extends CI_Model
 
     public function insert_purchase()
     {
-
         $purchase_id = $this->number_generator();
-        $p_id        = $this->input->post('product_id', TRUE);
-        $supplier_id = $this->input->post('supplier_id', TRUE);
-        $supinfo     = $this->db->select('*')->from('supplier_information')->where('supplier_id', $supplier_id)->get()->row();
-        $sup_head    = $supinfo->supplier_id . '-' . $supinfo->supplier_name;
-        $sup_coa     = $this->db->select('*')->from('acc_coa')->where('HeadName', $sup_head)->get()->row();
+        $product_ids = (array)$this->input->post('product_id', true);
+        if (empty($product_ids)) {
+            return 3;
+        }
+
+        $supplier_id = $this->input->post('supplier_id', true);
+        $supinfo = $this->db->select('*')->from('supplier_information')->where('supplier_id', $supplier_id)->get()->row();
+        if (!$supinfo) {
+            return 3;
+        }
         $receive_by = $this->session->userdata('id');
-        $receive_date = date('Y-m-d');
-        $createdate  = date('Y-m-d H:i:s');
-        $paid_amount = $this->input->post('paid_amount', TRUE);
-        $due_amount  = $this->input->post('due_amount', TRUE);
-        $discount    = $this->input->post('discount', TRUE);
-        $bank_id     = $this->input->post('bank_id', TRUE);
+        $purchase_date_input = $this->input->post('purchase_date', true);
+        $purchase_date = !empty($purchase_date_input) ? $purchase_date_input : date('Y-m-d');
+        $stock_location_id = $this->inventoryledger->resolveLocationId($this->input->post('stock_location_id', true));
+        if (!$stock_location_id) {
+            return 3;
+        }
 
-        $multipayamount = $this->input->post('pamount_by_method', TRUE);
-        $multipaytype = $this->input->post('multipaytype', TRUE);
+        $paid_amount = (float)$this->input->post('paid_amount', true);
+        $due_amount = (float)$this->input->post('due_amount', true);
+        $multipayamount = (array)$this->input->post('pamount_by_method', true);
+        $multipaytype = (array)$this->input->post('multipaytype', true);
+        $multiamnt = array_sum(array_map('floatval', $multipayamount));
 
-        $multiamnt = array_sum($multipayamount);
-
-        if ($multiamnt == $paid_amount) {
-
-            if (!empty($bank_id)) {
-                $bankname = $this->db->select('bank_name')->from('bank_add')->where('bank_id', $bank_id)->get()->row()->bank_name;
-
-                $bankcoaid = $this->db->select('HeadCode')->from('acc_coa')->where('HeadName', $bankname)->get()->row()->HeadCode;
-            } else {
-                $bankcoaid = '';
-            }
-
-            //supplier & product id relation ship checker.
-            for ($i = 0, $n = count($p_id); $i < $n; $i++) {
-                $product_id = $p_id[$i];
-                $value = $this->product_supplier_check($product_id, $supplier_id);
-                if ($value == 0) {
-                    $this->session->set_flashdata('error_message', display('product_and_supplier_did_not_match'));
-                    redirect(base_url('add_purchase'));
-                    exit();
-                }
-            }
-            if ($multipaytype[0] == 0) {
-                $is_credit = 1;
-            } else {
-                $is_credit = '';
-            }
-
-            $data = array(
-                'purchase_id'        => $purchase_id,
-                'chalan_no'          => $this->input->post('chalan_no', TRUE),
-                'supplier_id'        => $this->input->post('supplier_id', TRUE),
-                'grand_total_amount' => $this->input->post('grand_total_price', TRUE),
-                'total_discount'     => $this->input->post('discount', TRUE),
-                'invoice_discount'   => $this->input->post('total_discount', TRUE),
-                'total_vat_amnt'     => $this->input->post('total_vat_amnt', TRUE),
-                'purchase_date'      => $this->input->post('purchase_date', TRUE),
-                'purchase_details'   => $this->input->post('purchase_details', TRUE),
-                'paid_amount'        => $paid_amount,
-                'due_amount'         => $due_amount,
-                'status'             => 1,
-                'bank_id'            => $this->input->post('bank_id', TRUE),
-                'payment_type'       => 1,
-                'is_credit'          => $is_credit,
-            );
-
-            $this->db->insert('product_purchase', $data);
-            $purs_insert_id =  $this->db->insert_id();
-
-            $predefine_account  = $this->db->select('*')->from('acc_predefine_account')->get()->row();
-            $Narration          = "Purchase Voucher";
-            $Comment            = "Purchase Voucher for supplier";
-            $COAID              = $predefine_account->purchaseCode;
-
-
-            if ($multipaytype && $multipayamount) {
-
-                if ($multipaytype[0] == 0) {
-
-                    $amount_pay = $data['grand_total_amount'];
-                    $amnt_type = 'Credit';
-                    $reVID     = $predefine_account->supplierCode;
-                    $subcode   = $this->db->select('*')->from('acc_subcode')->where('referenceNo', $supplier_id)->where('subTypeId', 4)->get()->row()->id;
-                    $insrt_pay_amnt_vcher = $this->insert_purchase_debitvoucher($is_credit, $purchase_id, $COAID, $amnt_type, $amount_pay, $Narration, $Comment, $reVID, $subcode);
-                } else {
-                    $amnt_type = 'Debit';
-                    for ($i = 0; $i < count($multipaytype); $i++) {
-
-                        $reVID = $multipaytype[$i];
-                        $amount_pay = $multipayamount[$i];
-
-                        $insrt_pay_amnt_vcher = $this->insert_purchase_debitvoucher($is_credit, $purchase_id, $COAID, $amnt_type, $amount_pay, $Narration, $Comment, $reVID);
-                    }
-
-                    if ($data['due_amount'] > 0) {
-
-                        $amount_pay2 = $data['due_amount'];
-                        $amnt_type2 = 'Credit';
-                        $reVID2     = $predefine_account->supplierCode;
-                        $subcode2   = $this->db->select('*')->from('acc_subcode')->where('referenceNo', $supplier_id)->where('subTypeId', 4)->get()->row()->id;
-                        $this->insert_purchase_debitvoucher(1, $purchase_id, $COAID, $amnt_type2, $amount_pay2, $Narration, $Comment, $reVID2, $subcode2);
-                    }
-                }
-            }
-
-            $rate         = $this->input->post('product_rate', TRUE);
-            $quantity     = $this->input->post('product_quantity', TRUE);
-            $expiry_date  = $this->input->post('expiry_date', TRUE);
-            $batch_no     = $this->input->post('batch_no', TRUE);
-            $t_price      = $this->input->post('total_price', TRUE);
-            $discountvalue = $this->input->post('discountvalue', TRUE);
-            $vatpercent   = $this->input->post('vatpercent', TRUE);
-            $vatvalue     = $this->input->post('vatvalue', TRUE);
-            $discount_per = $this->input->post('discount_per', TRUE);
-
-            for ($i = 0, $n = count($p_id); $i < $n; $i++) {
-                $product_quantity = $quantity[$i];
-                $product_rate     = $rate[$i];
-                $product_id       = $p_id[$i];
-                $total_price      = $t_price[$i];
-                $ba_no            = $batch_no[$i];
-                $exp_date         = $expiry_date[$i];
-                $dis_per          = $discount_per[$i];
-                $disval           = $discountvalue[$i];
-                $vatper           = $vatpercent[$i];
-                $vatval           = $vatvalue[$i];
-
-                $data1 = array(
-                    'purchase_detail_id' => $this->generator(15),
-                    'purchase_id'        => $purs_insert_id,
-                    'product_id'         => $product_id,
-                    'quantity'           => $product_quantity,
-                    'rate'               => $product_rate,
-                    'batch_id'           => $ba_no,
-                    'expiry_date'        => $exp_date,
-                    'total_amount'       => $total_price,
-                    'discount'           => $dis_per,
-                    'discount_amnt'      => $disval,
-                    'vat_amnt_per'       => $vatper,
-                    'vat_amnt'           => $vatval,
-                    'status'             => 1
-                );
-
-                $product_price = array(
-
-                    'supplier_price' => $product_rate
-                );
-
-                if (!empty($quantity)) {
-                    $this->db->insert('product_purchase_details', $data1);
-                    $this->db->where('product_id', $product_id)->update('supplier_product', $product_price);
-                }
-            }
-
-            $setting_data = $this->db->select('is_autoapprove_v')->from('web_setting')->where('setting_id', 1)->get()->result_array();
-            if ($setting_data[0]['is_autoapprove_v'] == 1) {
-
-
-                $new = $this->autoapprove($purchase_id);
-            }
-
-            return 1;
-        } else {
-
+        if ($multiamnt != $paid_amount) {
             return 2;
         }
+
+        foreach ($product_ids as $product_id_check) {
+            if (!$this->product_supplier_check($product_id_check, $supplier_id)) {
+                $this->session->set_flashdata('error_message', display('product_and_supplier_did_not_match'));
+                redirect(base_url('add_purchase'));
+                exit();
+            }
+        }
+
+        $is_credit = '';
+        if (!empty($multipaytype) && isset($multipaytype[0]) && (int)$multipaytype[0] === 0) {
+            $is_credit = 1;
+        }
+
+        $data = array(
+            'purchase_id'        => $purchase_id,
+            'chalan_no'          => $this->input->post('chalan_no', true),
+            'supplier_id'        => $supplier_id,
+            'stock_location_id'  => $stock_location_id,
+            'grand_total_amount' => $this->input->post('grand_total_price', true),
+            'total_discount'     => $this->input->post('discount', true),
+            'invoice_discount'   => $this->input->post('total_discount', true),
+            'total_vat_amnt'     => $this->input->post('total_vat_amnt', true),
+            'purchase_date'      => $purchase_date,
+            'purchase_details'   => $this->input->post('purchase_details', true),
+            'paid_amount'        => $paid_amount,
+            'due_amount'         => $due_amount,
+            'status'             => 1,
+            'bank_id'            => $this->input->post('bank_id', true),
+            'payment_type'       => 1,
+            'is_credit'          => $is_credit,
+        );
+
+        $this->db->trans_begin();
+
+        $this->db->insert('product_purchase', $data);
+        $purs_insert_id = $this->db->insert_id();
+
+        $predefine_account = $this->db->select('*')->from('acc_predefine_account')->get()->row();
+        $Narration = 'Purchase Voucher';
+        $Comment = 'Purchase Voucher for supplier';
+        $COAID = $predefine_account ? $predefine_account->purchaseCode : null;
+
+        if ($multipaytype && $multipayamount) {
+            if ((int)$multipaytype[0] === 0) {
+                $amount_pay = $data['grand_total_amount'];
+                $amnt_type = 'Credit';
+                $reVID = $predefine_account->supplierCode;
+                $subcode_row = $this->db->select('id')->from('acc_subcode')->where('referenceNo', $supplier_id)->where('subTypeId', 4)->get()->row();
+                $subcode = $subcode_row ? $subcode_row->id : null;
+                $this->insert_purchase_debitvoucher($is_credit, $purchase_id, $COAID, $amnt_type, $amount_pay, $Narration, $Comment, $reVID, $subcode);
+            } else {
+                $amnt_type = 'Debit';
+                foreach ($multipaytype as $index => $pay_type) {
+                    $reVID = $pay_type;
+                    $amount_pay = isset($multipayamount[$index]) ? $multipayamount[$index] : 0;
+                    $this->insert_purchase_debitvoucher($is_credit, $purchase_id, $COAID, $amnt_type, $amount_pay, $Narration, $Comment, $reVID);
+                }
+
+                if ($data['due_amount'] > 0) {
+                    $amount_pay2 = $data['due_amount'];
+                    $amnt_type2 = 'Credit';
+                    $reVID2 = $predefine_account->supplierCode;
+                    $subcode2_row = $this->db->select('id')->from('acc_subcode')->where('referenceNo', $supplier_id)->where('subTypeId', 4)->get()->row();
+                    $subcode2 = $subcode2_row ? $subcode2_row->id : null;
+                    $this->insert_purchase_debitvoucher(1, $purchase_id, $COAID, $amnt_type2, $amount_pay2, $Narration, $Comment, $reVID2, $subcode2);
+                }
+            }
+        }
+
+        $rates = (array)$this->input->post('product_rate', true);
+        $quantities = (array)$this->input->post('product_quantity', true);
+        $expiry_dates = (array)$this->input->post('expiry_date', true);
+        $batch_numbers = (array)$this->input->post('batch_no', true);
+        $total_prices = (array)$this->input->post('total_price', true);
+        $discount_values = (array)$this->input->post('discountvalue', true);
+        $vat_percents = (array)$this->input->post('vatpercent', true);
+        $vat_values = (array)$this->input->post('vatvalue', true);
+        $discount_percents = (array)$this->input->post('discount_per', true);
+
+        foreach ($product_ids as $index => $product_id) {
+            $product_quantity = isset($quantities[$index]) ? (float)$quantities[$index] : 0;
+            $product_rate = isset($rates[$index]) ? (float)$rates[$index] : 0;
+            $total_price = isset($total_prices[$index]) ? (float)$total_prices[$index] : 0;
+            $batch_no = isset($batch_numbers[$index]) ? trim($batch_numbers[$index]) : null;
+            $expiry_date = isset($expiry_dates[$index]) ? $expiry_dates[$index] : null;
+            $discount_percent = isset($discount_percents[$index]) ? (float)$discount_percents[$index] : 0;
+            $discount_value = isset($discount_values[$index]) ? (float)$discount_values[$index] : 0;
+            $vat_percent = isset($vat_percents[$index]) ? (float)$vat_percents[$index] : 0;
+            $vat_value = isset($vat_values[$index]) ? (float)$vat_values[$index] : 0;
+
+            if ($product_quantity <= 0) {
+                continue;
+            }
+
+            $purchaseUnitId = $this->inventoryledger->getPreferredPurchaseUnitId($product_id);
+            if (!$purchaseUnitId) {
+                $purchaseUnitId = $this->inventoryledger->getBaseUnitId($product_id);
+            }
+
+            $detailData = array(
+                'purchase_detail_id' => $this->generator(15),
+                'purchase_id'        => $purs_insert_id,
+                'product_id'         => $product_id,
+                'unit_id'            => $purchaseUnitId,
+                'quantity'           => $product_quantity,
+                'rate'               => $product_rate,
+                'batch_id'           => $batch_no,
+                'expiry_date'        => $expiry_date,
+                'total_amount'       => $total_price,
+                'discount'           => $discount_percent,
+                'discount_amnt'      => $discount_value,
+                'vat_amnt_per'       => $vat_percent,
+                'vat_amnt'           => $vat_value,
+                'status'             => 1,
+            );
+
+            $this->db->insert('product_purchase_details', $detailData);
+            $detailRowId = $this->db->insert_id();
+
+            $lotResult = $this->inventoryledger->recordPurchaseReceipt(array(
+                'product_id'         => $product_id,
+                'location_id'        => $stock_location_id,
+                'unit_id'            => $purchaseUnitId,
+                'quantity'           => $product_quantity,
+                'batch_no'           => $batch_no,
+                'expiry_date'        => $expiry_date,
+                'purchase_id'        => $purchase_id,
+                'purchase_detail_id' => $detailData['purchase_detail_id'],
+                'purchase_date'      => $purchase_date,
+                'total_amount'       => $total_price,
+                'discount_amount'    => $discount_value,
+                'vat_amount'         => $vat_value,
+                'created_by'         => $receive_by,
+            ));
+
+            if ($lotResult === false) {
+                $this->db->trans_rollback();
+                return 3;
+            }
+
+            $this->db->where('id', $detailRowId)->update('product_purchase_details', array('stock_lot_id' => $lotResult['lot_id']));
+
+            $product_price = array('supplier_price' => $product_rate);
+            $this->db->where('product_id', $product_id)->update('supplier_product', $product_price);
+        }
+
+        $setting_data = $this->db->select('is_autoapprove_v')->from('web_setting')->where('setting_id', 1)->get()->result_array();
+        if ($setting_data && (int)$setting_data[0]['is_autoapprove_v'] === 1) {
+            $this->autoapprove($purchase_id);
+        }
+
+        if ($this->db->trans_status() === false) {
+            $this->db->trans_rollback();
+            return 3;
+        }
+
+        $this->db->trans_commit();
+        return 1;
     }
 
+    public function get_stock_locations()
+    {
+        return $this->inventoryledger->getActiveLocations();
+    }
 
     public function product_supplier_check($product_id, $supplier_id)
     {

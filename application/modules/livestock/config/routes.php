@@ -17,6 +17,7 @@ $route['livestock-groups/edit/(:num)']   = "livestock/livestock/livestock_group_
 $route['livestock-groups/delete/(:num)'] = "livestock/livestock/livestock_group_delete/$1";
 
 $route['livestocks']                  = "livestock/livestock/livestocks";
+$route['livestocks/name/(:any)']      = "livestock/livestock/livestocks/$1";
 $route['livestocks/create']           = "livestock/livestock/livestock_form";
 $route['livestocks/edit/(:num)']      = "livestock/livestock/livestock_form/$1";
 $route['livestocks/delete/(:num)']    = "livestock/livestock/livestock_delete/$1";
@@ -43,3 +44,12 @@ $route['vaccine-usages/delete/(:num)']    = "livestock/livestock/vaccine_usage_d
 
 $route['farm-reports']       = "livestock/livestock/farm_reports";
 $route['farm-reports/data']  = "livestock/livestock/farm_reports_data";
+$route['production-percentage'] = "livestock/livestock/production_percentage";
+
+$route['stock']                = "livestock/stock/index";
+$route['stock/consumption']    = "livestock/stock/consumption";
+$route['stock/waste']          = "livestock/stock/waste";
+$route['stock/transfers']      = "livestock/stock/transfers";
+$route['livestock/consumption'] = "livestock/stock/consumption";
+$route['livestock/waste']       = "livestock/stock/waste";
+$route['livestock/transfers']   = "livestock/stock/transfers";

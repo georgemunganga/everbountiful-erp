@@ -14,7 +14,9 @@ class Customer extends MX_Controller {
         parent::__construct();
   
         $this->load->model(array(
-            'customer_model')); 
+            'customer_model',
+            'customergroups_model' => 'CustomerGroups_model'
+        )); 
         if (! $this->session->userdata('isLogIn'))
             redirect('login');
           
@@ -94,7 +96,7 @@ class Customer extends MX_Controller {
         $this->form_validation->set_rules('customer_address',display('customer_address'),'max_length[255]');
         $this->form_validation->set_rules('address2',display('address2'),'max_length[255]'); 
         #-------------------------------#
-
+        
         $data['customer'] = (object)$postData = [
             'customer_id'      => $this->input->post('customer_id',true),
             'customer_name'    => $this->input->post('customer_name',true),
@@ -110,6 +112,7 @@ class Customer extends MX_Controller {
             'country'          => $this->input->post('country', true) ,
             'customer_address' => $this->input->post('customer_address', true) ,
             'address2'         => $this->input->post('address2', true) ,
+            'group_id'         => $this->input->post('group_id', true) ,
             'status'           => 1,
             'create_by'        => $this->session->userdata('id') ,
             
@@ -147,6 +150,7 @@ class Customer extends MX_Controller {
             $data['title']    = display('edit_customer');
             $data['customer'] = $this->customer_model->singledata($id);  
             }
+            $data['groups']   = $this->CustomerGroups_model->get_dropdown();
             $data['module']   = "customer";  
             $data['page']     = "form";  
             echo Modules::run('template/layout', $data); 
@@ -235,6 +239,181 @@ class Customer extends MX_Controller {
     $data['module']       = "customer";
     $data['page']         = "customer_advance";   
     echo Modules::run('template/layout', $data); 
+    }
+
+    // Customer Groups: list
+    public function customer_groups()
+    {
+        $data['title']  = 'Customer Groups';
+        $data['groups'] = $this->CustomerGroups_model->list_all();
+        $data['module'] = 'customer';
+        $data['page']   = 'customer_group_list';
+        echo Modules::run('template/layout', $data);
+    }
+
+    // Customer Groups: create/edit form
+    public function customer_group_form($id = null)
+    {
+        $data['title']  = empty($id) ? 'Add Group' : 'Edit Group';
+        $data['group']  = !empty($id) ? $this->CustomerGroups_model->get($id) : null;
+        $data['module'] = 'customer';
+        $data['page']   = 'customer_group_form';
+        echo Modules::run('template/layout', $data);
+    }
+
+    // Customer Groups: save
+    public function customer_group_save()
+    {
+        $id   = (int) $this->input->post('id', true);
+        $data = [
+            'group_name' => $this->input->post('group_name', true),
+            'description'=> $this->input->post('description', true),
+            'is_active'  => $this->input->post('is_active', true) ? 1 : 0,
+        ];
+        if ($id > 0) {
+            $this->CustomerGroups_model->update($id, $data);
+        } else {
+            $this->CustomerGroups_model->create($data);
+        }
+        redirect('customer/customer_groups');
+    }
+
+    // Customer Groups: delete
+    public function customer_group_delete($id)
+    {
+        $this->CustomerGroups_model->delete($id);
+        redirect('customer/customer_groups');
+    }
+
+    // Customer detail view with tabs
+    public function customer_detail($customer_id)
+    {
+        $customer = $this->customer_model->singledata($customer_id);
+        if (!$customer) {
+            show_404();
+            return;
+        }
+        // Date range for statement (defaults to current month)
+        $from = $this->input->get('from_date', true);
+        $to   = $this->input->get('to_date', true);
+        if (empty($from) || empty($to)) {
+            $from = date('Y-m-01');
+            $to   = date('Y-m-t');
+        }
+
+        $data['title']     = 'Customer Details';
+        $data['customer']  = $customer;
+        $data['invoices']  = $this->customer_model->get_customer_invoices($customer_id, $from, $to);
+        $data['payments']  = $this->customer_model->get_customer_payments($customer_id, $from, $to);
+        $data['notes']     = $this->customer_model->get_notes($customer_id);
+        $data['reminders'] = $this->customer_model->get_reminders($customer_id);
+        $data['files']     = $this->customer_model->get_files($customer_id);
+        $data['from_date'] = $from;
+        $data['to_date']   = $to;
+        $data['statement'] = $this->customer_model->get_customer_statement($customer_id, $from, $to);
+
+        $data['module']   = 'customer';
+        $data['page']     = 'customer_detail_tabs';
+        echo Modules::run('template/layout', $data);
+    }
+
+    // Statement HTML view (optional separate route)
+    public function customer_statement($customer_id)
+    {
+        $customer = $this->customer_model->singledata($customer_id);
+        if (!$customer) {
+            show_404();
+            return;
+        }
+        $from = $this->input->get('from_date', true) ?: date('Y-m-01');
+        $to   = $this->input->get('to_date', true) ?: date('Y-m-t');
+        $data['customer']  = $customer;
+        $data['from_date'] = $from;
+        $data['to_date']   = $to;
+        $data['statement'] = $this->customer_model->get_customer_statement($customer_id, $from, $to);
+        $data['title']     = 'Customer Statement';
+        $data['module']    = 'customer';
+        $data['page']      = 'customer_statement';
+        echo Modules::run('template/layout', $data);
+    }
+
+    // Statement PDF
+    public function customer_statement_pdf($customer_id)
+    {
+        $customer = $this->customer_model->singledata($customer_id);
+        if (!$customer) {
+            show_404();
+            return;
+        }
+        $from = $this->input->get('from_date', true) ?: date('Y-m-01');
+        $to   = $this->input->get('to_date', true) ?: date('Y-m-t');
+        $data['customer']  = $customer;
+        $data['from_date'] = $from;
+        $data['to_date']   = $to;
+        $data['statement'] = $this->customer_model->get_customer_statement($customer_id, $from, $to);
+
+        // Render HTML using a simple view and then stream via Dompdf
+        $html = $this->load->view('customer_statement_pdf', $data, true);
+        require_once FCPATH . 'vendor/autoload.php';
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        $dompdf->stream('customer_statement_' . $customer_id . '.pdf', ['Attachment' => true]);
+    }
+
+    // Notes CRUD
+    public function add_note($customer_id)
+    {
+        $text = $this->input->post('note_text', true);
+        if (!empty($text)) {
+            $this->customer_model->add_note($customer_id, $text);
+        }
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=notes');
+    }
+    public function delete_note($customer_id, $note_id)
+    {
+        $this->customer_model->delete_note($note_id, $customer_id);
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=notes');
+    }
+
+    // Reminders CRUD
+    public function add_reminder($customer_id)
+    {
+        $title = $this->input->post('title', true);
+        $remind_on = $this->input->post('remind_on', true);
+        if (!empty($title)) {
+            $this->customer_model->add_reminder($customer_id, $title, $remind_on);
+        }
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=reminders');
+    }
+    public function delete_reminder($customer_id, $reminder_id)
+    {
+        $this->customer_model->delete_reminder($reminder_id, $customer_id);
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=reminders');
+    }
+
+    // Files upload/delete
+    public function upload_file($customer_id)
+    {
+        if (!empty($_FILES['file']['name'])) {
+            $upload_dir = 'uploads/customer_files/';
+            if (!is_dir(FCPATH . $upload_dir)) {
+                @mkdir(FCPATH . $upload_dir, 0777, true);
+            }
+            $file_name = time() . '_' . preg_replace('/[^A-Za-z0-9_.-]/', '_', $_FILES['file']['name']);
+            $target = FCPATH . $upload_dir . $file_name;
+            if (move_uploaded_file($_FILES['file']['tmp_name'], $target)) {
+                $this->customer_model->add_file_record($customer_id, $_FILES['file']['name'], $upload_dir . $file_name);
+            }
+        }
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=files');
+    }
+    public function delete_file($customer_id, $file_id)
+    {
+        // Optionally remove physical file; for now, delete DB record
+        $this->customer_model->delete_file($file_id, $customer_id);
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=files');
     }
 
       public function insert_customer_advance(){

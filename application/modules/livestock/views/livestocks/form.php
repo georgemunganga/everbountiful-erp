@@ -9,6 +9,14 @@
             <div class="panel-body">
                 <?php echo form_open('livestocks' . (!empty($livestock->id) ? '/edit/' . $livestock->id : '/create'), array('class' => 'form-vertical')); ?>
                     <div class="form-group row">
+                        <label for="name" class="col-sm-3 col-form-label"><?php echo html_escape(display('name') ?: 'Name'); ?> <i class="text-danger">*</i></label>
+                        <div class="col-sm-6">
+                            <input type="text" name="name" id="name" class="form-control" required maxlength="255" value="<?php echo html_escape($livestock->name); ?>">
+                            <?php echo form_error('name', '<div class="text-danger">', '</div>'); ?>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
                         <label for="shed_id" class="col-sm-3 col-form-label"><?php echo html_escape(display('shed') ?: 'Shed'); ?> <i class="text-danger">*</i></label>
                         <div class="col-sm-6">
                             <select name="shed_id" id="shed_id" class="form-control" required>

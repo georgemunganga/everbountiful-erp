@@ -1,7 +1,24 @@
 <!-- Invoice js -->
 <script src="<?php echo base_url() ?>my-assets/js/admin_js/invoice.js" type="text/javascript"></script>
 
-
+<?php
+$selectLocationLabel = display('select_location') ?: 'Select Location';
+$manualSourceLabel = display('manual_source') ?: 'Manual/Unknown Source';
+$locationOptions = array('<option value="">' . html_escape($selectLocationLabel) . '</option>');
+if (!empty($stock_locations)) {
+    foreach ($stock_locations as $location) {
+        $optionLabel = trim((string) ($location['location_name'] ?? ''));
+        $optionCode = trim((string) ($location['location_code'] ?? ''));
+        if ($optionCode !== '') {
+            $optionLabel = sprintf('%s (%s)', $optionLabel, $optionCode);
+        }
+        $locationId = (int) ($location['id'] ?? 0);
+        $locationOptions[] = '<option value="' . $locationId . '">' . html_escape($optionLabel) . '</option>';
+    }
+}
+$locationOptions[] = '<option value="MANUAL">' . html_escape($manualSourceLabel) . '</option>';
+$locationOptionsHtml = implode('', $locationOptions);
+?>
 
 <!--Add Invoice -->
 <div class="row">
@@ -24,6 +41,7 @@
 
             <div class="panel-body">
                 <?php echo form_open_multipart('invoice/invoice/bdtask_manual_sales_insert',array('class' => 'form-vertical', 'id' => 'insert_sale','name' => 'insert_sale'))?>
+                <input type="hidden" name="sale_type" id="sale_type" value="cash">
                 <div class="row">
 
                     <div class="col-sm-6" id="payment_from_1">
@@ -87,6 +105,24 @@
                     </div>
                 </div>
                 <br>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group row align-items-center">
+                            <label class="col-sm-2 col-form-label"><?php echo html_escape(display('payment_mode') ?: 'Payment Mode'); ?></label>
+                            <div class="col-sm-10">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input sale-type-option" type="radio" name="sale_type_switch" id="sale_type_cash" value="cash" checked>
+                                    <label class="form-check-label" for="sale_type_cash"><?php echo html_escape(display('cash_sale') ?: 'Cash Sale'); ?></label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input sale-type-option" type="radio" name="sale_type_switch" id="sale_type_credit" value="credit_sale">
+                                    <label class="form-check-label" for="sale_type_credit"><?php echo html_escape(display('credit_sale') ?: 'Credit Sale'); ?></label>
+                                </div>
+                                <p class="text-muted small mb-0"><?php echo html_escape(display('credit_sale_help') ?: 'Choose credit sale to defer payment and keep the invoice outstanding.'); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover" id="normalinvoice">
                         <thead>
@@ -94,7 +130,7 @@
                                 <th class="text-center product_field"><?php echo display('item_information') ?> <i
                                         class="text-danger">*</i></th>
                                 <th class="text-center"><?php echo display('item_description')?></th>
-                                <th class="text-center"><?php echo display('batch_no')?><i class="text-danger">*</i>
+                                <th class="text-center"><?php echo display('issue_location') ?: 'Issue Location'; ?>
                                 </th>
                                 <th class="text-center"><?php echo display('available_qnty') ?></th>
                                 <th class="text-center"><?php echo display('unit') ?></th>
@@ -134,9 +170,8 @@
                                     <input type="text" name="desc[]" class="form-control text-right " tabindex="6" />
                                 </td>
                                 <td class="invoice_fields">
-                                    <select class="form-control basic-single" onchange="invoice_product_batch(1)"
-                                        id="serial_no_1" required name="serial_no[]" tabindex="7">
-                                        <option></option>
+                                    <select class="form-control basic-single issue-location-select" id="issue_location_1" name="issue_location_id[]" tabindex="7">
+                                        <?php echo $locationOptionsHtml; ?>
                                     </select>
                                 </td>
                                 <td>
@@ -277,7 +312,7 @@
                                         value="0" readonly="readonly" placeholder="" />
                                 </td>
                             </tr>
-                            <tr>
+                            <tr class="invoice-payment-row">
                                 <td class="text-right" colspan="11"><b><?php echo display('paid_ammount') ?>:</b></td>
                                 <td class="text-right">
                                     <input type="hidden" name="baseUrl" class="baseUrl"
@@ -294,7 +329,7 @@
                                         value="0.00" readonly="readonly" />
                                 </td>
                             </tr>
-                            <tr>
+                            <tr class="invoice-payment-row">
 
                                 <td colspan="11" class="text-right"><b><?php echo display('change'); ?>:</b></td>
                                 <td class="text-right">
@@ -309,7 +344,7 @@
                     <p hidden id="old-amount"><?php echo 0;?></p>
                     <p hidden id="pay-amount"></p>
                     <p hidden id="change-amount"></p>
-                    <div class="col-sm-6 table-bordered p-20">
+                    <div class="col-sm-6 table-bordered p-20 invoice-payment-controls">
                         <div id="adddiscount" class="display-none">
                             <div class="row no-gutters">
                                 <div class="form-group col-md-6">
@@ -372,4 +407,7 @@ function printRawHtml(view) {
     });
 
 }
+
+window.invoiceIssueLocationOptions = <?php echo json_encode($locationOptionsHtml); ?>;
+window.invoiceIssueLocationManualValue = 'MANUAL';
 </script>

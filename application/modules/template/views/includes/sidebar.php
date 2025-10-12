@@ -26,7 +26,7 @@
             </a>
         </li>
 
-        <li class="treeview <?php echo in_array($this->uri->segment(1), array('sheds', 'livestock-groups', 'livestocks', 'productions', 'feeds', 'feed-usages', 'vaccines', 'vaccine-usages', 'farm-reports')) ? "active" : null; ?>">
+        <li class="treeview <?php echo in_array($this->uri->segment(1), array('sheds', 'livestock-groups', 'livestocks', 'productions', 'feeds', 'feed-usages', 'vaccines', 'vaccine-usages', 'farm-reports', 'production-percentage', 'stock')) ? "active" : null; ?>">
             <a href="#">
                 <i class="fa fa-paw"></i>
                 <span><?php echo display('livestock_management') ?: 'Livestock Management'; ?></span>
@@ -61,6 +61,9 @@
                 </li>
                 <li class="<?php echo ($this->uri->segment(1) == 'farm-reports') ? 'active' : null; ?>">
                     <a href="<?php echo base_url('farm-reports'); ?>"><?php echo display('farm_reports') ?: 'Farm Reports'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'production-percentage') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('production-percentage'); ?>"><?php echo display('production_percentage_report') ?: 'Production Percentage'; ?></a>
                 </li>
             </ul>
         </li>
@@ -165,6 +168,37 @@
                         </li>
                     <?php } ?>
 
+                    <?php if ($this->permission1->method('credit_customer', 'read')->access()) { ?>
+                        <li class="<?php echo (($this->uri->segment(1) == "credit_customer") ? "active" : '') ?>">
+                            <a href="<?php echo base_url('credit_customer') ?>">
+                                <?php echo display('credit_customer') ?>
+                            </a>
+                        </li>
+                    <?php } ?>
+                    <?php if ($this->permission1->method('paid_customer', 'read')->access()) { ?>
+                        <li class="<?php echo (($this->uri->segment(1) == "paid_customer") ? "active" : '') ?>">
+                            <a href="<?php echo base_url('paid_customer') ?>">
+                                <?php echo display('paid_customer') ?>
+                            </a>
+                        </li>
+                    <?php } ?>
+                    <?php if ($this->permission1->method('customer_ledger', 'read')->access()) { ?>
+                        <li class="<?php echo (($this->uri->segment(1) == "customer_ledger") ? "active" : '') ?>">
+                            <a href="<?php echo base_url('customer_ledger') ?>">
+                                <?php echo display('customer_ledger') ?>
+                            </a>
+                        </li>
+                    <?php } ?>
+                    <?php if ($this->permission1->method('customer_advance', 'create')->access()) { ?>
+                        <li class="<?php echo (($this->uri->segment(1) == "customer_advance") ? "active" : '') ?>">
+                            <a href="<?php echo base_url('customer_advance') ?>">
+                                <?php echo display('customer_advance') ?>
+                            </a>
+                        </li>
+                    <?php } ?>
+                    <li class="<?php echo (($this->uri->segment(2) == "customer_groups") ? "active" : '') ?>">
+                        <a href="<?php echo base_url('customer/customer_groups') ?>">Customer Groups</a>
+                    </li>
 
                 </ul>
 

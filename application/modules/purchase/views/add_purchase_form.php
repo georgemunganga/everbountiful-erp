@@ -41,6 +41,31 @@
 
                     <div class="col-sm-6">
                         <div class="form-group row">
+                            <label for="stock_location_id" class="col-sm-4 col-form-label"><?php echo display('location') ?: 'Location'; ?>
+                                <i class="text-danger">*</i>
+                            </label>
+                            <div class="col-sm-6">
+                                <?php
+                                $selectedLocationId = set_value('stock_location_id');
+                                if (empty($selectedLocationId) && !empty($stock_locations)) {
+                                    $selectedLocationId = $stock_locations[0]['id'];
+                                }
+                                ?>
+                                <select name="stock_location_id" id="stock_location_id" class="form-control select2" required>
+                                    <?php if (!empty($stock_locations)): ?>
+                                        <?php foreach ($stock_locations as $location): ?>
+                                            <option value="<?php echo (int) $location['id']; ?>" <?php echo ((string) $selectedLocationId === (string) $location['id']) ? 'selected' : ''; ?>>
+                                                <?php echo html_escape($location['location_name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="form-group row">
                             <label for="date" class="col-sm-4 col-form-label"><?php echo display('purchase_date') ?>
                                 <i class="text-danger">*</i>
                             </label>

@@ -53,7 +53,7 @@
          ?>
                 <ol class="breadcrumb">
                     <li><a href="#"><i class="pe-7s-home"></i> <?php echo display('home') ?></a></li>
-                    <li><a href="#"><?php echo $module; ?></a></li>
+                    <li><a href="#"><?php echo isset($module_label) ? $module_label : $module; ?></a></li>
                     <li class="active"><?php echo isset($title) ? $title : ''; ?></li>
                 </ol>
                 <?php }?>

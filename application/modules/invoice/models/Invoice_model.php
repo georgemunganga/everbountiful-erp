@@ -491,9 +491,17 @@ class Invoice_model extends CI_Model
         $result = array();
 
         foreach ($available_quantity as $k => $v) {
-            if ($v < $quantity[$k]) {
+            if (!isset($quantity[$k])) {
+                continue;
+            }
+            if ($v === '' || $v === null) {
+                continue;
+            }
+            if (!is_numeric($v)) {
+                continue;
+            }
+            if ((float) $v > 0 && (float) $v < (float) $quantity[$k]) {
                 $this->session->set_userdata(array('error_message' => display('you_can_not_buy_greater_than_available_qnty')));
-                // redirect('Cinvoice');
             }
         }
 
@@ -1393,24 +1401,21 @@ class Invoice_model extends CI_Model
         $content = explode(',', $product_information->serial_no);
 
 
-        $html = "";
-        if (empty($pur_product_batch)) {
-            $html .= "No Serial Found !";
-        } else {
-            // Select option created for product
-            $html .= "<select name=\"serial_no[]\" onchange=\"invoice_product_batch()\"  class=\"serial_no_1 form-control basic-single\" id=\"serial_no_1\">";
-            $html .= "<option value=''>" . display('select_one') . "</option>";
+        $manualSourceLabel = display('manual_source') ?: 'Manual/Unknown Source';
+        $serialOptions = array();
+        $serialOptions[] = "<option value=''>" . (display('select_one') ?: 'Select One') . "</option>";
+        $serialOptions[] = "<option value='MANUAL'>" . html_escape($manualSourceLabel) . "</option>";
+        if (!empty($pur_product_batch)) {
             foreach ($pur_product_batch as $p_batch) {
                 $sellt_prod_batch = $this->db->select('SUM(quantity) as sale_qty,batch_id, product_id')->from('invoice_details')->where('product_id', $p_batch->product_id)->where('batch_id', $p_batch->batch_id)->get()->row();
                 $pur_prod = (empty($sellt_prod_batch->sale_qty) ? 0 : $sellt_prod_batch->sale_qty);
                 $available_prod = $p_batch->purchase_qty - $pur_prod;
                 if ($available_prod > 0) {
-                    # code...
-                    $html .= "<option value=" . $p_batch->batch_id . ">" . $p_batch->batch_id . "</option>";
+                    $serialOptions[] = "<option value=\"" . html_escape($p_batch->batch_id) . "\">" . html_escape($p_batch->batch_id) . "</option>";
                 }
             }
-            $html .= "</select>";
         }
+        $html = implode('', $serialOptions);
 
         $data2['total_product'] = $available_quantity;
         $data2['supplier_price'] = $product_information->supplier_price;

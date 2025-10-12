@@ -1,5 +1,39 @@
+"use strict";
+function setInvoiceSaleType(type) {
+    var saleTypeField = $('#sale_type');
+    if (!saleTypeField.length) {
+        return;
+    }
+    var normalizedType = type || 'cash';
+    saleTypeField.val(normalizedType);
+    var isCredit = normalizedType === 'credit_sale';
+    var paidField = $('#paidAmount');
+    var multiPayInputs = $('.number.pay');
+    var multiPayContainer = $('#add_new_payment');
+    var addPaymentBtn = $('#add_new_payment_type');
+
+    if (isCredit) {
+        paidField.prop('readonly', true).val('').data('user-set', false).addClass('bg-light');
+        multiPayInputs.prop('disabled', true).val('');
+        if (multiPayContainer.length) {
+            multiPayContainer.empty();
+        }
+        if (addPaymentBtn.length) {
+            addPaymentBtn.prop('disabled', true);
+        }
+        $('#pamount_by_method').val('');
+    } else {
+        paidField.prop('readonly', false).removeClass('bg-light');
+        multiPayInputs.prop('disabled', false);
+        if (addPaymentBtn.length) {
+            addPaymentBtn.prop('disabled', false);
+        }
+    }
+    $('.invoice-payment-row, .invoice-payment-controls').toggle(!isCredit);
+    invoice_calculateSum();
+}
+
 //Add Input Field Of Row
-    "use strict";
 function addInputField_invoice(t) {
 
     var row = $("#normalinvoice tbody tr").length;
@@ -49,12 +83,13 @@ function addInputField_invoice(t) {
         tab14 = tabindex + 14;
         tab15 = tabindex + 15;
        
+        var issueLocationOptions = window.invoiceIssueLocationOptions || "<option value=''>Select Location</option>";
+        var issueLocationSelect = "<select class='form-control basic-single issue-location-select' onchange='invoice_product_batch(" + count + ")' id='serial_no_" + count + "' name='serial_no[]' aria-hidden='true' tabindex='" + tab3 + "'>" + issueLocationOptions + "</select>";
         e.innerHTML = "<td><input type='text' name='product_name' onkeypress='invoice_productList(" + count + 
         ");' class='form-control productSelection common_product' placeholder='Product Name' id='" + a + 
         "' required tabindex='" + tab1 + "'><input type='hidden' class='common_product autocomplete_hidden_value  product_id_" + count + 
         "' name='product_id[]' id='SchoolHiddenId'/></td><td><input type='text' name='desc[]'' class='form-control text-right ' tabindex='" +
-         tab2 + "'/></td><td><select class='form-control basic-single'  onchange='invoice_product_batch(" + count + ")' id='serial_no_" + count + "' name='serial_no[]' required aria-hidden='true' tabindex='" + tab3 + 
-         "'><option></option></select></td> <td><input type='text' name='available_quantity[]' id='' class='form-control text-right common_avail_qnt available_quantity_" + 
+         tab2 + "'/></td><td>" + issueLocationSelect + "</td> <td><input type='text' name='available_quantity[]' id='' class='form-control text-right common_avail_qnt available_quantity_" + 
          count + "' value='0' readonly='readonly' /></td><td><input class='form-control text-right common_name unit_" + count + 
          " valid' value='None' readonly='' aria-invalid='false' type='text'></td><td> <input type='text' name='product_quantity[]' value='1' required='required' onkeyup='bdtask_invoice_quantity_calculate(" + 
          count + ");' onchange='bdtask_invoice_quantity_calculate(" + count + ");' id='total_qntt_" + count + "' class='common_qnt total_qntt_" + 
@@ -131,12 +166,13 @@ function addInputField_invoice_dynamic(t) {
         tab13 = tabindex + 13;
         tab14 = tabindex + 14;
         tab15 = tabindex + 15;
+        var issueLocationOptions = window.invoiceIssueLocationOptions || "<option value=''>Select Location</option>";
+        var issueLocationSelect = "<select class='form-control basic-single issue-location-select' onchange='invoice_product_batch(" + count + ")' id='serial_no_" + count + "' name='serial_no[]' aria-hidden='true' tabindex='" + tab3 + "'>" + issueLocationOptions + "</select>";
         e.innerHTML = "<td><input type='text' name='product_name' onkeypress='invoice_productList(" + count + 
         ");' class='form-control productSelection common_product' placeholder='Product Name' id='" + a + 
         "' required tabindex='" + tab1 + "'><input type='hidden' class='common_product autocomplete_hidden_value  product_id_" + count + 
         "' name='product_id[]' id='SchoolHiddenId'/></td><td><input type='text' name='desc[]'' class='form-control text-right ' tabindex='" +
-         tab2 + "'/></td><td><select class='form-control basic-single'  onchange='invoice_product_batch(" + count + ")' id='serial_no_" + count + "' name='serial_no[]' required aria-hidden='true' tabindex='" + tab3 + 
-         "'><option></option></select></td> <td><input type='text' name='available_quantity[]' id='' class='form-control text-right common_avail_qnt available_quantity_" + 
+         tab2 + "'/></td><td>" + issueLocationSelect + "</td> <td><input type='text' name='available_quantity[]' id='' class='form-control text-right common_avail_qnt available_quantity_" + 
          count + "' value='0' readonly='readonly' /></td><td><input class='form-control text-right common_name unit_" + count + 
          " valid' value='None' readonly='' aria-invalid='false' type='text'></td><td> <input type='text' name='product_quantity[]' value='1' required='required' onkeyup='bdtask_invoice_quantity_calculate(" + 
          count + ");' onchange='bdtask_invoice_quantity_calculate(" + count + ");' id='total_qntt_" + count + "' class='common_qnt total_qntt_" + 
@@ -174,17 +210,11 @@ function bdtask_invoice_quantity_calculate(item) {
     var total_discount = $("#total_discount_" + item).val();
     var taxnumber = $("#txfieldnum").val();
     var dis_type = $("#discount_type").val();
-    if (available_quantity != 0) {
-        if (parseInt(quantity) > parseInt(available_quantity)) {
-            var message = "You can Sale maximum " + available_quantity + " Items";
-            toastr["error"](message);
-            $("#total_qntt_" + item).val('');
-            var quantity = 0;
-            $("#total_price_" + item).val(0);
-            for(var i=0;i<taxnumber;i++){
-            $("#all_tax"+i+"_" + item).val(0);
-               bdtask_invoice_quantity_calculate(item);
-        }
+    var availableQtyNum = parseFloat(available_quantity);
+    if (!isNaN(availableQtyNum) && availableQtyNum > 0 && parseFloat(quantity) > availableQtyNum) {
+        var message = "Quantity exceeds available stock (" + available_quantity + ").";
+        if (typeof toastr !== 'undefined' && typeof toastr.warning === 'function') {
+            toastr["warning"](message);
         }
     }
 
@@ -366,11 +396,27 @@ var j = 0;
     var ttl_discount = +total_discount_ammount;
     $("#total_discount_ammount").val(ttl_discount.toFixed(2, 2));
     var grnt_totals = parseFloat(gt) + parseFloat(vatamnt);
-   
+    var saleType = $('#sale_type').val() || 'cash';
+    var paidField = $('#paidAmount');
+    var paidAmountNumeric = parseFloat(paidField.val());
+    if (isNaN(paidAmountNumeric)) {
+        paidAmountNumeric = 0;
+    }
+    if (saleType === 'credit_sale') {
+        paidAmountNumeric = 0;
+        paidField.val('');
+        paidField.data('user-set', false);
+    } else if (!paidField.data('user-set') && paidAmountNumeric === 0) {
+        paidAmountNumeric = grnt_totals;
+        paidField.val(paidAmountNumeric.toFixed(2));
+    }
     $("#grandTotal").val(grnt_totals.toFixed(2, 2));
-    $('#paidAmount').val(grnt_totals);
-    $("#pamount_by_method").val(grnt_totals);
-    // invoice_paidamount();
+    $("#pamount_by_method").val(paidAmountNumeric ? paidAmountNumeric.toFixed(2) : '');
+    var outstanding = grnt_totals - paidAmountNumeric;
+    if (outstanding < 0) {
+        outstanding = 0;
+    }
+    $("#dueAmmount").val(outstanding.toFixed(2));
     var  prb = parseFloat($("#previous").val(), 10);
     var pr = 0;
     var nt = 0;
@@ -392,11 +438,13 @@ $(document).on('click','#add_invoice',function(){
       total += parseFloat( $( this ).val() ) || 0;
     });
 
-    var gtotal=$("#paidAmount").val();
-    if (total != gtotal) {
-      toastr.error('Paid Amount Should Equal To Payment Amount')
-
-      return false;
+    var saleType = $('#sale_type').val() || 'cash';
+    var gtotal=parseFloat($("#paidAmount").val()) || 0;
+    if (saleType !== 'credit_sale') {
+        if (Math.abs(total - gtotal) > 0.009) {
+          toastr.error('Paid amount should match the total collected value.');
+          return false;
+        }
     }
   });
 
@@ -451,6 +499,11 @@ $(document).on('click','#add_new_payment_type',function(){
 
   
   function changedueamount(){
+    if (($('#sale_type').val() || 'cash') === 'credit_sale') {
+      $("#change-amount").text(0);
+      $("#pay-amount").text($('.grandTotalamnt').val());
+      return;
+    }
     var inputval = parseFloat(0);
     var maintotalamount = $('.grandTotalamnt').val();
     
@@ -477,6 +530,17 @@ $(document).on('click','#add_new_payment_type',function(){
 //Invoice Paid Amount
     "use strict";
 function invoice_paidamount() {
+    var saleType = $('#sale_type').val();
+    var grandTotalValue = parseFloat($("#grandTotal").val()) || 0;
+    if (saleType === 'credit_sale') {
+        $("#paidAmount").val('');
+        $("#pamount_by_method").val('');
+        $("#add_new_payment").empty();
+        $("#pay-amount").text('0');
+        $("#change").val(0);
+        $("#dueAmmount").val(grandTotalValue.toFixed(2));
+        return;
+    }
     var  prb = parseFloat($("#previous").val(), 10);
     var pr = 0;
     var d = 0;
@@ -486,8 +550,8 @@ function invoice_paidamount() {
     }else{
         pr = 0;
     }
-    var t = $("#grandTotal").val(),
-    a = $("#paidAmount").val(),
+    var t = grandTotalValue,
+    a = parseFloat($("#paidAmount").val()) || 0,
     e = t - a,
     f = e + pr,
     nt = parseFloat(t, 10) + pr;
@@ -935,6 +999,15 @@ $(document).ready(function(){
 
  $( document ).ready(function() {
         "use strict";
+        $('#paidAmount').on('input', function () {
+            $(this).data('user-set', true);
+        });
+        $('.sale-type-option').on('change', function () {
+            setInvoiceSaleType($(this).val());
+        });
+        if ($('#sale_type').length) {
+            setInvoiceSaleType($('#sale_type').val() || 'cash');
+        }
         var paytype = $("#editpayment_type").val();
         if(paytype == 2){
           $("#bank_div").css("display", "block");        
@@ -952,6 +1025,12 @@ $(document).ready(function(){
         var batch_no = $("#serial_no_" + sl).val();
         var taxnumber = $("#txfieldnum").val();
         var available_quantity = $(".available_quantity_" + sl).val();
+
+        var manualValue = window.invoiceIssueLocationManualValue || 'MANUAL';
+        if (!batch_no || batch_no === manualValue) {
+            $(".available_quantity_" + sl).val('0');
+            return;
+        }
 
         $.ajax( {
             url: base_url + "invoice/invoice/bdtask_batchwise_productprice",

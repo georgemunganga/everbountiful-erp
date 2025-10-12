@@ -27,6 +27,7 @@ class Invoice extends MX_Controller
         $this->load->model('invoice/Invoice_model', 'invoice_model');
         $this->load->model('customer/Customer_model', 'customer_model');
         $this->load->model('account/Accounts_model', 'accounts_model');
+        $this->load->model('inventory/Inventory_model', 'inventory_model');
 
         // Redirect if not logged in
         if (!$this->session->userdata('isLogIn')) {
@@ -46,6 +47,7 @@ class Invoice extends MX_Controller
         $data['title'] = display('add_invoice');
         $data['taxes'] = $this->invoice_model->tax_fileds();
         $data['module'] = "invoice";
+        $data['stock_locations'] = $this->inventory_model->get_active_locations();
         $vatortax = $this->invoice_model->vat_tax_setting();
         if ($vatortax->fixed_tax == 1) {
             $data['page'] = "add_invoice_form";
@@ -1724,7 +1726,11 @@ class Invoice extends MX_Controller
         if (!empty($product_info)) {
             $list[''] = '';
             foreach ($product_info as $value) {
-                $json_product[] = array('label' => $value['product_name'] . '(' . $value['product_model'] . ')', 'value' => $value['product_id']);
+                $label = (string) $value['product_name'];
+                if (!empty($value['product_model'])) {
+                    $label = trim($label . ' ' . $value['product_model']);
+                }
+                $json_product[] = array('label' => $label, 'value' => $value['product_id']);
             }
         } else {
             $json_product[] = 'No Product Found';

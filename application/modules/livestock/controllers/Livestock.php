@@ -8,10 +8,12 @@ class Livestock extends MX_Controller
         parent::__construct();
 
         $this->load->model(array(
-            'livestock_model'
+            'livestock_model',
+            'inventory/Inventory_model' => 'inventory_model'
         ));
+        $this->load->library('InventoryLedger');
 
-        if (!$this->session->userdata('isLogIn')) {
+        if (!$this->input->is_cli_request() && !$this->session->userdata('isLogIn')) {
             redirect('login');
         }
 
@@ -42,8 +44,59 @@ class Livestock extends MX_Controller
             'edit_shed'               => 'Edit Shed',
             'productions'             => 'Productions',
             'production'              => 'Production',
+            'production_date'         => 'Production Date',
             'add_production'          => 'Add Production',
             'edit_production'         => 'Edit Production',
+            'farm_collections'        => 'Farms Collections',
+            'production_percentage_report' => 'Production Percentage',
+            'summary'                 => 'Summary',
+            'daily_breakdown'         => 'Daily Breakdown',
+            'usable_output'           => 'Usable Output',
+            'yield_percentage'        => 'Yield Percentage',
+            'batches'                 => 'Batches',
+            'select_product_instruction' => 'Select a product to view production percentage details.',
+            'biological_assets'       => 'Biological Assets',
+            'livestock_asset'         => 'Livestock Asset',
+            'select_livestock_asset'  => 'Select Livestock Asset',
+            'use_livestock_asset_help'=> 'Choosing a livestock record will auto-fill the biological asset count.',
+            'no_livestock_available'  => 'No livestock records available.',
+            'asset_count_help'        => 'Optional: total number of productive units (animals or plants).',
+            'asset_count_override_help' => 'Override the auto-filled value from the selected livestock if needed.',
+            'interval'                => 'Interval',
+            'daily'                   => 'Daily',
+            'weekly'                  => 'Weekly',
+            'monthly'                 => 'Monthly',
+            'yearly'                  => 'Yearly',
+            'enter_asset_count'       => 'Enter number of producing units',
+            'component_meaning'       => 'Meaning of Each Component',
+            'term'                    => 'Term',
+            'description'             => 'Description',
+            'example_poultry'         => 'Example (Poultry)',
+            'example_crops'           => 'Example (Crops)',
+            'products_produced_desc'  => 'The measurable output (e.g. eggs, milk, fruit, harvested crops).',
+            'products_produced'       => 'Products Produced',
+            'biological_assets_present' => 'Biological Assets Present',
+            'biological_assets_present_desc' => 'The number of living organisms or producing units responsible for the output.',
+            'production_percentage_desc' => 'Yield relative to the number of productive units.',
+            'production_percentage_formula' => '(Units produced / Number of assets) x 100',
+            'examples'                => 'Examples',
+            'example_dairy'           => 'Dairy Example',
+            'production_rate'         => 'Production %',
+            'period'                  => 'Period',
+            'dynamic_production_template' => 'Dynamic Production Report Template',
+            'biological_asset_type'   => 'Biological Asset Type',
+            'number_of_assets'        => 'No. of Assets',
+            'units_produced'          => 'Units Produced',
+            'feed_inputs_used'        => 'Feed/Inputs Used',
+            'interpretation'          => 'Interpretation',
+            'interpretation_above_100'=> 'Above 100% -> Each biological unit produced more than expected (excellent efficiency).',
+            'interpretation_mid'      => 'Around 80-100% -> Normal, healthy production.',
+            'interpretation_low'      => 'Below 70% -> Potential stress, disease, or input constraints.',
+            'optional_metrics'        => 'Optional Metrics',
+            'yield_per_area'          => 'Yield per unit area (crops): Total yield / Area planted.',
+            'conversion_ratios'       => 'Conversion ratios (livestock): Feed input / Weight gain.',
+            'economic_efficiency'     => 'Economic efficiency: (Value of output / Cost of inputs) x 100.',
+            'invalid_date'            => 'Please provide a valid date.',
             'livestock_groups'        => 'Livestock Groups',
             'livestock_group'         => 'Livestock Group',
             'add_livestock_group'     => 'Add Livestock Group',
@@ -86,10 +139,14 @@ class Livestock extends MX_Controller
             'extras'                  => 'Extras',
             'interval'                => 'Interval',
             'filter'                  => 'Filter',
+            'filtered_by_name'        => 'Filtered by name: %s',
             'period'                  => 'Period',
             'from'                    => 'From',
             'to'                      => 'To',
             'mortality'               => 'Mortality',
+            'outputs'                 => 'Outputs',
+            'add_output'              => 'Add Output',
+            'please_add_output'       => 'Please add at least one output product',
         );
 
         foreach ($phrases as $phrase => $english) {
@@ -260,9 +317,121 @@ class Livestock extends MX_Controller
             }
         }
 
+        $isPost = strtoupper($this->input->server('REQUEST_METHOD')) === 'POST';
+
+        $outputItems = array();
+        $postedProducts = (array) $this->input->post('output_product_id', true);
+        $postedUnits = (array) $this->input->post('output_unit_id', true);
+        $postedQuantities = (array) $this->input->post('output_quantity', true);
+        $postedLosses = (array) $this->input->post('output_loss_qty', true);
+        $postedExtras = (array) $this->input->post('output_extras_qty', true);
+
+        if ($isPost && !empty($postedProducts)) {
+            $shedIdInput = (int) $this->input->post('shed_id', true);
+            $locationDefault = $shedIdInput > 0 ? $this->inventoryledger->resolveShedLocationId($shedIdInput) : $this->inventoryledger->getDefaultLocationId();
+
+            foreach ($postedProducts as $idx => $productId) {
+                $outputItems[] = array(
+                    'product_id'  => trim((string) $productId),
+                    'unit_id'     => isset($postedUnits[$idx]) ? $postedUnits[$idx] : '',
+                    'quantity'    => isset($postedQuantities[$idx]) ? $postedQuantities[$idx] : '',
+                    'loss_qty'    => isset($postedLosses[$idx]) ? $postedLosses[$idx] : '',
+                    'extras_qty'  => isset($postedExtras[$idx]) ? $postedExtras[$idx] : '',
+                    'location_id' => $locationDefault,
+                );
+            }
+        } elseif ($production) {
+            $existingOutputs = $this->livestock_model->get_production_outputs($production['id']);
+            foreach ($existingOutputs as $existing) {
+                $unitId = (int) $existing['unit_id'];
+                $outputItems[] = array(
+                    'product_id'  => $existing['product_id'],
+                    'unit_id'     => $unitId,
+                    'quantity'    => $this->inventoryledger->convertFromBaseQuantity($existing['product_id'], $unitId, $existing['quantity']),
+                    'loss_qty'    => $this->inventoryledger->convertFromBaseQuantity($existing['product_id'], $unitId, $existing['loss_quantity']),
+                    'extras_qty'  => 0,
+                    'location_id' => (int) $existing['location_id'],
+                );
+            }
+        }
+
+        if (empty($outputItems)) {
+            $outputItems[] = array(
+                'product_id'  => '',
+                'unit_id'     => '',
+                'quantity'    => '',
+                'loss_qty'    => '',
+                'extras_qty'  => '',
+                'location_id' => $production ? (int) $production['stock_location_id'] : $this->inventoryledger->getDefaultLocationId(),
+            );
+        }
+
+        $defaultProductionDate = date('Y-m-d');
+        if ($production) {
+            if (!empty($production['production_date']) && $production['production_date'] !== '0000-00-00') {
+                $timestamp = strtotime($production['production_date']);
+                if ($timestamp !== false) {
+                    $defaultProductionDate = date('Y-m-d', $timestamp);
+                }
+            } elseif (!empty($production['created_at'])) {
+                $timestamp = strtotime($production['created_at']);
+                if ($timestamp !== false) {
+                    $defaultProductionDate = date('Y-m-d', $timestamp);
+                }
+            }
+        }
+
+        $shedId = $isPost ? (int) $this->input->post('shed_id', true) : ($production ? (int) $production['shed_id'] : 0);
+        $defaultLocationId = $shedId > 0 ? $this->inventoryledger->resolveShedLocationId($shedId) : $this->inventoryledger->getDefaultLocationId();
+
+        $processedOutputs = array();
+        $totalQty = 0.0;
+        $totalLoss = 0.0;
+        $totalExtras = 0.0;
+
+        foreach ($outputItems as $item) {
+            $productId = isset($item['product_id']) ? trim((string) $item['product_id']) : '';
+            $quantity = isset($item['quantity']) && $item['quantity'] !== '' ? (float) $item['quantity'] : 0.0;
+            $lossQty = isset($item['loss_qty']) && $item['loss_qty'] !== '' ? (float) $item['loss_qty'] : 0.0;
+            $extrasQty = isset($item['extras_qty']) && $item['extras_qty'] !== '' ? (float) $item['extras_qty'] : 0.0;
+            $unitId = isset($item['unit_id']) && $item['unit_id'] !== '' ? (int) $item['unit_id'] : 0;
+            $locationId = isset($item['location_id']) ? (int) $item['location_id'] : 0;
+
+            if ($productId === '' || $quantity <= 0) {
+                continue;
+            }
+
+            if ($unitId <= 0) {
+                $unitId = $this->inventoryledger->getBaseUnitId($productId);
+            }
+            if ($locationId <= 0) {
+                $locationId = $defaultLocationId;
+            }
+
+            $processedOutputs[] = array(
+                'product_id'    => $productId,
+                'unit_id'       => $unitId,
+                'quantity'      => $quantity,
+                'mortality_qty' => $lossQty,
+                'damaged_qty'   => 0,
+                'extras_qty'    => $extrasQty,
+                'location_id'   => $locationId,
+            );
+
+            $totalQty += $quantity;
+            $totalLoss += $lossQty;
+            $totalExtras += $extrasQty;
+        }
+
+        if ($isPost) {
+            $_POST['produced_total_qty'] = $this->format_decimal($totalQty);
+            $_POST['produced_mortality_qty'] = $this->format_decimal($totalLoss);
+            $_POST['produced_extras_qty'] = $this->format_decimal($totalExtras);
+        }
+
         $this->form_validation->set_rules('name', $this->phrase('production', 'Production') . ' ' . strtolower($this->phrase('name', 'Name')), 'required|max_length[255]');
         $this->form_validation->set_rules('shed_id', $this->phrase('shed', 'Shed'), 'required|integer');
-        $this->form_validation->set_rules('unit_type_id', $this->phrase('unit', 'Unit'), 'required|integer');
+        $this->form_validation->set_rules('production_date', $this->phrase('production_date', 'Production Date'), 'required|callback_valid_date');
         $this->form_validation->set_rules('produced_total_qty', $this->phrase('produced_total_qty', 'Produced Total Qty'), 'numeric');
         $this->form_validation->set_rules('produced_mortality_qty', $this->phrase('mortality', 'Mortality'), 'numeric');
         $this->form_validation->set_rules('produced_damaged_qty', $this->phrase('produced_damaged_qty', 'Produced Damaged Qty'), 'numeric');
@@ -270,34 +439,63 @@ class Livestock extends MX_Controller
         $this->form_validation->set_rules('description', $this->phrase('description', 'Description'), 'max_length[1000]');
 
         if ($this->form_validation->run() === true) {
+            $productionDate = $this->normalize_date_input($this->input->post('production_date', true), date('Y-m-d'));
+
+            if (empty($processedOutputs)) {
+                $this->session->set_flashdata('exception', $this->phrase('please_add_output', 'Please add at least one output product.'));
+                redirect($production ? "productions/edit/{$production['id']}" : 'productions/add');
+            }
+
+            $primaryOutput = $processedOutputs[0];
+
             $payload = array(
                 'name'                   => $this->input->post('name', true),
-                'shed_id'                => (int) $this->input->post('shed_id', true),
-                'unit_type_id'           => (int) $this->input->post('unit_type_id', true),
+                'shed_id'                => $shedId,
+                'unit_type_id'           => (int) $primaryOutput['unit_id'],
                 'description'            => $this->input->post('description', true),
-                'produced_total_qty'     => $this->decimal_input('produced_total_qty'),
-                'produced_mortality_qty' => $this->decimal_input('produced_mortality_qty'),
+                'produced_total_qty'     => $this->format_decimal($totalQty),
+                'produced_mortality_qty' => $this->format_decimal($totalLoss),
                 'produced_damaged_qty'   => $this->decimal_input('produced_damaged_qty'),
-                'produced_extras_qty'    => $this->decimal_input('produced_extras_qty'),
+                'produced_extras_qty'    => $this->format_decimal($totalExtras),
+                'output_product_id'      => $primaryOutput['product_id'],
+                'stock_location_id'      => $primaryOutput['location_id'],
+                'output_unit_id'         => $primaryOutput['unit_id'],
+                'production_date'        => $productionDate,
             );
 
             if ($production) {
                 $success = $this->livestock_model->update_production($production['id'], $payload);
+                if ($success) {
+                    $syncSuccess = $this->sync_production_inventory($production['id'], $processedOutputs, $productionDate);
+                    if (!$syncSuccess) {
+                        $this->session->set_flashdata('exception', $this->phrase('please_try_again', 'Please try again.'));
+                        redirect("productions/edit/{$production['id']}");
+                    }
+                }
                 $message = $success ? 'successfully_updated' : 'please_try_again';
             } else {
-                $success = $this->livestock_model->create_production($payload);
+                $newId = $this->livestock_model->create_production($payload);
+                $success = (bool) $newId;
+                if ($success) {
+                    $syncSuccess = $this->sync_production_inventory($newId, $processedOutputs, $productionDate);
+                    if (!$syncSuccess) {
+                        $this->session->set_flashdata('exception', $this->phrase('please_try_again', 'Please try again.'));
+                        redirect('productions/add');
+                    }
+                }
                 $message = $success ? 'save_successfully' : 'please_try_again';
             }
 
             $this->flash_and_redirect($message, 'productions', $success ? 'message' : 'exception');
         }
 
-        $data['title']       = $production ? $this->phrase('edit_production', 'Edit Production') : $this->phrase('add_production', 'Add Production');
-        $data['production']  = (object) array(
+        $data['title'] = $production ? $this->phrase('edit_production', 'Edit Production') : $this->phrase('add_production', 'Add Production');
+        $data['production'] = (object) array(
             'id'                     => $production ? $production['id'] : null,
             'name'                   => set_value('name', $production ? $production['name'] : ''),
             'shed_id'                => set_value('shed_id', $production ? $production['shed_id'] : ''),
-            'unit_type_id'           => set_value('unit_type_id', $production ? $production['unit_type_id'] : ''),
+            'production_date'        => set_value('production_date', $defaultProductionDate),
+            'output_product_id'      => set_value('output_product_id', $production ? $production['output_product_id'] : ''),
             'description'            => set_value('description', $production ? $production['description'] : ''),
             'produced_total_qty'     => set_value('produced_total_qty', $production ? $production['produced_total_qty'] : '0.00'),
             'produced_mortality_qty' => set_value('produced_mortality_qty', $production ? $production['produced_mortality_qty'] : '0.00'),
@@ -306,8 +504,101 @@ class Livestock extends MX_Controller
         );
         $data['sheds'] = $this->livestock_model->get_sheds();
         $data['units'] = $this->livestock_model->get_units();
+        $data['products'] = $this->livestock_model->get_products();
+        $data['production_outputs'] = $outputItems;
 
         $this->render('productions/form', $data);
+    }
+
+    public function valid_date($date)
+    {
+        $normalized = $this->normalize_date_input($date, null);
+        if ($normalized === null) {
+            $this->form_validation->set_message('valid_date', $this->phrase('invalid_date', 'Please provide a valid date.'));
+            return false;
+        }
+        $_POST['production_date'] = $normalized;
+        return true;
+    }
+
+    private function normalize_date_input($input, $fallback = null)
+    {
+        if ($input === null) {
+            return $fallback;
+        }
+
+        $input = trim((string) $input);
+        if ($input === '') {
+            return $fallback;
+        }
+
+        $timestamp = strtotime($input);
+        if ($timestamp === false) {
+            return $fallback;
+        }
+
+        return date('Y-m-d', $timestamp);
+    }
+
+    private function sync_production_inventory($productionId, array $outputs, $productionDate)
+    {
+        $productionId = (int) $productionId;
+        if ($productionId <= 0) {
+            return false;
+        }
+
+        $productionDate = $this->normalize_date_input($productionDate, date('Y-m-d'));
+
+        if (empty($outputs)) {
+            $this->inventoryledger->clearProductionOutput($productionId);
+            return true;
+        }
+
+        $clearExisting = true;
+        $recordedAny = false;
+
+        foreach ($outputs as $output) {
+            $productId = isset($output['product_id']) ? trim($output['product_id']) : '';
+            $quantity = isset($output['quantity']) ? (float) $output['quantity'] : 0;
+            $locationId = isset($output['location_id']) ? (int) $output['location_id'] : 0;
+            $unitId = isset($output['unit_id']) ? (int) $output['unit_id'] : 0;
+
+            if ($productId === '' || $locationId <= 0 || $quantity <= 0) {
+                log_message('error', sprintf('Skipping invalid production output payload for production %s', $productionId));
+                continue;
+            }
+
+            if ($unitId <= 0) {
+                $unitId = $this->inventoryledger->getBaseUnitId($productId);
+            }
+            if ($locationId <= 0) {
+                $locationId = $this->inventoryledger->getDefaultLocationId();
+            }
+
+            $payload = array(
+                'production_id'   => $productionId,
+                'product_id'      => $productId,
+                'unit_id'         => $unitId,
+                'quantity'        => $quantity,
+                'mortality_qty'   => isset($output['mortality_qty']) ? (float) $output['mortality_qty'] : 0,
+                'damaged_qty'     => isset($output['damaged_qty']) ? (float) $output['damaged_qty'] : 0,
+                'extras_qty'      => isset($output['extras_qty']) ? (float) $output['extras_qty'] : 0,
+                'location_id'     => $locationId,
+                'production_date' => $productionDate,
+                'created_by'      => $this->session->userdata('id'),
+            );
+
+            $result = $this->inventoryledger->recordProductionOutput($payload, $clearExisting);
+            if ($result === false) {
+                log_message('error', sprintf('Failed to record production output for production %s, product %s', $productionId, $productId));
+                return false;
+            }
+
+            $recordedAny = true;
+            $clearExisting = false;
+        }
+
+        return $recordedAny;
     }
 
     public function production_delete($id = null)
@@ -323,10 +614,25 @@ class Livestock extends MX_Controller
 
     /* ----------------------------- Livestocks ---------------------------- */
 
-    public function livestocks()
+    public function livestocks($name = null)
     {
+        $queryName = $this->input->get('name', true);
+        $activeName = null;
+
+        if ($queryName !== null && $queryName !== '') {
+            $activeName = trim((string) $queryName);
+        } elseif ($name !== null && $name !== '') {
+            $activeName = trim((string) urldecode($name));
+        }
+
+        $filters = array();
+        if (!empty($activeName)) {
+            $filters['name'] = $activeName;
+        }
+
         $data['title']      = $this->phrase('livestocks', 'Livestocks');
-        $data['livestocks'] = $this->livestock_model->get_livestocks();
+        $data['livestocks'] = $this->livestock_model->get_livestocks($filters);
+        $data['active_name_filter'] = $activeName;
         $this->render('livestocks/index', $data);
     }
 
@@ -340,6 +646,7 @@ class Livestock extends MX_Controller
             }
         }
 
+        $this->form_validation->set_rules('name', $this->phrase('livestock', 'Livestock') . ' ' . strtolower($this->phrase('name', 'Name')), 'trim|required|max_length[255]');
         $this->form_validation->set_rules('shed_id', $this->phrase('shed', 'Shed'), 'required|integer');
         $this->form_validation->set_rules('livestock_group_id', $this->phrase('livestock_group', 'Livestock Group'), 'required|integer');
         $this->form_validation->set_rules('unit_type_id', $this->phrase('unit', 'Unit'), 'required|integer');
@@ -351,6 +658,7 @@ class Livestock extends MX_Controller
 
         if ($this->form_validation->run() === true) {
             $payload = array(
+                'name'                  => trim((string) $this->input->post('name', true)),
                 'shed_id'               => (int) $this->input->post('shed_id', true),
                 'livestock_group_id'    => (int) $this->input->post('livestock_group_id', true),
                 'unit_type_id'          => (int) $this->input->post('unit_type_id', true),
@@ -375,6 +683,7 @@ class Livestock extends MX_Controller
         $data['title']     = $livestock ? $this->phrase('edit_livestock', 'Edit Livestock') : $this->phrase('add_livestock', 'Add Livestock');
         $data['livestock'] = (object) array(
             'id'                     => $livestock ? $livestock['id'] : null,
+            'name'                   => set_value('name', $livestock ? $livestock['name'] : ''),
             'shed_id'                => set_value('shed_id', $livestock ? $livestock['shed_id'] : ''),
             'livestock_group_id'     => set_value('livestock_group_id', $livestock ? $livestock['livestock_group_id'] : ''),
             'unit_type_id'           => set_value('unit_type_id', $livestock ? $livestock['unit_type_id'] : ''),
@@ -489,49 +798,113 @@ class Livestock extends MX_Controller
         }
 
         $this->form_validation->set_rules('feed_id', $this->phrase('feed', 'Feed'), 'required|integer');
+        $this->form_validation->set_rules('name', $this->phrase('name', 'Name'), 'required|max_length[255]');
         $this->form_validation->set_rules('shed_id', $this->phrase('shed', 'Shed'), 'required|integer');
         $this->form_validation->set_rules('total_purchased_qty', $this->phrase('total_purchased', 'Total Purchased'), 'numeric');
         $this->form_validation->set_rules('used_total_qty', $this->phrase('used_total', 'Used Total'), 'numeric');
         $this->form_validation->set_rules('total_wasted_qty', $this->phrase('total_wasted', 'Total Wasted'), 'numeric');
+        $this->form_validation->set_rules('inventory_product_id', $this->phrase('product', 'Product'), 'required');
+        $this->form_validation->set_rules('location_id', $this->phrase('location', 'Location'), 'required|integer');
+
+        $existingLocationId = null;
+        if ($feed_usage) {
+            if (array_key_exists('inventory_location_id', $feed_usage) && $feed_usage['inventory_location_id'] !== null) {
+                $existingLocationId = (int) $feed_usage['inventory_location_id'];
+            } elseif (array_key_exists('location_id', $feed_usage) && $feed_usage['location_id'] !== null) {
+                $existingLocationId = (int) $feed_usage['location_id'];
+            }
+        }
 
         if ($this->form_validation->run() === true) {
+            // Permissions: enforce consumption and override
+            if (isset($this->permission1) && method_exists($this->permission1, 'method')) {
+                if (!$this->permission1->method('stock_consumption', 'create')->access()) {
+                    $this->flash_and_redirect('unauthorized', 'feed-usages', 'exception');
+                }
+            }
             $total_purchased = $this->decimal_input('total_purchased_qty');
             $used_total      = $this->decimal_input('used_total_qty');
             $total_wasted    = $this->decimal_input('total_wasted_qty');
             $total_instock   = max(0, $total_purchased - $used_total - $total_wasted);
+            $selectedLocationId = (int) $this->input->post('location_id', true);
+            if ($selectedLocationId <= 0) {
+                $selectedLocationId = null;
+            }
 
             $payload = array(
                 'feed_id'             => (int) $this->input->post('feed_id', true),
                 'shed_id'             => (int) $this->input->post('shed_id', true),
+                'inventory_product_id'=> trim($this->input->post('inventory_product_id', true)),
                 'total_purchased_qty' => $this->format_decimal($total_purchased),
                 'used_total_qty'      => $this->format_decimal($used_total),
                 'total_wasted_qty'    => $this->format_decimal($total_wasted),
                 'total_instock_qty'   => $this->format_decimal($total_instock),
             );
 
+            if ($selectedLocationId) {
+                if ($this->db->field_exists('inventory_location_id', 'feed_usages')) {
+                    $payload['inventory_location_id'] = $selectedLocationId;
+                } elseif ($this->db->field_exists('location_id', 'feed_usages')) {
+                    $payload['location_id'] = $selectedLocationId;
+                }
+            }
+
+            $allowOverride = (bool) $this->input->post('allow_override', true);
+
             if ($feed_usage) {
-                $success = $this->livestock_model->update_feed_usage($feed_usage['id'], $payload);
-                $message = $success ? 'successfully_updated' : 'please_try_again';
+                $usageId = (int) $feed_usage['id'];
+                $success = $this->livestock_model->update_feed_usage($usageId, $payload);
+                if ($success) {
+                    $this->sync_feed_usage_ledger($usageId, $allowOverride, null, $selectedLocationId);
+                    $message = 'successfully_updated';
+                    log_message('info', sprintf('Feed usage #%d updated and synced by user %s', $usageId, $this->session->userdata('id')));
+                } else {
+                    $message = 'please_try_again';
+                }
             } else {
-                $success = $this->livestock_model->create_feed_usage($payload);
-                $message = $success ? 'save_successfully' : 'please_try_again';
+                $usageId = $this->livestock_model->create_feed_usage($payload);
+                if ($usageId) {
+                    $this->sync_feed_usage_ledger($usageId, $allowOverride, null, $selectedLocationId);
+                    $message = 'save_successfully';
+                    log_message('info', sprintf('Feed usage #%d created and synced by user %s', $usageId, $this->session->userdata('id')));
+                } else {
+                    $message = 'please_try_again';
+                }
+                $success = (bool) $usageId;
+            }
+
+            if ($success && $allowOverride) {
+                if (isset($this->permission1) && method_exists($this->permission1, 'method')) {
+                    if (!$this->permission1->method('stock_override', 'create')->access()) {
+                        $this->flash_and_redirect('unauthorized', 'feed-usages', 'exception');
+                    }
+                }
+                log_message('warning', sprintf('Feed usage #%d applied with override by user %s', $usageId, $this->session->userdata('id')));
             }
 
             $this->flash_and_redirect($message, 'feed-usages', $success ? 'message' : 'exception');
         }
 
         $data['title'] = $feed_usage ? $this->phrase('edit_feed_usage', 'Edit Feed Usage') : $this->phrase('add_feed_usage', 'Add Feed Usage');
+        if (!$existingLocationId && $feed_usage) {
+            $existingLocationId = $this->inventoryledger->resolveShedLocationId((int) $feed_usage['shed_id']);
+        }
         $data['feed_usage'] = (object) array(
             'id'                   => $feed_usage ? $feed_usage['id'] : null,
             'feed_id'              => set_value('feed_id', $feed_usage ? $feed_usage['feed_id'] : ''),
             'shed_id'              => set_value('shed_id', $feed_usage ? $feed_usage['shed_id'] : ''),
+            'inventory_product_id' => set_value('inventory_product_id', $feed_usage ? $feed_usage['inventory_product_id'] : ''),
             'total_purchased_qty'  => set_value('total_purchased_qty', $feed_usage ? $feed_usage['total_purchased_qty'] : '0.00'),
             'used_total_qty'       => set_value('used_total_qty', $feed_usage ? $feed_usage['used_total_qty'] : '0.00'),
             'total_wasted_qty'     => set_value('total_wasted_qty', $feed_usage ? $feed_usage['total_wasted_qty'] : '0.00'),
             'total_instock_qty'    => set_value('total_instock_qty', $feed_usage ? $feed_usage['total_instock_qty'] : '0.00'),
+            'location_id'          => set_value('location_id', $existingLocationId ?: ''),
         );
         $data['feeds'] = $this->livestock_model->get_feeds_dropdown();
         $data['sheds'] = $this->livestock_model->get_sheds();
+        $data['inventory_products'] = $this->inventory_model->get_consumable_products();
+        $data['locations'] = $this->inventory_model->get_active_locations();
+        $data['recent_notifications'] = $this->inventory_model->get_recent_notifications(10);
 
         $this->render('feed_usages/form', $data);
     }
@@ -542,8 +915,12 @@ class Livestock extends MX_Controller
             $this->flash_and_redirect('not_found', 'feed-usages', 'exception');
         }
 
+        $this->inventoryledger->clearMovementsByReference('feed_usage', $id);
         $success = $this->livestock_model->delete_feed_usage($id);
         $message = $success ? 'successfully_deleted' : 'please_try_again';
+        if ($success) {
+            log_message('info', sprintf('Feed usage #%d deleted and ledger movements cleared by user %s', $id, $this->session->userdata('id')));
+        }
         $this->flash_and_redirect($message, 'feed-usages', $success ? 'message' : 'exception');
     }
 
@@ -637,6 +1014,15 @@ class Livestock extends MX_Controller
             }
         }
 
+        $existingLocationId = null;
+        if ($vaccine_usage) {
+            if (array_key_exists('inventory_location_id', $vaccine_usage) && $vaccine_usage['inventory_location_id'] !== null) {
+                $existingLocationId = (int) $vaccine_usage['inventory_location_id'];
+            } elseif (array_key_exists('location_id', $vaccine_usage) && $vaccine_usage['location_id'] !== null) {
+                $existingLocationId = (int) $vaccine_usage['location_id'];
+            }
+        }
+
         $this->form_validation->set_rules('vaccine_id', $this->phrase('vaccine', 'Vaccine'), 'required|integer');
         $this->form_validation->set_rules('shed_id', $this->phrase('shed', 'Shed'), 'integer');
         $this->form_validation->set_rules('usage_date', $this->phrase('usage_date', 'Usage Date'), 'required');
@@ -644,8 +1030,16 @@ class Livestock extends MX_Controller
         $this->form_validation->set_rules('used_total_qty', $this->phrase('used_total', 'Used Total'), 'numeric');
         $this->form_validation->set_rules('total_wasted_qty', $this->phrase('total_wasted', 'Total Wasted'), 'numeric');
         $this->form_validation->set_rules('notes', $this->phrase('notes', 'Notes'), 'max_length[2000]');
+        $this->form_validation->set_rules('inventory_product_id', $this->phrase('product', 'Product'), 'required');
+        $this->form_validation->set_rules('location_id', $this->phrase('location', 'Location'), 'required|integer');
 
         if ($this->form_validation->run() === true) {
+            // Permissions: enforce consumption and override
+            if (isset($this->permission1) && method_exists($this->permission1, 'method')) {
+                if (!$this->permission1->method('stock_consumption', 'create')->access()) {
+                    $this->flash_and_redirect('unauthorized', 'vaccine-usages', 'exception');
+                }
+            }
             $total_purchased = $this->decimal_input('total_purchased_qty');
             $total_used      = $this->decimal_input('used_total_qty');
             $total_wasted    = $this->decimal_input('total_wasted_qty');
@@ -653,11 +1047,16 @@ class Livestock extends MX_Controller
             $usage_date      = $this->input->post('usage_date', true);
             $usage_date      = $usage_date ? date('Y-m-d', strtotime($usage_date)) : date('Y-m-d');
             $shed_id         = $this->input->post('shed_id', true);
+            $selectedLocationId = (int) $this->input->post('location_id', true);
+            if ($selectedLocationId <= 0) {
+                $selectedLocationId = null;
+            }
 
             $payload = array(
                 'vaccine_id'           => (int) $this->input->post('vaccine_id', true),
                 'shed_id'              => ($shed_id !== '') ? (int) $shed_id : null,
                 'usage_date'           => $usage_date,
+                'inventory_product_id' => trim($this->input->post('inventory_product_id', true)),
                 'total_purchased_qty'  => $this->format_decimal($total_purchased),
                 'used_total_qty'       => $this->format_decimal($total_used),
                 'total_wasted_qty'     => $this->format_decimal($total_wasted),
@@ -665,31 +1064,72 @@ class Livestock extends MX_Controller
                 'notes'                => $this->input->post('notes', true),
             );
 
+            if ($selectedLocationId) {
+                if ($this->db->field_exists('inventory_location_id', 'vaccine_usages')) {
+                    $payload['inventory_location_id'] = $selectedLocationId;
+                } elseif ($this->db->field_exists('location_id', 'vaccine_usages')) {
+                    $payload['location_id'] = $selectedLocationId;
+                }
+            }
+
+            $allowOverride = (bool) $this->input->post('allow_override', true);
+
             if ($vaccine_usage) {
-                $success = $this->livestock_model->update_vaccine_usage($vaccine_usage['id'], $payload);
-                $message = $success ? 'successfully_updated' : 'please_try_again';
+                $usageId = (int) $vaccine_usage['id'];
+                $success = $this->livestock_model->update_vaccine_usage($usageId, $payload);
+                if ($success) {
+                    $this->sync_vaccine_usage_ledger($usageId, $allowOverride, null, $selectedLocationId);
+                    $message = 'successfully_updated';
+                    log_message('info', sprintf('Vaccine usage #%d updated and synced by user %s', $usageId, $this->session->userdata('id')));
+                } else {
+                    $message = 'please_try_again';
+                }
             } else {
-                $success = $this->livestock_model->create_vaccine_usage($payload);
-                $message = $success ? 'save_successfully' : 'please_try_again';
+                $usageId = $this->livestock_model->create_vaccine_usage($payload);
+                if ($usageId) {
+                    $this->sync_vaccine_usage_ledger($usageId, $allowOverride, null, $selectedLocationId);
+                    $message = 'save_successfully';
+                    log_message('info', sprintf('Vaccine usage #%d created and synced by user %s', $usageId, $this->session->userdata('id')));
+                } else {
+                    $message = 'please_try_again';
+                }
+                $success = (bool) $usageId;
+            }
+
+            if ($success && $allowOverride) {
+                if (isset($this->permission1) && method_exists($this->permission1, 'method')) {
+                    if (!$this->permission1->method('stock_override', 'create')->access()) {
+                        $this->flash_and_redirect('unauthorized', 'vaccine-usages', 'exception');
+                    }
+                }
+                log_message('warning', sprintf('Vaccine usage #%d applied with override by user %s', $usageId, $this->session->userdata('id')));
             }
 
             $this->flash_and_redirect($message, 'vaccine-usages', $success ? 'message' : 'exception');
         }
 
         $data['title'] = $vaccine_usage ? $this->phrase('edit_vaccine_usage', 'Edit Vaccine Usage') : $this->phrase('add_vaccine_usage', 'Add Vaccine Usage');
+        if (!$existingLocationId && $vaccine_usage) {
+            $existingLocationId = $this->inventoryledger->resolveShedLocationId((int) $vaccine_usage['shed_id']);
+        }
         $data['vaccine_usage'] = (object) array(
             'id'                   => $vaccine_usage ? $vaccine_usage['id'] : null,
             'vaccine_id'           => set_value('vaccine_id', $vaccine_usage ? $vaccine_usage['vaccine_id'] : ''),
             'shed_id'              => set_value('shed_id', $vaccine_usage ? $vaccine_usage['shed_id'] : ''),
             'usage_date'           => set_value('usage_date', $vaccine_usage ? $vaccine_usage['usage_date'] : date('Y-m-d')),
+            'inventory_product_id' => set_value('inventory_product_id', $vaccine_usage ? $vaccine_usage['inventory_product_id'] : ''),
             'total_purchased_qty'  => set_value('total_purchased_qty', $vaccine_usage ? $vaccine_usage['total_purchased_qty'] : '0.00'),
             'used_total_qty'       => set_value('used_total_qty', $vaccine_usage ? $vaccine_usage['used_total_qty'] : '0.00'),
             'total_wasted_qty'     => set_value('total_wasted_qty', $vaccine_usage ? $vaccine_usage['total_wasted_qty'] : '0.00'),
             'total_instock_qty'    => set_value('total_instock_qty', $vaccine_usage ? $vaccine_usage['total_instock_qty'] : '0.00'),
             'notes'                => set_value('notes', $vaccine_usage ? $vaccine_usage['notes'] : ''),
+            'location_id'          => set_value('location_id', $existingLocationId ?: ''),
         );
         $data['vaccines'] = $this->livestock_model->get_vaccines_dropdown();
         $data['sheds']    = $this->livestock_model->get_sheds();
+        $data['inventory_products'] = $this->inventory_model->get_consumable_products();
+        $data['locations'] = $this->inventory_model->get_active_locations();
+        $data['recent_notifications'] = $this->inventory_model->get_recent_notifications(10);
 
         $this->render('vaccine_usages/form', $data);
     }
@@ -700,8 +1140,12 @@ class Livestock extends MX_Controller
             $this->flash_and_redirect('not_found', 'vaccine-usages', 'exception');
         }
 
+        $this->inventoryledger->clearMovementsByReference('vaccine_usage', $id);
         $success = $this->livestock_model->delete_vaccine_usage($id);
         $message = $success ? 'successfully_deleted' : 'please_try_again';
+        if ($success) {
+            log_message('info', sprintf('Vaccine usage #%d deleted and ledger movements cleared by user %s', $id, $this->session->userdata('id')));
+        }
         $this->flash_and_redirect($message, 'vaccine-usages', $success ? 'message' : 'exception');
     }
 
@@ -744,6 +1188,345 @@ class Livestock extends MX_Controller
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode($response));
+    }
+
+    public function production_percentage()
+    {
+        $products = $this->livestock_model->get_products();
+        $livestockAssets = $this->livestock_model->get_livestock_assets();
+
+        $productIdInput = $this->input->get('product_id', true);
+        $selectedProductId = ($productIdInput !== null) ? trim((string) $productIdInput) : '';
+
+        $livestockIdInput = $this->input->get('livestock_id', true);
+        $selectedLivestockId = ($livestockIdInput !== null) ? trim((string) $livestockIdInput) : '';
+        $selectedLivestock = null;
+        foreach ($livestockAssets as $asset) {
+            if ((string) $asset['id'] === $selectedLivestockId) {
+                $selectedLivestock = $asset;
+                break;
+            }
+        }
+        if ($selectedLivestockId !== '' && !$selectedLivestock) {
+            $selectedLivestockId = '';
+        }
+
+        $intervalInput = strtolower((string) $this->input->get('interval', true));
+        $allowedIntervals = array('daily', 'weekly', 'monthly', 'yearly');
+        $selectedInterval = in_array($intervalInput, $allowedIntervals, true) ? $intervalInput : 'daily';
+
+        $assetCountInput = $this->input->get('asset_count', true);
+        $assetCountInputValue = ($assetCountInput !== null) ? trim((string) $assetCountInput) : '';
+        $assetCount = null;
+        $assetCountProvided = false;
+        if ($assetCountInputValue !== '') {
+            $candidate = (float) $assetCountInputValue;
+            if ($candidate > 0) {
+                $assetCount = $candidate;
+                $assetCountProvided = true;
+            }
+        }
+        if (!$assetCountProvided && $selectedLivestock && array_key_exists('livestock_total_qty', $selectedLivestock)) {
+            $assetCountInputValue = (string) $selectedLivestock['livestock_total_qty'];
+            $candidate = (float) ($selectedLivestock['livestock_total_qty'] ?? 0);
+            if ($candidate > 0) {
+                $assetCount = $candidate;
+            }
+        }
+
+        $endDateInput = $this->input->get('end_date', true);
+        $endDate = (!empty($endDateInput) && strtotime($endDateInput)) ? date('Y-m-d', strtotime($endDateInput)) : date('Y-m-d');
+
+        $startDateInput = $this->input->get('start_date', true);
+        $startDate = (!empty($startDateInput) && strtotime($startDateInput)) ? date('Y-m-d', strtotime($startDateInput)) : date('Y-m-d', strtotime('-29 days', strtotime($endDate)));
+
+        if ($startDate > $endDate) {
+            $tmp = $startDate;
+            $startDate = $endDate;
+            $endDate = $tmp;
+        }
+
+        $productName = '';
+        foreach ($products as $product) {
+            if ((string) $product['product_id'] === $selectedProductId) {
+                $productName = $product['product_name'];
+                break;
+            }
+        }
+
+        $summary = null;
+        $series  = array();
+        if ($selectedProductId !== '' && $productName !== '') {
+            $summary = $this->livestock_model->get_production_percentage_summary($selectedProductId, $startDate, $endDate);
+            $series  = $this->livestock_model->get_production_percentage_series($selectedProductId, $startDate, $endDate, $selectedInterval);
+        } else {
+            $selectedProductId = '';
+        }
+
+        $productionPercent = null;
+        $outputPerAsset = null;
+        if ($summary && $assetCount && $assetCount > 0) {
+            $totalOutput = (float) ($summary['total_output'] ?? 0.0);
+            if ($totalOutput > 0) {
+                $outputPerAsset = $totalOutput / $assetCount;
+                $productionPercent = $outputPerAsset * 100.0;
+            }
+        }
+
+        $enhancedSeries = array();
+        foreach ($series as $row) {
+            $row['production_percent'] = null;
+            if ($assetCount && $assetCount > 0) {
+                $row['production_percent'] = ($row['total_output'] ?? 0) > 0
+                    ? (($row['total_output'] / $assetCount) * 100.0)
+                    : 0.0;
+            }
+            $enhancedSeries[] = $row;
+        }
+
+        $data = array(
+            'title'                   => $this->phrase('production_percentage_report', 'Production Percentage'),
+            'products'                => $products,
+            'selected_product_id'     => $selectedProductId,
+            'selected_product_name'   => $productName,
+            'livestock_assets'        => $livestockAssets,
+            'selected_livestock_id'   => $selectedLivestockId,
+            'selected_livestock'      => $selectedLivestock,
+            'filters'                 => array(
+                'start_date' => $startDate,
+                'end_date'   => $endDate,
+            ),
+            'selected_interval'       => $selectedInterval,
+            'asset_count'             => $assetCount,
+            'asset_count_input'       => $assetCountInputValue,
+            'summary'                 => $summary,
+            'series'                  => $enhancedSeries,
+            'production_percent'      => $productionPercent,
+            'output_per_asset'        => $outputPerAsset,
+        );
+
+        $this->render('reports/production_percentage', $data);
+    }
+
+    private function sync_feed_usage_ledger($usageId, $allowOverride, $manualLotId = null, $locationOverride = null)
+    {
+        $usage = $this->livestock_model->get_feed_usage($usageId);
+        if (!$usage) {
+            return;
+        }
+
+        $this->inventoryledger->clearMovementsByReference('feed_usage', $usageId);
+
+        $productId = isset($usage['inventory_product_id']) ? trim($usage['inventory_product_id']) : '';
+        if ($productId === '') {
+            log_message('debug', sprintf('Feed usage #%d skipped ledger sync: no inventory product mapping', $usageId));
+            return;
+        }
+
+        $createdBy = (isset($this->session) && method_exists($this->session, 'userdata')) ? $this->session->userdata('id') : null;
+
+        if (!$locationOverride) {
+            if (isset($usage['inventory_location_id']) && $usage['inventory_location_id']) {
+                $locationOverride = (int) $usage['inventory_location_id'];
+            } elseif (isset($usage['location_id']) && $usage['location_id']) {
+                $locationOverride = (int) $usage['location_id'];
+            }
+        }
+
+        if (!$locationOverride) {
+            if (isset($usage['inventory_location_id']) && $usage['inventory_location_id']) {
+                $locationOverride = (int) $usage['inventory_location_id'];
+            } elseif (isset($usage['location_id']) && $usage['location_id']) {
+                $locationOverride = (int) $usage['location_id'];
+            }
+        }
+
+        $locationId = null;
+        if ($locationOverride) {
+            $locationId = $this->inventoryledger->resolveLocationId($locationOverride);
+        }
+        if (!$locationId) {
+            $locationId = $this->inventoryledger->resolveShedLocationId((int) ($usage['shed_id'] ?? 0));
+        }
+        if (!$locationId) {
+            $locationId = $this->inventoryledger->getDefaultLocationId();
+        }
+
+        if (!$locationId) {
+            log_message('warning', sprintf('Feed usage #%d skipped ledger sync: no location resolved', $usageId));
+            return;
+        }
+
+        $movementDate    = $usage['updated_at'] ?? date('Y-m-d');
+        $referenceLineId = isset($usage['feed_id']) ? (int) $usage['feed_id'] : null;
+
+        if ((float) $usage['used_total_qty'] > 0) {
+            $payload = array(
+                'product_id'        => $productId,
+                'location_id'       => $locationId,
+                'quantity'          => (float) $usage['used_total_qty'],
+                'reason_code'       => 'FEED_USAGE',
+                'movement_date'     => $movementDate,
+                'reference_type'    => 'feed_usage',
+                'reference_id'      => $usageId,
+                'reference_line_id' => $referenceLineId,
+                'narration'         => sprintf('Feed usage #%d (feed %s)', $usageId, $referenceLineId ?: '?'),
+                'allow_negative'    => $allowOverride,
+                'created_by'        => $createdBy,
+            );
+            if (!empty($manualLotId)) {
+                $payload['lot_id'] = (int) $manualLotId;
+            }
+            $result = $this->inventoryledger->recordConsumption($payload);
+            if ($result === false) {
+                log_message('error', sprintf('Failed to sync feed usage consumption for usage #%d', $usageId));
+            }
+        }
+
+        if ((float) $usage['total_wasted_qty'] > 0) {
+            $payload = array(
+                'product_id'        => $productId,
+                'location_id'       => $locationId,
+                'quantity'          => (float) $usage['total_wasted_qty'],
+                'reason_code'       => 'FEED_WASTE',
+                'movement_date'     => $movementDate,
+                'reference_type'    => 'feed_usage',
+                'reference_id'      => $usageId,
+                'reference_line_id' => $referenceLineId,
+                'narration'         => sprintf('Feed waste #%d', $usageId),
+                'allow_negative'    => $allowOverride,
+                'created_by'        => $createdBy,
+            );
+            if (!empty($manualLotId)) {
+                $payload['lot_id'] = (int) $manualLotId;
+            }
+            $result = $this->inventoryledger->recordWaste($payload);
+            if ($result === false) {
+                log_message('error', sprintf('Failed to sync feed waste for usage #%d', $usageId));
+            }
+        }
+    }
+
+    private function sync_vaccine_usage_ledger($usageId, $allowOverride, $manualLotId = null, $locationOverride = null)
+    {
+        $usage = $this->livestock_model->get_vaccine_usage($usageId);
+        if (!$usage) {
+            return;
+        }
+
+        $this->inventoryledger->clearMovementsByReference('vaccine_usage', $usageId);
+
+        $productId = isset($usage['inventory_product_id']) ? trim($usage['inventory_product_id']) : '';
+        if ($productId === '') {
+            log_message('debug', sprintf('Vaccine usage #%d skipped ledger sync: no inventory product mapping', $usageId));
+            return;
+        }
+
+        $createdBy = (isset($this->session) && method_exists($this->session, 'userdata')) ? $this->session->userdata('id') : null;
+
+        $locationId = null;
+        if ($locationOverride) {
+            $locationId = $this->inventoryledger->resolveLocationId($locationOverride);
+        }
+        if (!$locationId) {
+            $locationId = $this->inventoryledger->resolveShedLocationId((int) ($usage['shed_id'] ?? 0));
+        }
+        if (!$locationId) {
+            $locationId = $this->inventoryledger->getDefaultLocationId();
+        }
+
+        if (!$locationId) {
+            log_message('warning', sprintf('Vaccine usage #%d skipped ledger sync: no location resolved', $usageId));
+            return;
+        }
+
+        $movementDate    = $usage['usage_date'] ?? ($usage['updated_at'] ?? date('Y-m-d'));
+        $referenceLineId = isset($usage['vaccine_id']) ? (int) $usage['vaccine_id'] : null;
+
+        if ((float) $usage['used_total_qty'] > 0) {
+            $payload = array(
+                'product_id'        => $productId,
+                'location_id'       => $locationId,
+                'quantity'          => (float) $usage['used_total_qty'],
+                'reason_code'       => 'VACCINE_USAGE',
+                'movement_date'     => $movementDate,
+                'reference_type'    => 'vaccine_usage',
+                'reference_id'      => $usageId,
+                'reference_line_id' => $referenceLineId,
+                'narration'         => sprintf('Vaccine usage #%d (vaccine %s)', $usageId, $referenceLineId ?: '?'),
+                'allow_negative'    => $allowOverride,
+                'created_by'        => $createdBy,
+            );
+            if (!empty($manualLotId)) {
+                $payload['lot_id'] = (int) $manualLotId;
+            }
+            $result = $this->inventoryledger->recordConsumption($payload);
+            if ($result === false) {
+                log_message('error', sprintf('Failed to sync vaccine usage consumption for usage #%d', $usageId));
+            }
+        }
+
+        if ((float) $usage['total_wasted_qty'] > 0) {
+            $payload = array(
+                'product_id'        => $productId,
+                'location_id'       => $locationId,
+                'quantity'          => (float) $usage['total_wasted_qty'],
+                'reason_code'       => 'VACCINE_WASTE',
+                'movement_date'     => $movementDate,
+                'reference_type'    => 'vaccine_usage',
+                'reference_id'      => $usageId,
+                'reference_line_id' => $referenceLineId,
+                'narration'         => sprintf('Vaccine waste #%d', $usageId),
+                'allow_negative'    => $allowOverride,
+                'created_by'        => $createdBy,
+            );
+            if (!empty($manualLotId)) {
+                $payload['lot_id'] = (int) $manualLotId;
+            }
+            $result = $this->inventoryledger->recordWaste($payload);
+            if ($result === false) {
+                log_message('error', sprintf('Failed to sync vaccine waste for usage #%d', $usageId));
+            }
+        }
+    }
+
+    public function resync_inventory_usage($type = 'all', $allowOverride = '0')
+    {
+        if (!$this->input->is_cli_request()) {
+            show_error('Inventory usage resync must be run from the CLI.', 403);
+        }
+
+        $type = strtolower((string) $type);
+        $validTypes = array('feed', 'vaccine', 'all');
+        if (!in_array($type, $validTypes, true)) {
+            $type = 'all';
+        }
+
+        $allowOverrideFlag = in_array(strtolower((string) $allowOverride), array('1', 'true', 'yes', 'allow', 'override'), true);
+
+        $summary = array('feed' => 0, 'vaccine' => 0);
+
+        if ($type === 'all' || $type === 'feed') {
+            $ids = $this->db->select('id')->from('feed_usages')->order_by('id', 'asc')->get()->result_array();
+            foreach ($ids as $row) {
+                $usageId = (int) $row['id'];
+                $this->sync_feed_usage_ledger($usageId, $allowOverrideFlag, null, null);
+                $summary['feed']++;
+            }
+        }
+
+        if ($type === 'all' || $type === 'vaccine') {
+            $ids = $this->db->select('id')->from('vaccine_usages')->order_by('id', 'asc')->get()->result_array();
+            foreach ($ids as $row) {
+                $usageId = (int) $row['id'];
+                $this->sync_vaccine_usage_ledger($usageId, $allowOverrideFlag, null, null);
+                $summary['vaccine']++;
+            }
+        }
+
+        echo sprintf("Feed usages synced: %d%s", $summary['feed'], PHP_EOL);
+        echo sprintf("Vaccine usages synced: %d%s", $summary['vaccine'], PHP_EOL);
+        echo sprintf("Override mode: %s%s", $allowOverrideFlag ? 'enabled' : 'disabled', PHP_EOL);
     }
 
     /* ----------------------------- Helpers ------------------------------- */
