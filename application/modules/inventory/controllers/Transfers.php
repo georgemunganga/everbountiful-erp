@@ -18,12 +18,38 @@ class Transfers extends MX_Controller
 
     public function index()
     {
-        redirect('stock/transfers');
+        $this->form();
     }
 
     public function form()
     {
-        redirect('stock/transfers');
+        // Permission: stock_transfer create
+        if (isset($this->permission1) && method_exists($this->permission1, 'method')) {
+            if (!$this->permission1->method('stock_transfer', 'create')->access()) {
+                $this->session->set_flashdata('exception', display('unauthorized') ?: 'Unauthorized');
+                redirect('home');
+            }
+        }
+        $data = array();
+        $data['title'] = display('inventory_transfer') ?: 'Inventory Transfer';
+        $data['locations'] = $this->Inventory_model->get_active_locations();
+        $data['lots'] = $this->Inventory_model->get_available_lots();
+        $data['recent_transfers'] = $this->Inventory_model->get_recent_transfers(10);
+        $data['recent_notifications'] = $this->Inventory_model->get_recent_notifications(10);
+
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            // Permission: stock_override for allowing negative during transfer (if applicable)
+            if ($this->input->post('allow_override') && isset($this->permission1) && method_exists($this->permission1, 'method')) {
+                if (!$this->permission1->method('stock_override', 'create')->access()) {
+                    $this->session->set_flashdata('exception', display('unauthorized') ?: 'Unauthorized');
+                    redirect('inventory/transfers');
+                }
+            }
+            $this->process_form($data);
+            return;
+        }
+
+        $this->render('transfers/form', $data);
     }
 
     private function process_form(array $data)

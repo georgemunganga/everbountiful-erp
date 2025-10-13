@@ -32,10 +32,16 @@
                                             <div class="title"><?php echo  display('employee_name')?> :<?php echo  $paymentdata[0]['first_name'].' '.$paymentdata[0]['last_name']?></div>
                                             <div class="title"><?php echo  display('designation')?>   : <?php echo  $paymentdata[0]['position_name']?></div>
                                             <div class="title"><?php echo  display('salary_date')?>   : <?php echo  $paymentdata[0]['payment_date']?></div>
+                                            <?php if (!empty($paymentdata[0]['working_period'])): ?>
+                                            <div class="title"><?php echo  display('worked_days') ?: 'Worked Days'; ?>   : <?php echo  html_escape($paymentdata[0]['working_period']); ?></div>
+                                            <?php endif; ?>
+                                            <?php if (!empty($leave_days) && (float)$leave_days > 0): ?>
+                                            <div class="title"><?php echo  display('leave_days') ?: 'Leave Days'; ?>   : <?php echo  html_escape($leave_days); ?></div>
+                                            <?php endif; ?>
                                             
                                         </div>
                                     </div>
-                                	</table>
+                               	</table>
                                 
                                 </div>
                                 

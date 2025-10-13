@@ -58,13 +58,23 @@
                     </div>
 
                     <div class="form-group row">
+                        <label class="col-sm-3 col-form-label"><?php echo html_escape(display('auto_allocate') ?: 'Auto allocate'); ?></label>
+                        <div class="col-sm-6">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="auto_allocate" name="auto_allocate" value="1" <?php echo set_checkbox('auto_allocate', '1', true); ?>>
+                                <label class="form-check-label" for="auto_allocate"><?php echo html_escape(display('auto_allocate_hint') ?: 'Auto select lots by product and location'); ?></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
                         <label for="inventory_product_id" class="col-sm-3 col-form-label"><?php echo html_escape(display('product') ?: 'Product'); ?> <i class="text-danger">*</i></label>
                         <div class="col-sm-6">
                             <select name="inventory_product_id" id="inventory_product_id" class="form-control" required>
                                 <option value=""><?php echo html_escape(display('select_one') ?: 'Select one'); ?></option>
                                 <?php if (!empty($inventory_products)): ?>
                                     <?php foreach ($inventory_products as $product): ?>
-                                        <option value="<?php echo $product['product_id']; ?>" <?php echo set_select('inventory_product_id', $product['product_id'], ((string) $feed_usage->inventory_product_id === (string) $product['product_id'])); ?>>
+                                        <option value="<?php echo $product['product_id']; ?>" <?php echo ((string) $feed_usage->inventory_product_id === (string) $product['product_id']) ? 'selected' : ''; ?>>
                                             <?php echo html_escape($product['product_name']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -81,13 +91,41 @@
                                 <option value=""><?php echo html_escape(display('select_one') ?: 'Select one'); ?></option>
                                 <?php if (!empty($locations)): ?>
                                     <?php foreach ($locations as $loc): ?>
-                                        <option value="<?php echo $loc['id']; ?>" <?php echo set_select('location_id', $loc['id'], ((string) $feed_usage->location_id === (string) $loc['id'])); ?>>
+                                        <option value="<?php echo $loc['id']; ?>">
                                             <?php echo html_escape($loc['location_name']); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </select>
                             <?php echo form_error('location_id', '<div class="text-danger">', '</div>'); ?>
+                        </div>
+                    </div>
+
+                    <div id="manual-lot-fields">
+                        <div class="form-group row">
+                            <label for="lot_id" class="col-sm-3 col-form-label"><?php echo html_escape(display('lot') ?: 'Lot'); ?></label>
+                            <div class="col-sm-6">
+                                <select name="lot_id" id="lot_id" class="form-control">
+                                    <option value=""><?php echo html_escape(display('select_one') ?: 'Select one'); ?></option>
+                                    <?php if (!empty($lots)): ?>
+                                        <?php foreach ($lots as $lot): ?>
+                                            <?php
+                                                $label = sprintf(
+                                                    '%s - %s (%s) [%s %s]',
+                                                    $lot['lot_code'],
+                                                    $lot['product_name'],
+                                                    $lot['location_name'],
+                                                    number_format($lot['available_qty'], 4),
+                                                    $lot['unit_name']
+                                                );
+                                            ?>
+                                            <option value="<?php echo $lot['lot_id']; ?>" <?php echo set_select('lot_id', $lot['lot_id']); ?>>
+                                                <?php echo html_escape($label); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -166,5 +204,24 @@
 
     recalcInstock();
 
+    var autoToggle = document.getElementById('auto_allocate');
+    var manualFields = document.getElementById('manual-lot-fields');
+    function refreshFields() {
+        if (!autoToggle) {
+            return;
+        }
+        var checked = autoToggle.checked;
+        if (manualFields) {
+            manualFields.style.display = checked ? 'none' : '';
+            var lotSelect = manualFields.querySelector('#lot_id');
+            if (lotSelect) {
+                lotSelect.required = !checked;
+            }
+        }
+    }
+    if (autoToggle) {
+        autoToggle.addEventListener('change', refreshFields);
+        refreshFields();
+    }
 })();
 </script>

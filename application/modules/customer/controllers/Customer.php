@@ -1,8 +1,8 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
  #------------------------------------    
-    # Author: Bdtask Ltd
-    # Author link: https://www.bdtask.com/
+    # Author:Greenwebb Ltd
+    # Author link: https://www.Greenwebb.com/
     # Dynamic style php file
     # Developed by :Isahaq
     #------------------------------------    
@@ -15,7 +15,8 @@ class Customer extends MX_Controller {
   
         $this->load->model(array(
             'customer_model',
-            'customergroups_model' => 'CustomerGroups_model'
+            'customergroups_model' => 'CustomerGroups_model',
+            'template/template_model' => 'template_model'
         )); 
         if (! $this->session->userdata('isLogIn'))
             redirect('login');
@@ -303,7 +304,45 @@ class Customer extends MX_Controller {
 
         $data['title']     = 'Customer Details';
         $data['customer']  = $customer;
-        $data['invoices']  = $this->customer_model->get_customer_invoices($customer_id, $from, $to);
+        $data['contacts']  = $this->customer_model->get_customer_contacts($customer_id);
+        $data['credit_notes'] = $this->customer_model->get_credit_notes($customer_id);
+        $data['estimates'] = $this->customer_model->get_estimates($customer_id);
+        $data['expenses']  = $this->customer_model->get_expenses($customer_id);
+        $data['contact_form_data'] = $this->session->flashdata('contact_form_data') ?: array();
+        $data['credit_note_form_data'] = $this->session->flashdata('credit_note_form_data') ?: array();
+        $data['estimate_form_data'] = $this->session->flashdata('estimate_form_data') ?: array();
+        $data['expense_form_data'] = $this->session->flashdata('expense_form_data') ?: array();
+        $invoice_rows = $this->customer_model->get_customer_invoices($customer_id, $from, $to);
+        $prepared_invoices = array();
+        if (!empty($invoice_rows)) {
+            foreach ($invoice_rows as $row) {
+                $total = isset($row['total_amount']) ? (float) $row['total_amount'] : 0.0;
+                $paid  = isset($row['paid_amount']) ? (float) $row['paid_amount'] : 0.0;
+                $due   = isset($row['due_amount']) ? (float) $row['due_amount'] : max(0.0, $total - $paid);
+                $status = 'Unpaid';
+                $status_class = 'label label-danger';
+                $epsilon = 0.01;
+                if ($total <= $epsilon) {
+                    $status = 'Paid';
+                    $status_class = 'label label-success';
+                    $due = 0.0;
+                } elseif ($due <= $epsilon) {
+                    $status = 'Paid';
+                    $status_class = 'label label-success';
+                    $due = 0.0;
+                } elseif ($paid > $epsilon) {
+                    $status = 'Partially Paid';
+                    $status_class = 'label label-warning';
+                }
+                $row['total_amount'] = $total;
+                $row['paid_amount']  = $paid;
+                $row['due_amount']   = $due;
+                $row['status_label'] = $status;
+                $row['status_class'] = $status_class;
+                $prepared_invoices[] = $row;
+            }
+        }
+        $data['invoices']  = $prepared_invoices;
         $data['payments']  = $this->customer_model->get_customer_payments($customer_id, $from, $to);
         $data['notes']     = $this->customer_model->get_notes($customer_id);
         $data['reminders'] = $this->customer_model->get_reminders($customer_id);
@@ -311,12 +350,181 @@ class Customer extends MX_Controller {
         $data['from_date'] = $from;
         $data['to_date']   = $to;
         $data['statement'] = $this->customer_model->get_customer_statement($customer_id, $from, $to);
+        $setting           = $this->template_model->setting();
+        if ($setting) {
+            $data['currency'] = !empty($setting->currency_symbol) ? $setting->currency_symbol : (!empty($setting->currency) ? $setting->currency : 'ZMW');
+            $data['position'] = isset($setting->currency_position) ? (int) $setting->currency_position : 0;
+        } else {
+            $data['currency'] = 'ZMW';
+            $data['position'] = 0;
+        }
 
         $data['module']   = 'customer';
         $data['page']     = 'customer_detail_tabs';
         echo Modules::run('template/layout', $data);
     }
 
+    public function add_contact($customer_id)
+    {
+        $this->form_validation->set_rules('name', 'Contact Name', 'required|max_length[255]');
+        $this->form_validation->set_rules('email', 'Email', 'max_length[255]');
+        $this->form_validation->set_rules('phone', 'Phone', 'max_length[100]');
+        $this->form_validation->set_rules('position', 'Position', 'max_length[255]');
+
+        if ($this->form_validation->run() === false) {
+            $this->session->set_flashdata('exception', validation_errors());
+            $this->session->set_flashdata('contact_form_data', $this->input->post(null, true));
+            redirect('customer/customer/customer_detail/' . $customer_id . '?tab=contacts');
+            return;
+        }
+
+        $contact_data = array(
+            'name'     => $this->input->post('name', true),
+            'email'    => $this->input->post('email', true),
+            'phone'    => $this->input->post('phone', true),
+            'position' => $this->input->post('position', true),
+        );
+
+        $this->customer_model->add_customer_contact($customer_id, $contact_data);
+        $this->session->set_flashdata('message', 'Contact saved successfully.');
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=contacts');
+    }
+
+    public function delete_contact($customer_id, $contact_id)
+    {
+        if ($this->customer_model->delete_customer_contact($customer_id, $contact_id)) {
+            $this->session->set_flashdata('message', 'Contact deleted.');
+        } else {
+            $this->session->set_flashdata('exception', display('please_try_again'));
+        }
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=contacts');
+    }
+
+    public function add_credit_note($customer_id)
+    {
+        $this->form_validation->set_rules('number', 'Credit Note Number', 'required|max_length[100]');
+        $this->form_validation->set_rules('date', 'Date', 'required');
+        $this->form_validation->set_rules('amount', 'Amount', 'required|numeric');
+        $this->form_validation->set_rules('status', 'Status', 'max_length[50]');
+        $this->form_validation->set_rules('remarks', 'Remarks', 'max_length[500]');
+
+        if ($this->form_validation->run() === false) {
+            $this->session->set_flashdata('exception', validation_errors());
+            $this->session->set_flashdata('credit_note_form_data', $this->input->post(null, true));
+            redirect('customer/customer/customer_detail/' . $customer_id . '?tab=credit_notes');
+            return;
+        }
+
+        $note_data = array(
+            'number'  => $this->input->post('number', true),
+            'date'    => $this->input->post('date', true),
+            'amount'  => $this->input->post('amount', true),
+            'status'  => $this->input->post('status', true),
+            'remarks' => $this->input->post('remarks', true),
+        );
+
+        if ($this->customer_model->add_credit_note($customer_id, $note_data)) {
+            $this->session->set_flashdata('message', 'Credit note saved.');
+        } else {
+            $this->session->set_flashdata('exception', display('please_try_again'));
+            $this->session->set_flashdata('credit_note_form_data', $note_data);
+        }
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=credit_notes');
+    }
+
+    public function delete_credit_note($customer_id, $note_id)
+    {
+        if ($this->customer_model->delete_credit_note($customer_id, $note_id)) {
+            $this->session->set_flashdata('message', 'Credit note deleted.');
+        } else {
+            $this->session->set_flashdata('exception', display('please_try_again'));
+        }
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=credit_notes');
+    }
+
+    public function add_estimate($customer_id)
+    {
+        $this->form_validation->set_rules('number', 'Estimate Number', 'required|max_length[100]');
+        $this->form_validation->set_rules('date', 'Date', 'required');
+        $this->form_validation->set_rules('amount', 'Amount', 'required|numeric');
+        $this->form_validation->set_rules('status', 'Status', 'max_length[50]');
+        $this->form_validation->set_rules('notes', 'Notes', 'max_length[500]');
+
+        if ($this->form_validation->run() === false) {
+            $this->session->set_flashdata('exception', validation_errors());
+            $this->session->set_flashdata('estimate_form_data', $this->input->post(null, true));
+            redirect('customer/customer/customer_detail/' . $customer_id . '?tab=estimates');
+            return;
+        }
+
+        $estimate_data = array(
+            'number' => $this->input->post('number', true),
+            'date'   => $this->input->post('date', true),
+            'amount' => $this->input->post('amount', true),
+            'status' => $this->input->post('status', true),
+            'notes'  => $this->input->post('notes', true),
+        );
+
+        if ($this->customer_model->add_estimate($customer_id, $estimate_data)) {
+            $this->session->set_flashdata('message', 'Estimate saved.');
+        } else {
+            $this->session->set_flashdata('exception', display('please_try_again'));
+            $this->session->set_flashdata('estimate_form_data', $estimate_data);
+        }
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=estimates');
+    }
+
+    public function delete_estimate($customer_id, $estimate_id)
+    {
+        if ($this->customer_model->delete_estimate($customer_id, $estimate_id)) {
+            $this->session->set_flashdata('message', 'Estimate deleted.');
+        } else {
+            $this->session->set_flashdata('exception', display('please_try_again'));
+        }
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=estimates');
+    }
+
+    public function add_expense($customer_id)
+    {
+        $this->form_validation->set_rules('category', 'Category', 'required|max_length[100]');
+        $this->form_validation->set_rules('date', 'Date', 'required');
+        $this->form_validation->set_rules('amount', 'Amount', 'required|numeric');
+        $this->form_validation->set_rules('vendor', 'Vendor', 'max_length[150]');
+        $this->form_validation->set_rules('notes', 'Notes', 'max_length[500]');
+
+        if ($this->form_validation->run() === false) {
+            $this->session->set_flashdata('exception', validation_errors());
+            $this->session->set_flashdata('expense_form_data', $this->input->post(null, true));
+            redirect('customer/customer/customer_detail/' . $customer_id . '?tab=expenses');
+            return;
+        }
+
+        $expense_data = array(
+            'category' => $this->input->post('category', true),
+            'date'     => $this->input->post('date', true),
+            'amount'   => $this->input->post('amount', true),
+            'vendor'   => $this->input->post('vendor', true),
+            'notes'    => $this->input->post('notes', true),
+        );
+
+        if ($this->customer_model->add_expense($customer_id, $expense_data)) {
+            $this->session->set_flashdata('message', 'Expense saved.');
+        } else {
+            $this->session->set_flashdata('exception', display('please_try_again'));
+            $this->session->set_flashdata('expense_form_data', $expense_data);
+        }
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=expenses');
+    }
+
+    public function delete_expense($customer_id, $expense_id)
+    {
+        if ($this->customer_model->delete_expense($customer_id, $expense_id)) {
+            $this->session->set_flashdata('message', 'Expense deleted.');
+        } else {
+            $this->session->set_flashdata('exception', display('please_try_again'));
+        }
+        redirect('customer/customer/customer_detail/' . $customer_id . '?tab=expenses');
+    }
     // Statement HTML view (optional separate route)
     public function customer_statement($customer_id)
     {
@@ -484,4 +692,6 @@ class Customer extends MX_Controller {
     }
 
 }
+
+
 

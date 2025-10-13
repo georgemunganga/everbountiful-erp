@@ -68,13 +68,22 @@ class Livestock_model extends CI_Model
 
     /* -------------------------------- Sheds ------------------------------ */
 
-    public function get_sheds()
+    public function get_sheds($limit = null, $offset = 0)
     {
-        return $this->db->select('*')
+        $builder = $this->db->select('*')
             ->from('sheds')
-            ->order_by('name', 'asc')
-            ->get()
-            ->result_array();
+            ->order_by('name', 'asc');
+
+        if ($limit !== null) {
+            $builder->limit((int) $limit, (int) $offset);
+        }
+
+        return $builder->get()->result_array();
+    }
+
+    public function count_sheds()
+    {
+        return (int) $this->db->from('sheds')->count_all_results();
     }
 
     public function get_shed($id)
@@ -103,13 +112,22 @@ class Livestock_model extends CI_Model
 
     /* ------------------------- Livestock Groups ------------------------- */
 
-    public function get_livestock_groups()
+    public function get_livestock_groups($limit = null, $offset = 0)
     {
-        return $this->db->select('*')
+        $builder = $this->db->select('*')
             ->from('livestock_groups')
-            ->order_by('name', 'asc')
-            ->get()
-            ->result_array();
+            ->order_by('name', 'asc');
+
+        if ($limit !== null) {
+            $builder->limit((int) $limit, (int) $offset);
+        }
+
+        return $builder->get()->result_array();
+    }
+
+    public function count_livestock_groups()
+    {
+        return (int) $this->db->from('livestock_groups')->count_all_results();
     }
 
     public function get_livestock_group($id)
@@ -138,16 +156,25 @@ class Livestock_model extends CI_Model
 
     /* ------------------------------ Productions ------------------------- */
 
-    public function get_productions()
+    public function get_productions($limit = null, $offset = 0)
     {
-        return $this->db->select('p.*, s.name AS shed_name, u.unit_name, pi.product_name AS output_product_name')
+        $builder = $this->db->select('p.*, s.name AS shed_name, u.unit_name, pi.product_name AS output_product_name')
             ->from('productions p')
             ->join('sheds s', 's.id = p.shed_id', 'left')
             ->join('units u', 'u.unit_id = p.unit_type_id', 'left')
             ->join('product_information pi', 'pi.product_id = p.output_product_id', 'left')
-            ->order_by('p.created_at', 'desc')
-            ->get()
-            ->result_array();
+            ->order_by('p.created_at', 'desc');
+
+        if ($limit !== null) {
+            $builder->limit((int) $limit, (int) $offset);
+        }
+
+        return $builder->get()->result_array();
+    }
+
+    public function count_productions()
+    {
+        return (int) $this->db->from('productions')->count_all_results();
     }
 
     public function get_production($id)
@@ -299,7 +326,7 @@ class Livestock_model extends CI_Model
 
     /* ------------------------------ Livestocks -------------------------- */
 
-    public function get_livestocks(array $filters = array())
+    public function get_livestocks(array $filters = array(), $limit = null, $offset = 0)
     {
         $builder = $this->db->select('l.*, s.name AS shed_name, g.name AS group_name, u.unit_name')
             ->from('livestocks l')
@@ -311,9 +338,24 @@ class Livestock_model extends CI_Model
             $builder->like('l.name', $filters['name']);
         }
 
+        if ($limit !== null) {
+            $builder->limit((int) $limit, (int) $offset);
+        }
+
         return $builder->order_by('l.created_at', 'desc')
             ->get()
             ->result_array();
+    }
+
+    public function count_livestocks(array $filters = array())
+    {
+        $builder = $this->db->from('livestocks l');
+
+        if (!empty($filters['name'])) {
+            $builder->like('l.name', $filters['name']);
+        }
+
+        return (int) $builder->count_all_results();
     }
 
     public function get_livestock_assets()
@@ -351,14 +393,23 @@ class Livestock_model extends CI_Model
 
     /* -------------------------------- Feeds ----------------------------- */
 
-    public function get_feeds()
+    public function get_feeds($limit = null, $offset = 0)
     {
-        return $this->db->select('f.*, u.unit_name')
+        $builder = $this->db->select('f.*, u.unit_name')
             ->from('feeds f')
             ->join('units u', 'u.unit_id = f.purchase_unit_id', 'left')
-            ->order_by('f.created_at', 'desc')
-            ->get()
-            ->result_array();
+            ->order_by('f.created_at', 'desc');
+
+        if ($limit !== null) {
+            $builder->limit((int) $limit, (int) $offset);
+        }
+
+        return $builder->get()->result_array();
+    }
+
+    public function count_feeds()
+    {
+        return (int) $this->db->from('feeds')->count_all_results();
     }
 
     public function get_feeds_dropdown()
@@ -396,15 +447,24 @@ class Livestock_model extends CI_Model
 
     /* --------------------------- Feed Usages ---------------------------- */
 
-    public function get_feed_usages()
+    public function get_feed_usages($limit = null, $offset = 0)
     {
-        return $this->db->select('fu.*, f.name AS feed_name, s.name AS shed_name')
+        $builder = $this->db->select('fu.*, f.name AS feed_name, s.name AS shed_name')
             ->from('feed_usages fu')
             ->join('feeds f', 'f.id = fu.feed_id', 'left')
             ->join('sheds s', 's.id = fu.shed_id', 'left')
-            ->order_by('fu.created_at', 'desc')
-            ->get()
-            ->result_array();
+            ->order_by('fu.created_at', 'desc');
+
+        if ($limit !== null) {
+            $builder->limit((int) $limit, (int) $offset);
+        }
+
+        return $builder->get()->result_array();
+    }
+
+    public function count_feed_usages()
+    {
+        return (int) $this->db->from('feed_usages')->count_all_results();
     }
 
     public function get_feed_usage($id)
@@ -433,14 +493,23 @@ class Livestock_model extends CI_Model
 
     /* ------------------------------ Vaccines --------------------------- */
 
-    public function get_vaccines()
+    public function get_vaccines($limit = null, $offset = 0)
     {
-        return $this->db->select('v.*, u.unit_name')
+        $builder = $this->db->select('v.*, u.unit_name')
             ->from('vaccines v')
             ->join('units u', 'u.unit_id = v.unit_type_id', 'left')
-            ->order_by('v.created_at', 'desc')
-            ->get()
-            ->result_array();
+            ->order_by('v.created_at', 'desc');
+
+        if ($limit !== null) {
+            $builder->limit((int) $limit, (int) $offset);
+        }
+
+        return $builder->get()->result_array();
+    }
+
+    public function count_vaccines()
+    {
+        return (int) $this->db->from('vaccines')->count_all_results();
     }
 
     public function get_vaccines_dropdown()
@@ -478,16 +547,25 @@ class Livestock_model extends CI_Model
 
     /* --------------------------- Vaccine Usages ------------------------ */
 
-    public function get_vaccine_usages()
+    public function get_vaccine_usages($limit = null, $offset = 0)
     {
-        return $this->db->select('vu.*, v.name AS vaccine_name, s.name AS shed_name')
+        $builder = $this->db->select('vu.*, v.name AS vaccine_name, s.name AS shed_name')
             ->from('vaccine_usages vu')
             ->join('vaccines v', 'v.id = vu.vaccine_id', 'left')
             ->join('sheds s', 's.id = vu.shed_id', 'left')
             ->order_by('vu.usage_date', 'desc')
-            ->order_by('vu.created_at', 'desc')
-            ->get()
-            ->result_array();
+            ->order_by('vu.created_at', 'desc');
+
+        if ($limit !== null) {
+            $builder->limit((int) $limit, (int) $offset);
+        }
+
+        return $builder->get()->result_array();
+    }
+
+    public function count_vaccine_usages()
+    {
+        return (int) $this->db->from('vaccine_usages')->count_all_results();
     }
 
     public function get_vaccine_usage($id)

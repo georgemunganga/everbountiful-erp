@@ -426,15 +426,38 @@ public function create_employee_payment($data = array())
 			->result();
 	}
 
-	public function gmb_salary_generate_delete($id = null,$salname = null)
-	{
-		$sheet = $this->db->select('salary_group_id, name')
-			->from('gmb_salary_sheet_generate')
-			->where('ssg_id', $id)
-			->get()
-			->row();
+		public function gmb_salary_generate_delete($id = null,$salname = null)
+		{
+			$sheet = $this->db->select('salary_group_id, name')
+				->from('gmb_salary_sheet_generate')
+				->where('ssg_id', $id)
+				->get()
+				->row();
 
-		if ($sheet) {
+			if (!$sheet) {
+				return false;
+			}
+
+			$this->db->trans_start();
+
+			$salary_rows = $this->db->select('g.id, g.employee_id, g.office_loan_deduct, g.office_loan_transaction_id, g.createDate')
+				->from('gmb_salary_generate g')
+				->where('g.sal_month_year', $sheet->name);
+			if (isset($sheet->salary_group_id) && $sheet->salary_group_id !== null) {
+				$salary_rows = $salary_rows->where('g.salary_group_id', (int) $sheet->salary_group_id);
+			}
+			$salary_rows = $salary_rows->get()->result();
+
+			foreach ($salary_rows as $salary_row) {
+				if (!empty($salary_row->office_loan_transaction_id) && floatval($salary_row->office_loan_deduct) > 0) {
+					$this->revert_office_loan_deduction(
+						$salary_row->office_loan_transaction_id,
+						$salary_row->createDate,
+						floatval($salary_row->office_loan_deduct)
+					);
+				}
+			}
+
 			$this->db->where('ssg_id', $id)->delete('gmb_salary_sheet_generate');
 
 			$this->db->where('sal_month_year', $sheet->name);
@@ -442,14 +465,11 @@ public function create_employee_payment($data = array())
 				$this->db->where('salary_group_id', (int) $sheet->salary_group_id);
 			}
 			$this->db->delete('gmb_salary_generate');
-		}
 
-		if ($this->db->affected_rows() > 0) {
-			return true;
-		} else {
-			return false;
+			$this->db->trans_complete();
+
+			return $this->db->trans_status();
 		}
-	} 
 
 	public function emp_salary_paymentView($limit = null, $start = null)
 	{
@@ -1366,18 +1386,35 @@ public function get_tax_slabs($only_active = false)
 		return $this->db->where('id', $id)->delete('hrm_tax_slabs');
 	}
 
-	// Update office loan deduction after payroll processing
-	public function update_office_loan_deduction($data = array())
+	private function generate_person_ledger_transaction_id()
 	{
-		$transaction_id = $data['transaction_id'];
-		$deduction_amount = $data['deduction_amount'];
-		$deduction_date = $data['deduction_date'];
+		do {
+			$candidate = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 10));
+			$exists = $this->db->select('transaction_id')
+				->from('person_ledger')
+				->where('transaction_id', $candidate)
+				->limit(1)
+				->get()
+				->num_rows() > 0;
+		} while ($exists);
 
-		// Update office_loan_details
-		$this->db->query("UPDATE office_loan_details 
-			SET total_paid = LEAST(principal_amount, IFNULL(total_paid, 0) + ?),
-				last_deduction_date = ?,
-				next_due_date = CASE 
+		return $candidate;
+	}
+
+		// Update office loan deduction after payroll processing
+		public function update_office_loan_deduction($data = array())
+		{
+			$transaction_id = $data['transaction_id'];
+			$deduction_amount = $data['deduction_amount'];
+			$deduction_date = $data['deduction_date'];
+
+			$this->db->trans_start();
+
+			// Update office_loan_details
+			$this->db->query("UPDATE office_loan_details 
+				SET total_paid = LEAST(principal_amount, IFNULL(total_paid, 0) + ?),
+					last_deduction_date = ?,
+					next_due_date = CASE 
 					WHEN repayment_end_date IS NOT NULL AND DATE_ADD(?, INTERVAL 1 MONTH) > repayment_end_date 
 						THEN repayment_end_date
 					ELSE DATE_ADD(?, INTERVAL 1 MONTH)
@@ -1388,27 +1425,121 @@ public function get_tax_slabs($only_active = false)
 		// Get person_id for this transaction
 		$person_query = $this->db->select('pl.person_id')
 			->from('person_ledger pl')
-			->where('pl.transaction_id', $transaction_id)
-			->limit(1)
-			->get();
+				->where('pl.transaction_id', $transaction_id)
+				->limit(1)
+				->get();
 
-		if ($person_query->num_rows() > 0) {
-			$person_id = $person_query->row()->person_id;
+			$success = false;
+			if ($person_query->num_rows() > 0) {
+				$person_id = $person_query->row()->person_id;
 
-			// Add credit entry to person_ledger
-			$ledger_data = array(
-				'person_id' => $person_id,
-				'transaction_id' => $transaction_id,
-				'date' => $deduction_date,
-				'debit' => 0,
-				'credit' => $deduction_amount,
-				'details' => 'Payroll deduction - ' . date('M Y', strtotime($deduction_date))
-			);
+				// Add credit entry to person_ledger
+				$ledger_transaction_id = $this->generate_person_ledger_transaction_id();
+				$ledger_data = array(
+					'person_id' => $person_id,
+					'transaction_id' => $ledger_transaction_id,
+					'date' => $deduction_date,
+					'debit' => 0,
+					'credit' => $deduction_amount,
+					'details' => 'Payroll deduction - ' . date('M Y', strtotime($deduction_date)) . ' (Loan ref: ' . $transaction_id . ')'
+				);
 
-			return $this->db->insert('person_ledger', $ledger_data);
+				$success = $this->db->insert('person_ledger', $ledger_data);
+			}
+
+			$this->db->trans_complete();
+
+			return $success && $this->db->trans_status();
 		}
 
-		return false;
-	}
+		private function recalculate_office_loan_progress($loan_transaction_id)
+		{
+			$loan = $this->db->select('*')
+				->from('office_loan_details')
+				->where('transaction_id', $loan_transaction_id)
+				->limit(1)
+				->get()
+				->row();
 
-}
+			if (!$loan) {
+				return;
+			}
+
+			$person_row = $this->db->select('person_id')
+				->from('person_ledger')
+				->where('transaction_id', $loan_transaction_id)
+				->where('debit >', 0)
+				->limit(1)
+				->get()
+				->row();
+
+			$person_id = $person_row ? $person_row->person_id : null;
+			if (!$person_id) {
+				return;
+			}
+
+			$credits = $this->db->select('date, credit')
+				->from('person_ledger')
+				->where('person_id', $person_id)
+				->where('credit >', 0)
+				->like('details', 'Loan ref: ' . $loan_transaction_id)
+				->order_by('date', 'asc')
+				->get()
+				->result();
+
+			$total_paid = 0.0;
+			$last_date = null;
+			foreach ($credits as $row) {
+				$total_paid += floatval($row->credit);
+				$last_date = $row->date;
+			}
+
+			$total_paid = min(floatval($loan->principal_amount), $total_paid);
+
+			$payments_made = count($credits);
+			$next_due_date = null;
+			$repayment_start = !empty($loan->repayment_start_date) ? $loan->repayment_start_date : $loan->disbursement_date;
+			if (!empty($repayment_start) && $total_paid < floatval($loan->principal_amount)) {
+				try {
+					$next_due = new DateTime($repayment_start);
+					if ($payments_made > 0) {
+						$next_due->modify('+' . $payments_made . ' month');
+					}
+					$candidate = $next_due->format('Y-m-d');
+					if (!empty($loan->repayment_end_date) && strtotime($candidate) > strtotime($loan->repayment_end_date)) {
+						$candidate = $loan->repayment_end_date;
+					}
+					$next_due_date = $candidate;
+				} catch (Exception $exception) {
+					$next_due_date = null;
+				}
+			}
+
+			if ($total_paid >= floatval($loan->principal_amount)) {
+				$next_due_date = null;
+			}
+
+			$this->db->where('transaction_id', $loan_transaction_id)->update('office_loan_details', array(
+				'total_paid' => $total_paid,
+				'last_deduction_date' => $last_date ? $last_date : null,
+				'next_due_date' => $next_due_date,
+			));
+		}
+
+		public function revert_office_loan_deduction($loan_transaction_id, $deduction_date, $amount)
+		{
+			if (empty($loan_transaction_id) || empty($deduction_date) || floatval($amount) <= 0) {
+				return true;
+			}
+
+			$this->db->where('date', $deduction_date)
+				->where('credit', floatval($amount))
+				->like('details', 'Loan ref: ' . $loan_transaction_id)
+				->delete('person_ledger');
+
+			$this->recalculate_office_loan_progress($loan_transaction_id);
+
+			return true;
+		}
+
+	}

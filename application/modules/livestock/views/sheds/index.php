@@ -40,7 +40,7 @@
                             <?php if (!empty($sheds)): ?>
                                 <?php foreach ($sheds as $index => $shed): ?>
                                     <tr>
-                                        <td><?php echo $index + 1; ?></td>
+                                        <td><?php echo (isset($offset) ? $offset : 0) + $index + 1; ?></td>
                                         <td><?php echo html_escape($shed['name']); ?></td>
                                         <td><?php echo html_escape($shed['description']); ?></td>
                                         <td><?php echo html_escape($shed['created_at']); ?></td>
@@ -64,6 +64,13 @@
                         </tbody>
                     </table>
                 </div>
+                <?php if (!empty($links)): ?>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <?php echo $links; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

@@ -288,7 +288,7 @@
                                                     src="http://localhost/www/salesERPphp8.2/assets/static-img/bKash-logo.png"
                                                     alt="">
                                                 <span>Card</span></button>
-                                            <strong>Total Payable: </strong> <strong id="total_payable">$</strong>
+                                            <strong>Total Payable: </strong> <strong id="total_payable">K</strong>
                                         </div>
                                         <div class="col-sm-12 mb-3">
                                             <div class="input-group d-flex gap-10 position-relative">

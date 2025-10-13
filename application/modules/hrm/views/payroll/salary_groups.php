@@ -1,3 +1,16 @@
+<?php
+$group_label = display('group_name');
+if (empty($group_label) || $group_label === 'group_name') {
+    $group_label = trim((display('group') ?: 'Group') . ' ' . (display('name') ?: 'Name'));
+}
+if ($group_label === '') {
+    $group_label = 'Group Name';
+}
+$component_label = display('salary_components');
+if (empty($component_label) || $component_label === 'salary_components') {
+    $component_label = 'Salary Components';
+}
+?>
 <div class="row">
     <div class="col-md-4">
         <div class="panel panel-bd">
@@ -56,7 +69,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="group_components"><?php echo display('salary_components'); ?></label>
+                        <label for="group_components"><?php echo html_escape($component_label); ?></label>
                         <select class="form-control" name="component_ids[]" id="group_components" multiple="multiple" size="6">
                             <?php if (!empty($components)) { ?>
                                 <?php foreach ($components as $component) { ?>
@@ -78,30 +91,6 @@
                             <?php } ?>
                         </select>
                     </div>
-
-                    <div class="form-group">
-                        <label for="group_tax_slabs"><?php echo display('tax_slabs'); ?></label>
-                        <select class="form-control" name="tax_slab_ids[]" id="group_tax_slabs" multiple="multiple" size="6">
-                            <?php if (!empty($tax_slabs)) { ?>
-                                <?php foreach ($tax_slabs as $slab) { ?>
-                                    <?php
-                                        $slab_id = isset($slab->id) ? (int) $slab->id : 0;
-                                        $min_amount = isset($slab->min_amount) ? (float) $slab->min_amount : 0.0;
-                                        $max_amount = isset($slab->max_amount) && $slab->max_amount !== null ? (float) $slab->max_amount : null;
-                                        $rate_percent = isset($slab->rate_percent) ? (float) $slab->rate_percent : 0.0;
-                                        $range_label = number_format($min_amount, 2) . ' - ' . ($max_amount !== null ? number_format($max_amount, 2) : '∞');
-                                        $slab_label = $range_label . ' @ ' . number_format($rate_percent, 2) . '%';
-                                        $inactive_slab = (isset($slab->status) && (string) $slab->status !== '1') ? ' (' . (display('inactive') ?: 'Inactive') . ')' : '';
-                                        $slab_label .= $inactive_slab;
-                                    ?>
-                                    <option value="<?php echo $slab_id; ?>"><?php echo html_escape($slab_label); ?></option>
-                                <?php } ?>
-                            <?php } else { ?>
-                                <option value=""><?php echo display('no_data_found'); ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>
-
                     <div class="form-group text-right">
                         <button type="button" class="btn btn-default" id="salaryGroupReset"><?php echo display('cancel'); ?></button>
                         <button type="submit" class="btn btn-success" id="salaryGroupSubmit"><?php echo display('save'); ?></button>
@@ -126,8 +115,7 @@
                             <th><?php echo html_escape($group_label); ?></th>
                             <th><?php echo display('status'); ?></th>
                             <th><?php echo display('employee_name'); ?></th>
-                            <th><?php echo display('salary_components'); ?></th>
-                            <th><?php echo display('tax_slabs'); ?></th>
+                            <th><?php echo html_escape($component_label); ?></th>
                             <th><?php echo display('created_date') ? display('created_date') : 'Created'; ?></th>
                             <th><?php echo display('action'); ?></th>
                         </tr>
@@ -138,13 +126,12 @@
                             <?php foreach ($groups as $group) { ?>
                                 <?php
                                     $group_id = isset($group->id) ? (int) $group->id : 0;
-                                    $assignment = isset($group_assignments[$group_id]) ? $group_assignments[$group_id] : array('employees' => array(), 'components' => array(), 'tax_slabs' => array());
+                                    $assignment = isset($group_assignments[$group_id]) ? $group_assignments[$group_id] : array('employees' => array(), 'components' => array());
                                     $status_active = isset($group->status) && (string) $group->status === '1';
                                     $status_label = $status_active ? (display('active') ?: 'Active') : (display('inactive') ?: 'Inactive');
                                     $status_class = $status_active ? 'label label-success' : 'label label-warning';
                                     $employees_json = html_escape(json_encode($assignment['employees']));
                                     $components_json = html_escape(json_encode($assignment['components']));
-                                    $slabs_json = html_escape(json_encode($assignment['tax_slabs']));
                                     $created_at = isset($group->created_at) ? $group->created_at : '';
                                 ?>
                                 <tr>
@@ -153,7 +140,6 @@
                                     <td><span class="<?php echo $status_class; ?>"><?php echo html_escape($status_label); ?></span></td>
                                     <td><?php echo isset($group->employee_count) ? (int) $group->employee_count : 0; ?></td>
                                     <td><?php echo isset($group->component_count) ? (int) $group->component_count : 0; ?></td>
-                                    <td><?php echo isset($group->tax_slab_count) ? (int) $group->tax_slab_count : 0; ?></td>
                                     <td><?php echo html_escape($created_at); ?></td>
                                     <td>
                                         <?php if ($this->permission1->method('manage_salary_setup','update')->access()) { ?>
@@ -164,8 +150,7 @@
                                                 data-description="<?php echo html_escape(isset($group->description) ? $group->description : ''); ?>"
                                                 data-status="<?php echo $status_active ? 1 : 0; ?>"
                                                 data-employees="<?php echo $employees_json; ?>"
-                                                data-components="<?php echo $components_json; ?>"
-                                                data-slabs="<?php echo $slabs_json; ?>">
+                                                data-components="<?php echo $components_json; ?>">
                                                 <i class="fa fa-pencil"></i>
                                             </button>
                                         <?php } ?>
@@ -180,7 +165,7 @@
                             <?php } ?>
                         <?php } else { ?>
                             <tr>
-                                <td colspan="8" class="text-center"><?php echo display('no_data_found'); ?></td>
+                                <td colspan="7" class="text-center"><?php echo display('no_data_found'); ?></td>
                             </tr>
                         <?php } ?>
                     </tbody>
@@ -207,20 +192,54 @@
         var $groupStatus = $form.find('[name="status"]');
         var $employeeSelect = $form.find('[name="employee_ids[]"]');
         var $componentSelect = $form.find('[name="component_ids[]"]');
-        var $slabSelect = $form.find('[name="tax_slab_ids[]"]');
+
+        function parseAssignmentValues(raw) {
+            if (raw === undefined || raw === null || raw === '') {
+                return [];
+            }
+
+            if (Array.isArray(raw)) {
+                return raw;
+            }
+
+            if (typeof raw === 'string') {
+                var trimmed = $.trim(raw);
+                if (trimmed === '') {
+                    return [];
+                }
+                try {
+                    var parsed = JSON.parse(trimmed);
+                    if (Array.isArray(parsed)) {
+                        return parsed;
+                    }
+                } catch (err) {
+                    var parts = trimmed.split(',');
+                    if (parts.length > 1) {
+                        return parts;
+                    }
+                }
+            }
+
+            return [];
+        }
+
+        function setMultiSelectValues($select, values) {
+            if (!$select.length) {
+                return;
+            }
+
+            var normalized = $.map(values, function (value) {
+                return value !== null && value !== undefined ? value.toString() : null;
+            });
+
+            $select.val(normalized).trigger('change');
+        }
 
         function resetSalaryGroupForm() {
             $form[0].reset();
             $groupId.val('');
-            if ($employeeSelect.length) {
-                $employeeSelect.find('option').prop('selected', false);
-            }
-            if ($componentSelect.length) {
-                $componentSelect.find('option').prop('selected', false);
-            }
-            if ($slabSelect.length) {
-                $slabSelect.find('option').prop('selected', false);
-            }
+            setMultiSelectValues($employeeSelect, []);
+            setMultiSelectValues($componentSelect, []);
             $formTitle.text(defaultTitle);
             $submitBtn.text(defaultSubmit);
         }
@@ -248,41 +267,11 @@
                 $groupStatus.val(data.status.toString());
             }
 
-            var employees = [];
-            var components = [];
-            var slabs = [];
+            var employees = parseAssignmentValues(data.employees);
+            var components = parseAssignmentValues(data.components);
 
-            if (data.employees) {
-                try {
-                    employees = JSON.parse(data.employees);
-                } catch (err) {
-                    employees = [];
-                }
-            }
-            if (data.components) {
-                try {
-                    components = JSON.parse(data.components);
-                } catch (err) {
-                    components = [];
-                }
-            }
-            if (data.slabs) {
-                try {
-                    slabs = JSON.parse(data.slabs);
-                } catch (err) {
-                    slabs = [];
-                }
-            }
-
-            if ($employeeSelect.length) {
-                $employeeSelect.val($.map(employees, function (value) { return value.toString(); }));
-            }
-            if ($componentSelect.length) {
-                $componentSelect.val($.map(components, function (value) { return value.toString(); }));
-            }
-            if ($slabSelect.length) {
-                $slabSelect.val($.map(slabs, function (value) { return value.toString(); }));
-            }
+            setMultiSelectValues($employeeSelect, employees);
+            setMultiSelectValues($componentSelect, components);
 
             $formTitle.text('<?php echo display('update') ? display('update') . ' ' . (display('group') ?: 'Group') : 'Update Salary Group'; ?>');
             $submitBtn.text('<?php echo display('update'); ?>');

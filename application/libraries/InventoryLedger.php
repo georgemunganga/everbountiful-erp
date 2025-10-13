@@ -178,6 +178,117 @@ class InventoryLedger
     }
 
     /**
+     * Record an opening balance movement for a product/location.
+     */
+    public function recordOpeningBalance(array $payload)
+    {
+        $productId  = isset($payload['product_id']) ? trim($payload['product_id']) : '';
+        $locationId = (int) ($payload['location_id'] ?? 0);
+        $unitId     = (int) ($payload['unit_id'] ?? 0);
+        $quantity   = (float) ($payload['quantity'] ?? 0);
+        if ($productId === '' || $locationId <= 0 || $quantity <= 0) {
+            return false;
+        }
+
+        $baseUnit = $this->getBaseUnitContext($productId);
+        if (!$baseUnit) {
+            return false;
+        }
+        if ($unitId <= 0) {
+            $unitId = (int) $baseUnit['unit_id'];
+        }
+
+        $quantityBase = $this->convertToBaseQuantity($productId, $unitId, $quantity);
+        if ($quantityBase <= 0) {
+            return false;
+        }
+
+        $reference = isset($payload['reference']) && $payload['reference'] !== ''
+            ? (string) $payload['reference']
+            : sprintf('OB-%s-%d', $productId, $locationId);
+
+        if (!empty($payload['clear_existing'])) {
+            $this->clearMovementsByReference('opening_balance', $reference);
+            $this->ci->db->where('source_type', 'opening_balance')
+                ->where('source_reference', $reference)
+                ->delete('stock_lots');
+        }
+
+        $existingLot = $this->ci->db->select('id')
+            ->from('stock_lots')
+            ->where('product_id', $productId)
+            ->where('source_type', 'opening_balance')
+            ->where('source_reference', $reference)
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if ($existingLot) {
+            $lotId = (int) $existingLot->id;
+            $this->ci->db->where('id', $lotId)->update('stock_lots', array(
+                'location_id'      => $locationId,
+                'initial_quantity' => $quantityBase,
+                'notes'            => $payload['notes'] ?? null,
+                'status'           => 'open',
+            ));
+        } else {
+            $lotId = $this->ensureLot([
+                'lot_code'         => $reference,
+                'product_id'       => $productId,
+                'base_unit_id'     => $baseUnit['unit_id'],
+                'location_id'      => $locationId,
+                'initial_quantity' => $quantityBase,
+                'source_type'      => 'opening_balance',
+                'source_reference' => $reference,
+                'notes'            => $payload['notes'] ?? null,
+            ]);
+            if (!$lotId) {
+                return false;
+            }
+        }
+
+        $reasonId = $this->ensureReason(
+            'INITIAL_BALANCE',
+            'Initial balance load',
+            'in',
+            'Opening stock load',
+            1
+        );
+        if (!$reasonId) {
+            return false;
+        }
+
+        $movementDate = $this->safeDate($payload['opening_date'] ?? null) ?: date('Y-m-d');
+        $movementId = $this->createMovement([
+            'movement_date'     => $movementDate,
+            'product_id'        => $productId,
+            'lot_id'            => $lotId,
+            'location_id'       => $locationId,
+            'unit_id'           => $baseUnit['unit_id'],
+            'quantity_in'       => $quantityBase,
+            'quantity_out'      => 0,
+            'cost_per_unit'     => 0,
+            'cost_total'        => 0,
+            'reason_id'         => $reasonId,
+            'reference_type'    => 'opening_balance',
+            'reference_id'      => $reference,
+            'reference_line_id' => null,
+            'narration'         => $payload['notes'] ?? 'Opening balance',
+            'created_by'        => $payload['created_by'] ?? null,
+        ]);
+
+        if (!$movementId) {
+            return false;
+        }
+
+        return [
+            'lot_id'      => (int) $lotId,
+            'movement_id' => (int) $movementId,
+            'reference'   => $reference,
+        ];
+    }
+
+    /**
      * Refresh a production batch output and post stock movements.
      *
      * @param array $payload contains:

@@ -169,12 +169,11 @@
     <!-- Header Section -->
     <div class="header clearfix">
         <div class="company-info">
-            <div class="company-name">Your Company Name</div>
+            <div class="company-name">Everbountiful Farms</div>
             <div class="company-address">
-                123 Business Street<br>
-                Business City, State 12345<br>
-                Phone: (555) 123-4567<br>
-                Email: info@yourcompany.com
+                Kafue<br>                
+                Phone: +260978821001<br>
+                Email: +260978821001
             </div>
         </div>
         <div class="statement-info">
@@ -224,19 +223,19 @@
             <?php $s = $statement['summary']; ?>
             <tr>
                 <td class="label">Beginning Balance:</td>
-                <td class="amount">$<?php echo number_format($s['beginning'], 2); ?></td>
+                <td class="amount">K<?php echo number_format($s['beginning'], 2); ?></td>
             </tr>
             <tr>
                 <td class="label">Invoiced Amount:</td>
-                <td class="amount">$<?php echo number_format($s['invoiced'], 2); ?></td>
+                <td class="amount">K<?php echo number_format($s['invoiced'], 2); ?></td>
             </tr>
             <tr>
                 <td class="label">Amount Paid:</td>
-                <td class="amount">$<?php echo number_format($s['paid'], 2); ?></td>
+                <td class="amount">K<?php echo number_format($s['paid'], 2); ?></td>
             </tr>
             <tr style="background-color: #e3f2fd;">
                 <td class="label" style="font-size: 14px;"><strong>Balance Due:</strong></td>
-                <td class="amount" style="font-size: 14px; color: #007bff;"><strong>$<?php echo number_format($s['balance_due'], 2); ?></strong></td>
+                <td class="amount" style="font-size: 14px; color: #007bff;"><strong>K<?php echo number_format($s['balance_due'], 2); ?></strong></td>
             </tr>
         </table>
     </div>
@@ -261,7 +260,7 @@
                         <td><?php echo html_escape($line['details']); ?></td>
                         <td class="amount-cell"><?php echo $line['amount'] ? '$' . $line['amount'] : ''; ?></td>
                         <td class="amount-cell"><?php echo $line['payments'] ? '$' . $line['payments'] : ''; ?></td>
-                        <td class="amount-cell"><strong>$<?php echo $line['balance']; ?></strong></td>
+                        <td class="amount-cell"><strong>K<?php echo $line['balance']; ?></strong></td>
                     </tr>
                 <?php } ?>
             </tbody>
@@ -271,13 +270,13 @@
     <!-- Balance Due Highlight -->
     <div class="balance-due">
         <div class="balance-due-label">Total Balance Due</div>
-        <div class="balance-due-amount">$<?php echo number_format($s['balance_due'], 2); ?></div>
+        <div class="balance-due-amount">K<?php echo number_format($s['balance_due'], 2); ?></div>
     </div>
 
     <!-- Footer -->
     <div class="footer">
         <p>Thank you for your business. Please remit payment by the due date to avoid any late fees.</p>
-        <p>For questions about this statement, please contact us at (555) 123-4567 or info@yourcompany.com</p>
+        <p>For questions about this statement, please contact us at +260978821001 or info@everbountiful.com</p>
         <p style="margin-top: 15px;">Generated on <?php echo date('F j, Y \a\t g:i A'); ?></p>
     </div>
 </body>

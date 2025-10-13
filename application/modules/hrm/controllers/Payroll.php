@@ -10,6 +10,7 @@ class Payroll extends MX_Controller {
 		$this->load->model(array(
 			'Payroll_model',
 			'account/Accounts_model',
+			'hrm/Leave_model' => 'leave_model',
 		));	
 		$this->load->library('numbertowords');
 
@@ -716,14 +717,25 @@ class Payroll extends MX_Controller {
 	} 
 
 	public function payslip($id = null){
-			$data['title']         = display('salary_slip');
-			$data['paymentdata']   = $this->Payroll_model->salary_paymentinfo($id);  
-			$data['addition']      = $this->Payroll_model->salary_addition_fields($data['paymentdata'][0]['employee_id']);
-			$data['deduction']     = $this->Payroll_model->salary_deduction_fields($data['paymentdata'][0]['employee_id']);
-			$data['amountinword'] = $this->numbertowords->convert_number(intval(str_replace(',', '', $data['paymentdata'][0]['total_salary'])));
+			$data['title']       = display('salary_slip');
+			$paymentdata         = $this->Payroll_model->salary_paymentinfo($id);
+
+			if (empty($paymentdata)) {
+				$this->session->set_flashdata('exception', display('not_found') ?: 'Not found');
+				redirect('employee_salary_payment_view');
+			}
+
+			$data['paymentdata'] = $paymentdata;  
+			$employeeId = $paymentdata[0]['employee_id'] ?? null;
+			$data['addition']    = $this->Payroll_model->salary_addition_fields($employeeId);
+			$data['deduction']   = $this->Payroll_model->salary_deduction_fields($employeeId);
+			$data['amountinword'] = $this->numbertowords->convert_number(intval(str_replace(',', '', $paymentdata[0]['total_salary'])));
 			$data['setting']     = $this->Payroll_model->setting();
+			$salaryMonthRef      = $paymentdata[0]['salary_month'] ?? '';
+			$paymentDate         = $paymentdata[0]['payment_date'] ?? '';
+			$data['leave_days']  = $this->leave_model->get_leave_days_for_period($employeeId, $salaryMonthRef, $paymentDate);
 			$data['module']      = "hrm";
-			$data['page']          = "payslip";   
+			$data['page']        = "payslip";   
 			echo Modules::run('template/layout', $data); 
 
 	}
@@ -1102,14 +1114,8 @@ class Payroll extends MX_Controller {
 						/* Starts of loan deduction*/
 						$loan_deduct = 0.0;
 						$loan_id = null;
-						$loan_installment_respo = $this->Payroll_model->loan_installment_deduction($emp_id);
-						if($loan_installment_respo){
 
-							$loan_deduct = floatval($loan_installment_respo->installment);
-							$loan_id = $loan_installment_respo->loan_id;
-						}
-
-						// Office loan deduction
+						// Office loan deduction only
 						$office_loan_deduct = 0.0;
 						$office_loan_transaction_id = null;
 						// Convert salary month to proper date format for loan deduction check
@@ -1126,7 +1132,7 @@ class Payroll extends MX_Controller {
 						/*Net salary calculation*/
 						$net_salary = 0.0;
 						$total_deductions =  0.0;
-						$total_deductions = ($state_income_tax + $soc_sec_npf_tax + $loan_deduct + $office_loan_deduct);
+						$total_deductions = ($state_income_tax + $soc_sec_npf_tax + $office_loan_deduct);
 						$net_salary = ($gross_salary - $total_deductions);
 
 						/*Ends*/
@@ -1168,25 +1174,6 @@ class Payroll extends MX_Controller {
 						$salary_generate_respo = $this->db->insert('gmb_salary_generate', $paymentData);
 
 						if($salary_generate_respo){
-							// Update loan afetr applying it to salary generate
-							if($loan_installment_respo){
-
-								$total_released_amount = 0.0;
-								$total_released_amount = floatval($loan_installment_respo->released_amount) + $loan_deduct;
-
-								$total_installment_cleared = 0;
-								$total_installment_cleared = (int)$loan_installment_respo->installment_cleared + 1;
-
-								$loan_installment_data = array(
-									'loan_id'            => $loan_id,
-									'installment_cleared'=> $total_installment_cleared,
-									'released_amount'    => $total_released_amount,
-									'updated_by'         => $this->session->userdata('id'),
-								);
-
-								$loan_installmnt_paid_respo = $this->Payroll_model->update_loan_installment($loan_installment_data);
-							}
-
 							// Update office loan after applying deduction
 							if($office_loan_respo && $office_loan_deduct > 0){
 								$office_loan_deduction_data = array(
@@ -1492,7 +1479,6 @@ class Payroll extends MX_Controller {
 		$data['group_assignments'] = $assignments;
 		$data['employees'] = $this->Payroll_model->get_all_employees_for_groups();
 		$data['components'] = $this->Payroll_model->get_salary_components(false);
-		$data['tax_slabs'] = $this->db->table_exists('hrm_tax_slabs') ? $this->Payroll_model->get_tax_slabs() : array();
 
 		echo Modules::run('template/layout', $data);
 	}
@@ -1659,26 +1645,62 @@ class Payroll extends MX_Controller {
 
 	public function salary_pay_slip($id)
 	{ 
+		$data = $this->prepare_pay_slip_data($id);
+		if ($data === null) {
+			$this->session->set_flashdata('exception', display('not_found'));
+			redirect('employee_salary_payment_view');
+		}
+
+		$data['module']    = "hrm";
+		$data['page']      = "employee_salary/pay_slip"; 
+
+		echo Modules::run('template/layout', $data); 
+	}
+
+	public function salary_pay_slip_pdf($id)
+	{
+		$data = $this->prepare_pay_slip_data($id);
+		if ($data === null) {
+			$this->session->set_flashdata('exception', display('not_found'));
+			redirect('employee_salary_payment_view');
+		}
+
+		$this->load->library('pdfgenerator');
+		$page = $this->load->view('employee_salary/pay_slip_pdf', $data, true);
+
+		$employee_name = isset($data['employee_info']->first_name) ? trim($data['employee_info']->first_name . ' ' . $data['employee_info']->last_name) : 'pay_slip';
+		$employee_name = strtolower(preg_replace('/[^A-Za-z0-9]+/', '_', $employee_name));
+		$filename = 'pay_slip_' . $employee_name . '_' . $id;
+
+		$pdf_content = $this->pdfgenerator->generate($page, $filename, false);
+		$this->load->helper('download');
+		force_download($filename . '.pdf', $pdf_content);
+	}
+
+	private function prepare_pay_slip_data($id)
+	{
+		$data = array();
 		$data['title']         = display('view_employee_payment'); 
-		$data['setting'] = $setting = $this->Payroll_model->setting();
+		$data['setting'] = $this->Payroll_model->setting();
 		$data['user_info'] = $this->session->userdata();
 
 		$data['salary_info'] =  $salary_info  = $this->Payroll_model->employee_salary_generate_info($id);
+		if (empty($salary_info)) {
+			return null;
+		}
 
 		$component_breakdown = $this->Payroll_model->calculate_component_breakdown($salary_info);
 		$component_add_total = isset($component_breakdown['earning_total']) ? (float) $component_breakdown['earning_total'] : 0.0;
 		$component_ded_total = isset($component_breakdown['deduction_total']) ? (float) $component_breakdown['deduction_total'] : 0.0;
-                $loan_total = floatval($salary_info->loan_deduct);
-                $office_loan_total = floatval($salary_info->office_loan_deduct);
+        $office_loan_total = floatval($salary_info->office_loan_deduct);
 
 		$data['component_breakdown'] = $component_breakdown;
 		$data['component_add_total'] = round($component_add_total, 2);
 		$data['component_ded_total'] = round($component_ded_total, 2);
-                $data['loan_total'] = round($loan_total, 2);
-                $data['office_loan_total'] = round($office_loan_total, 2);
+        $data['office_loan_total'] = round($office_loan_total, 2);
 
-                $total_deductions = $component_ded_total + $loan_total + $office_loan_total;
-                $data['total_deductions'] = round($total_deductions, 2);
+        $total_deductions = $component_ded_total + $office_loan_total;
+        $data['total_deductions'] = round($total_deductions, 2);
 
 		$post_gross_total = isset($salary_info->gross_salary) ? ((float) $salary_info->gross_salary + $component_add_total) : $component_add_total;
 		$data['post_gross_total'] = round($post_gross_total, 2);
@@ -1697,10 +1719,10 @@ class Payroll extends MX_Controller {
 		$data['month_name']  = $month;
 		$data['year_name']   = $year;
 		// Get month number based on moth name..
-	    $month = $this->month_number_check($month);
-	    $data['month_number']   = $month;
+	    $month_number = $this->month_number_check($month);
+	    $data['month_number']   = $month_number;
 	    // Get last date of the month
-	    $firstDate = $year.'-'.$month.'-'.'1';
+	    $firstDate = $year.'-'.$month_number.'-'.'1';
 	    $data['first_date']   = $firstDate;
 
 	    $lastGetDate = date("Y-m-t", strtotime($firstDate));
@@ -1714,10 +1736,11 @@ class Payroll extends MX_Controller {
 	    $employee_info  = $this->Payroll_model->employee_info($salary_info->employee_id);
 	    $data['employee_info'] = $employee_info;
 
-		$data['module']    = "hrm";
-		$data['page']      = "employee_salary/pay_slip"; 
+		$leaveDays = $this->leave_model->get_leave_days_for_period((int) $salary_info->employee_id, $salary_info->sal_month_year ?? '', $salary_info->createDate ?? '');
+		$data['leave_days'] = round($leaveDays, 2);
+		$data['worked_days'] = !empty($salary_info->total_attendance) ? $salary_info->total_attendance : ($salary_info->total_count ?? '');
 
-		echo Modules::run('template/layout', $data); 
+		return $data;
 	}
 
 	public function gmb_employee_salary_chart($ssg_id)
@@ -1781,7 +1804,7 @@ class Payroll extends MX_Controller {
 
 			$gross_salary 			   = $gross_salary + floatval($value->gross_salary);
 			$net_salary   			   = $net_salary + floatval($value->net_salary);
-			$loan_deduction_total      = floatval($value->loan_deduct) + (isset($value->office_loan_deduct) ? floatval($value->office_loan_deduct) : 0.0);
+			$loan_deduction_total      = isset($value->office_loan_deduct) ? floatval($value->office_loan_deduct) : 0.0;
 			$loans   				   = $loans + $loan_deduction_total;
 			$state_income_tax          = $state_income_tax + floatval($value->income_tax);
 			$employee_npf_contribution = $employee_npf_contribution + floatval($value->soc_sec_npf_tax);

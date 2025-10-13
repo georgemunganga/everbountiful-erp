@@ -5,6 +5,9 @@ class CustomerGroups_model extends CI_Model
 {
     public function list_all()
     {
+        if (!$this->db->table_exists('customer_groups')) {
+            return [];
+        }
         return $this->db->select('*')
             ->from('customer_groups')
             ->order_by('group_name', 'asc')
@@ -24,11 +27,17 @@ class CustomerGroups_model extends CI_Model
 
     public function get($id)
     {
+        if (!$this->db->table_exists('customer_groups')) {
+            return null;
+        }
         return $this->db->select('*')->from('customer_groups')->where('id', (int)$id)->get()->row();
     }
 
     public function create($data)
     {
+        if (!$this->db->table_exists('customer_groups')) {
+            return false;
+        }
         return $this->db->insert('customer_groups', [
             'group_name' => trim($data['group_name'] ?? ''),
             'description' => $data['description'] ?? null,
@@ -38,6 +47,9 @@ class CustomerGroups_model extends CI_Model
 
     public function update($id, $data)
     {
+        if (!$this->db->table_exists('customer_groups')) {
+            return false;
+        }
         return $this->db->where('id', (int)$id)->update('customer_groups', [
             'group_name' => trim($data['group_name'] ?? ''),
             'description' => $data['description'] ?? null,
@@ -47,6 +59,9 @@ class CustomerGroups_model extends CI_Model
 
     public function delete($id)
     {
+        if (!$this->db->table_exists('customer_groups')) {
+            return false;
+        }
         return $this->db->where('id', (int)$id)->delete('customer_groups');
     }
 }

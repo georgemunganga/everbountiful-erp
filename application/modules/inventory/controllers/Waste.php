@@ -29,12 +29,40 @@ class Waste extends MX_Controller
 
     public function index()
     {
-        redirect('stock/waste');
+        $this->form();
     }
 
     public function form()
     {
-        redirect('stock/waste');
+        // Permission: stock_waste create
+        if (isset($this->permission1) && method_exists($this->permission1, 'method')) {
+            if (!$this->permission1->method('stock_waste', 'create')->access()) {
+                $this->session->set_flashdata('exception', display('unauthorized') ?: 'Unauthorized');
+                redirect('home');
+            }
+        }
+        $data = array();
+        $data['title'] = display('inventory_waste') ?: 'Inventory Waste';
+        $data['lots'] = $this->Inventory_model->get_available_lots();
+        $data['locations'] = $this->Inventory_model->get_active_locations();
+        $data['products'] = $this->Inventory_model->get_consumable_products();
+        $data['reasons'] = $this->reasonOptions;
+        $data['recent_waste'] = $this->Inventory_model->get_recent_waste(10);
+        $data['recent_notifications'] = $this->Inventory_model->get_recent_notifications(10);
+
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            // Permission: stock_override for allowing negative
+            if ($this->input->post('allow_override') && isset($this->permission1) && method_exists($this->permission1, 'method')) {
+                if (!$this->permission1->method('stock_override', 'create')->access()) {
+                    $this->session->set_flashdata('exception', display('unauthorized') ?: 'Unauthorized');
+                    redirect('inventory/waste');
+                }
+            }
+            $this->process_form($data);
+            return;
+        }
+
+        $this->render('waste/form', $data);
     }
 
     private function process_form(array $data)

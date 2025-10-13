@@ -237,6 +237,91 @@ class Stock extends MX_Controller
         redirect('stock/waste');
     }
 
+    public function opening_balance()
+    {
+        if (isset($this->permission1) && method_exists($this->permission1, 'method')) {
+            if (!$this->permission1->method('stock_opening', 'create')->access()) {
+                $this->session->set_flashdata('exception', display('unauthorized') ?: 'Unauthorized');
+                redirect('home');
+            }
+        }
+
+        $data = array();
+        $data['title'] = display('inventory_opening_balance') ?: 'Opening Balance';
+        $data['locations'] = $this->Inventory_model->get_active_locations();
+        $data['products'] = $this->Inventory_model->get_consumable_products();
+        $data['recent_openings'] = $this->Inventory_model->get_recent_opening_balances(20);
+        $data['form_action'] = 'inventory/opening-balance';
+
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            $this->processOpeningBalance($data);
+            return;
+        }
+
+        $this->render('opening/form', $data);
+    }
+
+    private function processOpeningBalance(array $data)
+    {
+        $this->form_validation->set_rules('product_id', display('product') ?: 'Product', 'required');
+        $this->form_validation->set_rules('location_id', display('location') ?: 'Location', 'required|integer');
+        $this->form_validation->set_rules('quantity', display('quantity') ?: 'Quantity', 'required|numeric|greater_than[0]');
+        $this->form_validation->set_rules('opening_date', display('date') ?: 'Date', 'required');
+
+        if ($this->form_validation->run() === false) {
+            $data['validation_errors'] = validation_errors();
+            $this->render('opening/form', $data);
+            return;
+        }
+
+        $productId   = trim($this->input->post('product_id', true));
+        $locationId  = (int) $this->input->post('location_id', true);
+        $quantity    = (float) $this->input->post('quantity', true);
+        $openingDate = $this->input->post('opening_date', true);
+        $unitId      = 0;
+        $reference   = trim((string) $this->input->post('reference_code', true));
+        $notes       = $this->input->post('notes', true);
+
+        if ($reference === '') {
+            $reference = sprintf('OB-%s-%d', $productId, $locationId);
+        }
+
+        if ($this->input->post('replace_existing')) {
+            $this->inventoryledger->clearMovementsByReference('opening_balance', $reference);
+            $this->db->where('source_type', 'opening_balance')
+                ->where('source_reference', $reference)
+                ->delete('stock_lots');
+        }
+
+        $result = $this->inventoryledger->recordOpeningBalance(array(
+            'product_id'      => $productId,
+            'location_id'     => $locationId,
+            'unit_id'         => $unitId,
+            'quantity'        => $quantity,
+            'opening_date'    => $openingDate,
+            'notes'           => $notes,
+            'reference'       => $reference,
+            'created_by'      => $this->session->userdata('id'),
+        ));
+
+        if ($result === false) {
+            $this->session->set_flashdata('exception', display('please_try_again') ?: 'Please try again');
+            redirect('stock/opening_balance');
+        }
+
+        log_message('info', sprintf(
+            'Opening balance recorded (product %s, location %d, qty %.2f, ref %s) by user %s',
+            $productId,
+            $locationId,
+            $quantity,
+            $reference,
+            $this->session->userdata('id')
+        ));
+
+        $this->session->set_flashdata('message', display('save_successfully') ?: 'Saved successfully');
+        redirect('stock/opening_balance');
+    }
+
     public function transfers()
     {
         if (isset($this->permission1) && method_exists($this->permission1, 'method')) {

@@ -25,10 +25,10 @@
         <?php $s = $statement['summary']; ?>
         <p>Period: <?php echo date('d-m-Y', strtotime($from_date)); ?> To <?php echo date('d-m-Y', strtotime($to_date)); ?></p>
         <table class="table table-bordered">
-          <tr><th>Beginning Balance</th><td>$<?php echo number_format($s['beginning'], 2); ?></td></tr>
-          <tr><th>Invoiced Amount</th><td>$<?php echo number_format($s['invoiced'], 2); ?></td></tr>
-          <tr><th>Amount Paid</th><td>$<?php echo number_format($s['paid'], 2); ?></td></tr>
-          <tr><th>Balance Due</th><td>$<?php echo number_format($s['balance_due'], 2); ?></td></tr>
+          <tr><th>Beginning Balance</th><td>K<?php echo number_format($s['beginning'], 2); ?></td></tr>
+          <tr><th>Invoiced Amount</th><td>K<?php echo number_format($s['invoiced'], 2); ?></td></tr>
+          <tr><th>Amount Paid</th><td>K<?php echo number_format($s['paid'], 2); ?></td></tr>
+          <tr><th>Balance Due</th><td>K<?php echo number_format($s['balance_due'], 2); ?></td></tr>
         </table>
 
         <h5>Transactions</h5>

@@ -3889,6 +3889,10 @@ public function customer_receive(){
   $data['customer_list'] = $this->accounts_model->get_customer();
   $data['voucher_no']    = $this->accounts_model->Creceive();
   $data['all_pmethod']   = $this->accounts_model->pmethod_dropdown();
+  $prefillCustomerId     = $this->input->get('customer_id', true);
+  $returnTo              = $this->input->get('return_to', true);
+  $data['prefill_customer_id'] = $prefillCustomerId ? trim($prefillCustomerId) : '';
+  $data['return_to'] = $returnTo ? trim($returnTo) : '';
   $data['title']         = display('customer_receive');
   $data['module']        = "account";
   $data['page']          = "customer_receive_form"; 

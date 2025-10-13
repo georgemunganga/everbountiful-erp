@@ -51,7 +51,7 @@
                             <?php if (!empty($livestocks)): ?>
                                 <?php foreach ($livestocks as $index => $livestock): ?>
                                     <tr>
-                                        <td><?php echo $index + 1; ?></td>
+                                        <td><?php echo (isset($offset) ? $offset : 0) + $index + 1; ?></td>
                                         <td><?php echo html_escape($livestock['name']); ?></td>
                                         <td><?php echo html_escape($livestock['shed_name']); ?></td>
                                         <td><?php echo html_escape($livestock['group_name']); ?></td>
@@ -81,6 +81,13 @@
                         </tbody>
                     </table>
                 </div>
+                <?php if (!empty($links)): ?>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <?php echo $links; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

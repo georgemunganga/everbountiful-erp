@@ -83,13 +83,11 @@ function addInputField_invoice(t) {
         tab14 = tabindex + 14;
         tab15 = tabindex + 15;
        
-        var issueLocationOptions = window.invoiceIssueLocationOptions || "<option value=''>Select Location</option>";
-        var issueLocationSelect = "<select class='form-control basic-single issue-location-select' onchange='invoice_product_batch(" + count + ")' id='serial_no_" + count + "' name='serial_no[]' aria-hidden='true' tabindex='" + tab3 + "'>" + issueLocationOptions + "</select>";
         e.innerHTML = "<td><input type='text' name='product_name' onkeypress='invoice_productList(" + count + 
         ");' class='form-control productSelection common_product' placeholder='Product Name' id='" + a + 
         "' required tabindex='" + tab1 + "'><input type='hidden' class='common_product autocomplete_hidden_value  product_id_" + count + 
-        "' name='product_id[]' id='SchoolHiddenId'/></td><td><input type='text' name='desc[]'' class='form-control text-right ' tabindex='" +
-         tab2 + "'/></td><td>" + issueLocationSelect + "</td> <td><input type='text' name='available_quantity[]' id='' class='form-control text-right common_avail_qnt available_quantity_" + 
+        "' name='product_id[]' id='SchoolHiddenId'/><input type='hidden' name='serial_no[]' id='serial_no_" + count + "' class='invoice-serial-value' /></td><td><input type='text' name='desc[]'' class='form-control text-right ' tabindex='" +
+         tab2 + "'/></td><td><input type='text' name='available_quantity[]' id='' class='form-control text-right common_avail_qnt available_quantity_" + 
          count + "' value='0' readonly='readonly' /></td><td><input class='form-control text-right common_name unit_" + count + 
          " valid' value='None' readonly='' aria-invalid='false' type='text'></td><td> <input type='text' name='product_quantity[]' value='1' required='required' onkeyup='bdtask_invoice_quantity_calculate(" + 
          count + ");' onchange='bdtask_invoice_quantity_calculate(" + count + ");' id='total_qntt_" + count + "' class='common_qnt total_qntt_" + 
@@ -166,13 +164,11 @@ function addInputField_invoice_dynamic(t) {
         tab13 = tabindex + 13;
         tab14 = tabindex + 14;
         tab15 = tabindex + 15;
-        var issueLocationOptions = window.invoiceIssueLocationOptions || "<option value=''>Select Location</option>";
-        var issueLocationSelect = "<select class='form-control basic-single issue-location-select' onchange='invoice_product_batch(" + count + ")' id='serial_no_" + count + "' name='serial_no[]' aria-hidden='true' tabindex='" + tab3 + "'>" + issueLocationOptions + "</select>";
         e.innerHTML = "<td><input type='text' name='product_name' onkeypress='invoice_productList(" + count + 
         ");' class='form-control productSelection common_product' placeholder='Product Name' id='" + a + 
         "' required tabindex='" + tab1 + "'><input type='hidden' class='common_product autocomplete_hidden_value  product_id_" + count + 
-        "' name='product_id[]' id='SchoolHiddenId'/></td><td><input type='text' name='desc[]'' class='form-control text-right ' tabindex='" +
-         tab2 + "'/></td><td>" + issueLocationSelect + "</td> <td><input type='text' name='available_quantity[]' id='' class='form-control text-right common_avail_qnt available_quantity_" + 
+        "' name='product_id[]' id='SchoolHiddenId'/><input type='hidden' name='serial_no[]' id='serial_no_" + count + "' class='invoice-serial-value' /></td><td><input type='text' name='desc[]'' class='form-control text-right ' tabindex='" +
+         tab2 + "'/></td><td><input type='text' name='available_quantity[]' id='' class='form-control text-right common_avail_qnt available_quantity_" + 
          count + "' value='0' readonly='readonly' /></td><td><input class='form-control text-right common_name unit_" + count + 
          " valid' value='None' readonly='' aria-invalid='false' type='text'></td><td> <input type='text' name='product_quantity[]' value='1' required='required' onkeyup='bdtask_invoice_quantity_calculate(" + 
          count + ");' onchange='bdtask_invoice_quantity_calculate(" + count + ");' id='total_qntt_" + count + "' class='common_qnt total_qntt_" + 
@@ -978,7 +974,38 @@ $(document).ready(function(){
                             $('.'+unit).val(obj.unit);
                             $('.'+tax).val(obj.tax);
                             $('#txfieldnum').val(obj.txnmber);
-                            $('#'+serial_no).html(obj.serial);
+                            var manualValue = window.invoiceIssueLocationManualValue || 'MANUAL';
+                            var selectedBatch = '';
+                            if (obj.serial) {
+                                var tempWrapper = document.createElement('select');
+                                tempWrapper.innerHTML = obj.serial;
+                                var optionNodes = tempWrapper.querySelectorAll('option');
+                                var manualFallback = '';
+                                for (var i = 0; i < optionNodes.length; i++) {
+                                    var option = optionNodes[i];
+                                    var value = option.value || '';
+                                    if (!value) {
+                                        continue;
+                                    }
+                                    if (value === manualValue) {
+                                        manualFallback = manualValue;
+                                        continue;
+                                    }
+                                    if (!selectedBatch) {
+                                        selectedBatch = value;
+                                    }
+                                }
+                                if (!selectedBatch && manualFallback) {
+                                    selectedBatch = manualFallback;
+                                }
+                            }
+                            $('#'+serial_no).val(selectedBatch);
+                            if (selectedBatch && selectedBatch !== manualValue) {
+                                invoice_product_batch(sl);
+                            } else {
+                                var totalAvailable = parseFloat(obj.total_product || 0);
+                                $(".available_quantity_" + sl).val(totalAvailable > 0 ? totalAvailable.toFixed(2) : '0');
+                            }
                             $('#'+vat_percent).val(obj.product_vat);
                            
                                    bdtask_invoice_quantity_calculate(sl);

@@ -16,6 +16,52 @@
                 $next_due_label        = display('next_due_date') ? display('next_due_date') : 'Next Due Date';
                 $deduction_history     = display('deduction_history') ? display('deduction_history') : 'Deduction History';
                 $payroll_deductions_lb = display('payroll_deductions') ? display('payroll_deductions') : 'Payroll Deductions';
+                $schedule_labels       = array(
+                    'disbursement_date'    => display('disbursement_date') ? display('disbursement_date') : 'Disbursement Date',
+                    'repayment_start_date' => display('repayment_start_date') ? display('repayment_start_date') : 'Repayment Start Date',
+                    'repayment_end_date'   => display('repayment_end_date') ? display('repayment_end_date') : 'Repayment Due Date',
+                    'repayment_period'     => display('repayment_period') ? display('repayment_period') : 'Repayment Period',
+                    'payment_channel_label'=> display('payment_type') ? display('payment_type') : 'Payment Channel',
+                );
+
+                if (!function_exists('render_loan_schedule_details')) {
+                    function render_loan_schedule_details($entry, $schedule_labels)
+                    {
+                        $details = isset($entry['details']) ? trim($entry['details']) : '';
+                        $schedule_meta = isset($entry['schedule_meta']) && is_array($entry['schedule_meta']) ? $entry['schedule_meta'] : array();
+                        $output = '';
+
+                        if ($details !== '') {
+                            $output .= '<div>' . nl2br(html_escape($details)) . '</div>';
+                        }
+
+                        if (!empty($schedule_meta)) {
+                            $items = array();
+                            foreach ($schedule_labels as $field => $label) {
+                                if (empty($schedule_meta[$field])) {
+                                    continue;
+                                }
+                                $value = $schedule_meta[$field];
+                                if ($field === 'repayment_period') {
+                                    $months = (int) $value;
+                                    $month_word = $months === 1 ? (display('month') ?: 'Month') : (display('months') ?: 'Months');
+                                    $value = $months . ' ' . $month_word;
+                                }
+                                $items[] = '<li><strong>' . html_escape($label) . ':</strong> ' . html_escape($value) . '</li>';
+                            }
+
+                            if (!empty($items)) {
+                                $output .= '<ul class="list-unstyled text-muted small m-b-0">' . implode('', $items) . '</ul>';
+                            }
+                        }
+
+                        if ($output === '') {
+                            $output = '&mdash;';
+                        }
+
+                        return $output;
+                    }
+                }
 
                 $person_name    = isset($person['person_name']) ? $person['person_name'] : '';
                 $person_phone   = isset($person['person_phone']) ? $person['person_phone'] : '';
@@ -104,14 +150,13 @@
                                 <?php foreach ($ledger as $row) { ?>
                                     <?php
                                     $entry_date    = isset($row['date']) ? $row['date'] : (isset($row['VDate']) ? date('Y-m-d', strtotime($row['VDate'])) : '');
-                                    $description   = isset($row['details']) ? $row['details'] : (isset($row['Narration']) ? $row['Narration'] : '');
                                     $debit_amount  = isset($row['debit']) ? (float) $row['debit'] : (isset($row['Debit']) ? (float) $row['Debit'] : 0);
                                     $credit_amount = isset($row['credit']) ? (float) $row['credit'] : (isset($row['Credit']) ? (float) $row['Credit'] : 0);
                                     $row_balance   = isset($row['balance']) ? (float) $row['balance'] : ($debit_amount - $credit_amount);
                                     ?>
                                     <tr>
                                         <td><?php echo html_escape($entry_date); ?></td>
-                                        <td><?php echo nl2br(html_escape($description)); ?></td>
+                                        <td><?php echo render_loan_schedule_details($row, $schedule_labels); ?></td>
                                         <td class="text-right"><?php echo $debit_amount > 0 ? number_format($debit_amount, 2) : '-'; ?></td>
                                         <td class="text-right"><?php echo $credit_amount > 0 ? number_format($credit_amount, 2) : '-'; ?></td>
                                         <td class="text-right"><?php echo number_format($row_balance, 2); ?></td>
@@ -149,7 +194,7 @@
                                     <tr>
                                         <td><?php echo html_escape(isset($deduction['date']) ? $deduction['date'] : ''); ?></td>
                                         <td class="text-right"><?php echo number_format(isset($deduction['credit']) ? $deduction['credit'] : 0, 2); ?></td>
-                                        <td><?php echo nl2br(html_escape(isset($deduction['details']) ? $deduction['details'] : '')); ?></td>
+                                        <td><?php echo render_loan_schedule_details($deduction, $schedule_labels); ?></td>
                                     </tr>
                                 <?php } ?>
                             </tbody>

@@ -163,6 +163,31 @@ class Inventory_model extends CI_Model
             ->result_array();
     }
 
+    public function get_recent_opening_balances($limit = 10)
+    {
+        return $this->db->select([
+                'sm.id',
+                'sm.movement_date',
+                'sm.product_id',
+                'sm.quantity_in',
+                'sm.reference_id',
+                'sm.narration',
+                'pi.product_name',
+                'u.unit_name',
+                'sl.location_name',
+            ])
+            ->from('stock_movements sm')
+            ->join('product_information pi', 'pi.product_id = sm.product_id', 'left')
+            ->join('units u', 'u.unit_id = sm.unit_id', 'left')
+            ->join('stock_locations sl', 'sl.id = sm.location_id', 'left')
+            ->where('sm.reference_type', 'opening_balance')
+            ->order_by('sm.movement_date', 'desc')
+            ->order_by('sm.id', 'desc')
+            ->limit($limit)
+            ->get()
+            ->result_array();
+    }
+
     public function get_recent_waste($limit = 10)
     {
         return $this->db->select([

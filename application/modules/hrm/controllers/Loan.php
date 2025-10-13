@@ -146,6 +146,40 @@ class Loan extends MX_Controller {
         return $this->add_months_to_date($start_date, $period_months - 1);
     }
 
+    private function calculate_period_months($start_date, $end_date)
+    {
+        $start_date = $this->normalize_date_input($start_date, null);
+        $end_date   = $this->normalize_date_input($end_date, null);
+
+        if (empty($start_date) || empty($end_date)) {
+            return 1;
+        }
+
+        $start_time = strtotime($start_date);
+        $end_time   = strtotime($end_date);
+
+        if ($start_time === false || $end_time === false || $end_time <= $start_time) {
+            return 1;
+        }
+
+        $period = 1;
+        $limit  = 600;
+
+        while ($period <= $limit) {
+            $candidate      = $this->add_months_to_date($start_date, $period - 1);
+            $candidate_time = strtotime($candidate);
+            if ($candidate_time === $end_time) {
+                return $period;
+            }
+            if ($candidate_time > $end_time) {
+                return max(1, $period - 1);
+            }
+            $period++;
+        }
+
+        return $period;
+    }
+
     private function build_schedule_payload(array $overrides = array(), $fallback_disbursement = null)
     {
         $today = date('Y-m-d');
@@ -680,6 +714,29 @@ class Loan extends MX_Controller {
                 $loan_list[$key]['total_credit'] = (float) $loan['total_credit'];
                 $loan_list[$key]['outstanding'] = max(0, round($principal_amount - $loan_list[$key]['total_credit'], 2));
                 $loan_list[$key]['employee_display_name'] = !empty($loan['employee_full_name']) ? $loan['employee_full_name'] : $loan['person_name'];
+
+                $parsed_schedule = $this->parse_schedule_from_details(isset($loan['details']) ? $loan['details'] : '');
+                $loan_list[$key]['details'] = $parsed_schedule['details'];
+
+                if (!empty($parsed_schedule['schedule'])) {
+                    $schedule_meta = $parsed_schedule['schedule'];
+                    if (empty($loan_list[$key]['disbursement_date']) && !empty($schedule_meta['disbursement_date'])) {
+                        $loan_list[$key]['disbursement_date'] = $schedule_meta['disbursement_date'];
+                    }
+                    if (empty($loan_list[$key]['repayment_start_date']) && !empty($schedule_meta['repayment_start_date'])) {
+                        $loan_list[$key]['repayment_start_date'] = $schedule_meta['repayment_start_date'];
+                    }
+                    if (empty($loan_list[$key]['repayment_end_date']) && !empty($schedule_meta['repayment_end_date'])) {
+                        $loan_list[$key]['repayment_end_date'] = $schedule_meta['repayment_end_date'];
+                    }
+                    if (empty($loan_list[$key]['repayment_period']) && !empty($schedule_meta['repayment_period'])) {
+                        $loan_list[$key]['repayment_period'] = $schedule_meta['repayment_period'];
+                    }
+                    if (!empty($schedule_meta['payment_channel_label'])) {
+                        $loan_list[$key]['payment_channel_label'] = $schedule_meta['payment_channel_label'];
+                    }
+                }
+
                 $total_amount += $principal_amount;
             }
         }
@@ -720,6 +777,10 @@ class Loan extends MX_Controller {
 
         if (!empty($ledger)) {
             foreach ($ledger as $key => $entry) {
+                $parsed = $this->parse_schedule_from_details(isset($entry['details']) ? $entry['details'] : '');
+                $ledger[$key]['details'] = $parsed['details'];
+                $ledger[$key]['schedule_meta'] = $parsed['schedule'];
+
                 if (empty($primary_detail) && (float) $entry['debit'] > 0) {
                     $detail_candidate = $this->loan_model->get_office_loan_detail($entry['transaction_id']);
                     if (!empty($detail_candidate)) {
@@ -945,11 +1006,6 @@ class Loan extends MX_Controller {
         if ($repayment_period < 1) {
             $repayment_period = 1;
         }
-
-        $monthly_installment = round($amount / max(1, $repayment_period), 2);
-        $amount_formatted = number_format($amount, 2, '.', '');
-        $monthly_installment_formatted = number_format($monthly_installment, 2, '.', '');
-        $monthly_installment_formatted = number_format($monthly_installment, 2, '.', '');
         $default_start_date = date('Y-m-d', strtotime('+1 month', strtotime($disbursement_date)));
         $repayment_start_date = $this->sanitize_date($this->input->post('repayment_start_date', TRUE), $default_start_date);
         if (strtotime($repayment_start_date) === false) {
@@ -959,9 +1015,37 @@ class Loan extends MX_Controller {
             $repayment_start_date = $default_start_date;
         }
 
-        $calculated_end_date = date('Y-m-d', strtotime('+' . ($repayment_period - 1) . ' month', strtotime($repayment_start_date)));
-        $repayment_end_date_input = $this->sanitize_date($this->input->post('repayment_end_date', TRUE), $calculated_end_date);
-        $repayment_end_date = ($repayment_end_date_input === $calculated_end_date) ? $repayment_end_date_input : $calculated_end_date;
+        $requested_due_raw = $this->input->post('repayment_end_date', TRUE);
+        $requested_due_clean = $this->sanitize_date($requested_due_raw, null);
+        $due_adjusted = false;
+
+        if ($requested_due_raw !== '' && (empty($requested_due_clean) || strtotime($requested_due_clean) === false)) {
+            $due_adjusted = true;
+            $repayment_end_date = $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        } elseif (!empty($requested_due_clean) && strtotime($requested_due_clean) < strtotime($repayment_start_date)) {
+            $due_adjusted = true;
+            $repayment_end_date = $repayment_start_date;
+        } else {
+            $repayment_end_date = $requested_due_clean ?: $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        }
+
+        $repayment_period = max(1, (int) $this->calculate_period_months($repayment_start_date, $repayment_end_date));
+        $repayment_end_date = $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        if (!empty($requested_due_clean) && strtotime($requested_due_clean) !== false) {
+            if (strtotime($requested_due_clean) !== strtotime($repayment_end_date)) {
+                $due_adjusted = true;
+            }
+        }
+
+        $monthly_installment = round($amount / max(1, $repayment_period), 2);
+        $monthly_installment_formatted = number_format($monthly_installment, 2, '.', '');
+
+        $next_due_input = $this->sanitize_date($this->input->post('next_due_date', TRUE), $repayment_start_date);
+        if (empty($next_due_input) || strtotime($next_due_input) === false || strtotime($next_due_input) < strtotime($repayment_start_date)) {
+            $next_due_date = $repayment_start_date;
+        } else {
+            $next_due_date = $next_due_input;
+        }
 
         if (empty($entry_date)) {
             $entry_date = date('Y-m-d');
@@ -1133,12 +1217,15 @@ class Loan extends MX_Controller {
                 'principal_amount'     => $amount_formatted,
                 'monthly_installment'  => $monthly_installment_formatted,
                 'total_paid'           => 0.0,
-                'next_due_date'        => $repayment_start_date,
+                'next_due_date'        => $next_due_date,
             ));
 
             $this->db->insert('acc_transaction',$loan);
             $this->db->insert('acc_transaction',$credit_entry);
             $this->session->set_flashdata(array('message' => display('successfully_added')));
+            if ($due_adjusted) {
+                $this->session->set_flashdata('warning', 'Repayment due date was adjusted to align with the monthly repayment schedule.');
+            }
             redirect(base_url('manage_office_loans'));
         } else {
             $this->session->set_flashdata(array('exception' => display('not_added')));
@@ -1231,6 +1318,11 @@ class Loan extends MX_Controller {
         $paytype        = $this->payment_channel_requires_bank($payment_channel) ? 2 : 1;
         $bank_id        = $this->input->post('bank_id', TRUE);
 
+        $entry_date = $this->sanitize_date($date, date('Y-m-d'));
+        if (empty($entry_date)) {
+            $entry_date = date('Y-m-d');
+        }
+
         $disbursement_date = $this->sanitize_date($this->input->post('disbursement_date', TRUE), $entry_date);
         if (empty($disbursement_date)) {
             $disbursement_date = $entry_date;
@@ -1241,7 +1333,8 @@ class Loan extends MX_Controller {
             $repayment_period = 1;
         }
 
-        $monthly_installment = round($amount / max(1, $repayment_period), 2);
+        $amount_formatted = number_format($amount, 2, '.', '');
+
         $default_start_date = date('Y-m-d', strtotime('+1 month', strtotime($disbursement_date)));
         $repayment_start_date = $this->sanitize_date($this->input->post('repayment_start_date', TRUE), $default_start_date);
         if (strtotime($repayment_start_date) === false) {
@@ -1251,12 +1344,36 @@ class Loan extends MX_Controller {
             $repayment_start_date = $default_start_date;
         }
 
-        $calculated_end_date = date('Y-m-d', strtotime('+' . ($repayment_period - 1) . ' month', strtotime($repayment_start_date)));
-        $repayment_end_date_input = $this->sanitize_date($this->input->post('repayment_end_date', TRUE), $calculated_end_date);
-        $repayment_end_date = ($repayment_end_date_input === $calculated_end_date) ? $repayment_end_date_input : $calculated_end_date;
+        $requested_due_raw = $this->input->post('repayment_end_date', TRUE);
+        $requested_due_clean = $this->sanitize_date($requested_due_raw, null);
+        $due_adjusted = false;
 
-        if (empty($entry_date)) {
-            $entry_date = date('Y-m-d');
+        if ($requested_due_raw !== '' && (empty($requested_due_clean) || strtotime($requested_due_clean) === false)) {
+            $due_adjusted = true;
+            $repayment_end_date = $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        } elseif (!empty($requested_due_clean) && strtotime($requested_due_clean) < strtotime($repayment_start_date)) {
+            $due_adjusted = true;
+            $repayment_end_date = $repayment_start_date;
+        } else {
+            $repayment_end_date = $requested_due_clean ?: $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        }
+
+        $repayment_period = max(1, (int) $this->calculate_period_months($repayment_start_date, $repayment_end_date));
+        $repayment_end_date = $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        if (!empty($requested_due_clean) && strtotime($requested_due_clean) !== false) {
+            if (strtotime($requested_due_clean) !== strtotime($repayment_end_date)) {
+                $due_adjusted = true;
+            }
+        }
+
+        $monthly_installment = round($amount / max(1, $repayment_period), 2);
+        $monthly_installment_formatted = number_format($monthly_installment, 2, '.', '');
+
+        $next_due_input = $this->sanitize_date($this->input->post('next_due_date', TRUE), $repayment_start_date);
+        if (empty($next_due_input) || strtotime($next_due_input) === false || strtotime($next_due_input) < strtotime($repayment_start_date)) {
+            $next_due_date = $repayment_start_date;
+        } else {
+            $next_due_date = $next_due_input;
         }
         $details = !empty($details) ? $details : '';
         if ($paytype !== 2) {
@@ -1384,7 +1501,7 @@ class Loan extends MX_Controller {
             'repayment_end_date'   => $repayment_end_date,
             'principal_amount'     => $amount_formatted,
             'monthly_installment'  => $monthly_installment_formatted,
-            'next_due_date'        => $repayment_start_date,
+            'next_due_date'        => $next_due_date,
         ));
 
         $loan = array(
@@ -1424,6 +1541,9 @@ class Loan extends MX_Controller {
         $this->db->insert('acc_transaction', $credit_entry);
 
         $this->session->set_flashdata(array('message' => display('successfully_updated')));
+        if ($due_adjusted) {
+            $this->session->set_flashdata('warning', 'Repayment due date was adjusted to align with the monthly repayment schedule.');
+        }
         redirect(base_url('manage_office_loans'));
     }
 

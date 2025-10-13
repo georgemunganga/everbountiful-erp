@@ -26,7 +26,7 @@
             </a>
         </li>
 
-        <li class="treeview <?php echo in_array($this->uri->segment(1), array('sheds', 'livestock-groups', 'livestocks', 'productions', 'feeds', 'feed-usages', 'vaccines', 'vaccine-usages', 'farm-reports', 'production-percentage', 'stock')) ? "active" : null; ?>">
+        <li class="treeview <?php echo in_array($this->uri->segment(1), array('sheds', 'livestock-groups', 'livestocks', 'productions', 'feeds', 'feed-usages', 'vaccines', 'vaccine-usages', 'farm-reports')) ? "active" : null; ?>">
             <a href="#">
                 <i class="fa fa-paw"></i>
                 <span><?php echo display('livestock_management') ?: 'Livestock Management'; ?></span>
@@ -62,11 +62,42 @@
                 <li class="<?php echo ($this->uri->segment(1) == 'farm-reports') ? 'active' : null; ?>">
                     <a href="<?php echo base_url('farm-reports'); ?>"><?php echo display('farm_reports') ?: 'Farm Reports'; ?></a>
                 </li>
-                <li class="<?php echo ($this->uri->segment(1) == 'production-percentage') ? 'active' : null; ?>">
-                    <a href="<?php echo base_url('production-percentage'); ?>"><?php echo display('production_percentage_report') ?: 'Production Percentage'; ?></a>
+            </ul>
+        </li>
+
+        <!-- Inventory menu start -->
+        <li class="treeview <?php echo ($this->uri->segment(1) == 'inventory') ? 'active' : null; ?>">
+            <a href="#">
+                <i class="fa fa-archive"></i>
+                <span><?php echo display('inventory') ?: 'Inventory'; ?></span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+            </a>
+            <ul class="treeview-menu">
+                <li class="<?php echo ($this->uri->segment(1) == 'inventory' && $this->uri->segment(2) == 'opening-balance') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('inventory/opening-balance'); ?>">
+                        <?php echo display('inventory_opening_balance') ?: 'Opening Balance'; ?>
+                    </a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'inventory' && $this->uri->segment(2) == 'consumption') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('inventory/consumption'); ?>">
+                        <?php echo display('inventory_consumption') ?: 'Consumption'; ?>
+                    </a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'inventory' && $this->uri->segment(2) == 'waste') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('inventory/waste'); ?>">
+                        <?php echo display('inventory_waste') ?: 'Waste'; ?>
+                    </a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'inventory' && $this->uri->segment(2) == 'transfers') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('inventory/transfers'); ?>">
+                        <?php echo display('inventory_transfer') ?: 'Transfers'; ?>
+                    </a>
                 </li>
             </ul>
         </li>
+        <!-- Inventory menu end -->
 
         <!-- Invoice menu start -->
         <?php if ($this->permission1->method('new_invoice', 'create')->access() || $this->permission1->method('manage_invoice', 'read')->access() || $this->permission1->method('pos_invoice', 'create')->access() || $this->permission1->method('gui_pos', 'create')->access() || $this->permission1->method('terms_list', 'read')->access()  || $this->permission1->method('terms_add', 'read')->access()) { ?>
@@ -1049,6 +1080,12 @@
                                                             echo " ";
                                                         } ?>"><a href="<?php echo base_url('employee_salary_payment_view') ?>"> <?php echo display('employee_salary_payment_view') ?></a></li>
                                 <?php } ?>
+
+                                <li class="treeview <?php if ($this->uri->segment('1') == ("leaves")) {
+                                                        echo "active";
+                                                    } else {
+                                                        echo " ";
+                                                    } ?>"><a href="<?php echo base_url('leaves') ?>"><?php echo display('leave_management') ?: 'Leave Management'; ?></a></li>
 
 
                                 <?php if ($this->permission1->method('employee_salary_generate', 'read')->access()) { ?>

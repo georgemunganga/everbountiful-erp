@@ -1,0 +1,9 @@
+sheet,row_index,note
+daily_reports,3,"Non-dated row with data: {'mortality': 2007, 'feed_bags': 300}"
+daily_reports,14,Non-dated row with data: {'extras': '67 -60= 7-7=0'}
+daily_reports,17,Non-dated row with data: {'extras': '11+7+10='}
+daily_reports,,Feed usage values were stored as negatives in the sheet; the script now records their absolute values.
+egg_sales,6,Price per tray missing; total/balance were inferred where possible.
+egg_sales,8,Price per tray missing; total/balance were inferred where possible.
+egg_sales,11,Price per tray missing; total/balance were inferred where possible.
+egg_sales,16,Price per tray missing; total/balance were inferred where possible.

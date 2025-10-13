@@ -93,8 +93,7 @@ table.payrollDatatableReport td.noborder {
                                     <th class="text-left" width="9%">
                                         Soc.Sec.NPF<?php echo $social_security_tax_percnt ? ' ' . $social_security_tax_percnt . '%' : ''; ?></th>
                                     <th class="text-left" width="9%">Employer Contribution</th>
-                                    <th class="text-left" width="8%">Loan Deduction</th>
-                                    <th class="text-left" width="8%">Office Loan</th>
+                                    <th class="text-left" width="12%">Office Loan Deduction</th>
                                     <th class="text-left" width="10%">Total Deductions</th>
                                     <th class="text-left" width="8%">Net Salary</th>
                                 </tr>
@@ -114,8 +113,7 @@ table.payrollDatatableReport td.noborder {
                                     $component_add_total_display = isset($row->component_add_total) ? (float) $row->component_add_total : 0.0;
                                     $component_ded_total_display = isset($row->component_ded_total) ? (float) $row->component_ded_total : 0.0;
                                     $office_loan_deduct = isset($row->office_loan_deduct) ? floatval($row->office_loan_deduct) : 0.0;
-                                    $loan_deduction_total = floatval($row->loan_deduct);
-                                    $total_deductions = $component_ded_total_display + floatval($row->income_tax) + floatval($row->soc_sec_npf_tax) + $loan_deduction_total + $office_loan_deduct;
+                                    $total_deductions = $component_ded_total_display + floatval($row->income_tax) + floatval($row->soc_sec_npf_tax) + $office_loan_deduct;
 
                                 ?>
 
@@ -131,7 +129,6 @@ table.payrollDatatableReport td.noborder {
                                     <td class="text-left"><?php echo $currency . ' ' . $row->soc_sec_npf_tax; ?></td>
                                     <td class="text-left">
                                         <?php echo $currency . ' ' . floatval($row->employer_contribution); ?></td>
-                                    <td class="text-left"><?php echo $currency . ' ' . number_format($loan_deduction_total, 2); ?></td>
                                     <td class="text-left"><?php echo $currency . ' ' . number_format($office_loan_deduct, 2); ?></td>
 
                                     <td class="text-left"><?php echo $currency . ' ' . $total_deductions; ?></td>
@@ -150,7 +147,7 @@ table.payrollDatatableReport td.noborder {
 
                             <tfoot>
                                 <tr>
-                                    <td colspan="13" class="noborder">
+                                    <td colspan="12" class="noborder">
                                         <table border="0" width="100%"
                                             style="padding-top: 100px;border: none !important;">
                                             <tr>

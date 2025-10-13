@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Livestock extends MX_Controller
 {
+    const DEFAULT_PAGE_SIZE = 20;
+
     public function __construct()
     {
         parent::__construct();
@@ -165,6 +167,46 @@ class Livestock extends MX_Controller
         }
     }
 
+    private function configure_pagination($baseRoute, $totalRows, $perPage = self::DEFAULT_PAGE_SIZE, $uriSegment = 2)
+    {
+        $this->load->library('pagination');
+
+        $config = array(
+            'base_url'          => base_url($baseRoute),
+            'total_rows'        => (int) $totalRows,
+            'per_page'          => (int) $perPage,
+            'uri_segment'       => $uriSegment,
+            'last_link'         => 'Last',
+            'first_link'        => 'First',
+            'next_link'         => 'Next',
+            'prev_link'         => 'Prev',
+            'full_tag_open'     => "<ul class='pagination col-xs pull-right'>",
+            'full_tag_close'    => "</ul>",
+            'num_tag_open'      => '<li>',
+            'num_tag_close'     => '</li>',
+            'cur_tag_open'      => "<li class='disabled'><li class='active'><a href='#'>",
+            'cur_tag_close'     => "<span class='sr-only'></span></a></li>",
+            'next_tag_open'     => '<li>',
+            'next_tag_close'    => '</li>',
+            'prev_tag_open'     => '<li>',
+            'prev_tag_close'    => '</li>',
+            'first_tag_open'    => '<li>',
+            'first_tag_close'   => '</li>',
+            'last_tag_open'     => '<li>',
+            'last_tag_close'    => '</li>',
+            'reuse_query_string'=> true,
+        );
+
+        $this->pagination->initialize($config);
+
+        $offset = (int) $this->uri->segment($uriSegment, 0);
+        if ($offset < 0) {
+            $offset = 0;
+        }
+
+        return array($config['per_page'], $offset, $this->pagination->create_links());
+    }
+
     private function flash_and_redirect($message_key, $redirect_to, $type = 'message')
     {
         $this->session->set_flashdata(array($type => display($message_key) ?: $message_key));
@@ -177,7 +219,11 @@ class Livestock extends MX_Controller
     {
         try {
             $data['title'] = $this->phrase('sheds', 'Sheds');
-            $data['sheds'] = $this->livestock_model->get_sheds();
+            $totalRows = $this->livestock_model->count_sheds();
+            list($perPage, $offset, $links) = $this->configure_pagination('sheds', $totalRows);
+            $data['sheds'] = $this->livestock_model->get_sheds($perPage, $offset);
+            $data['links'] = $links;
+            $data['offset'] = $offset;
             $this->render('sheds/index', $data);
         } catch (\Throwable $th) {
             dd($th);
@@ -240,7 +286,11 @@ class Livestock extends MX_Controller
     public function livestock_groups()
     {
         $data['title']            = $this->phrase('livestock_groups', 'Livestock Groups');
-        $data['livestock_groups'] = $this->livestock_model->get_livestock_groups();
+        $totalRows = $this->livestock_model->count_livestock_groups();
+        list($perPage, $offset, $links) = $this->configure_pagination('livestock-groups', $totalRows);
+        $data['livestock_groups'] = $this->livestock_model->get_livestock_groups($perPage, $offset);
+        $data['links']            = $links;
+        $data['offset']           = $offset;
         $this->render('livestock_groups/index', $data);
     }
 
@@ -303,7 +353,11 @@ class Livestock extends MX_Controller
     public function productions()
     {
         $data['title']        = $this->phrase('productions', 'Productions');
-        $data['productions']  = $this->livestock_model->get_productions();
+        $totalRows = $this->livestock_model->count_productions();
+        list($perPage, $offset, $links) = $this->configure_pagination('productions', $totalRows);
+        $data['productions']  = $this->livestock_model->get_productions($perPage, $offset);
+        $data['links']        = $links;
+        $data['offset']       = $offset;
         $this->render('productions/index', $data);
     }
 
@@ -630,9 +684,21 @@ class Livestock extends MX_Controller
             $filters['name'] = $activeName;
         }
 
-        $data['title']      = $this->phrase('livestocks', 'Livestocks');
-        $data['livestocks'] = $this->livestock_model->get_livestocks($filters);
-        $data['active_name_filter'] = $activeName;
+        $baseRoute = 'livestocks';
+        $uriSegment = 2;
+        if (!empty($activeName) && $name !== null) {
+            $baseRoute = 'livestocks/name/' . urlencode($activeName);
+            $uriSegment = 4;
+        }
+
+        $totalRows = $this->livestock_model->count_livestocks($filters);
+        list($perPage, $offset, $links) = $this->configure_pagination($baseRoute, $totalRows, self::DEFAULT_PAGE_SIZE, $uriSegment);
+
+        $data['title']               = $this->phrase('livestocks', 'Livestocks');
+        $data['livestocks']          = $this->livestock_model->get_livestocks($filters, $perPage, $offset);
+        $data['active_name_filter']  = $activeName;
+        $data['links']               = $links;
+        $data['offset']              = $offset;
         $this->render('livestocks/index', $data);
     }
 
@@ -716,7 +782,11 @@ class Livestock extends MX_Controller
     public function feeds()
     {
         $data['title'] = $this->phrase('feeds', 'Feeds');
-        $data['feeds'] = $this->livestock_model->get_feeds();
+        $totalRows = $this->livestock_model->count_feeds();
+        list($perPage, $offset, $links) = $this->configure_pagination('feeds', $totalRows);
+        $data['feeds'] = $this->livestock_model->get_feeds($perPage, $offset);
+        $data['links'] = $links;
+        $data['offset'] = $offset;
         $this->render('feeds/index', $data);
     }
 
@@ -783,7 +853,11 @@ class Livestock extends MX_Controller
     public function feed_usages()
     {
         $data['title']       = $this->phrase('feed_usages', 'Feed Usages');
-        $data['feed_usages'] = $this->livestock_model->get_feed_usages();
+        $totalRows = $this->livestock_model->count_feed_usages();
+        list($perPage, $offset, $links) = $this->configure_pagination('feed-usages', $totalRows);
+        $data['feed_usages'] = $this->livestock_model->get_feed_usages($perPage, $offset);
+        $data['links']       = $links;
+        $data['offset']      = $offset;
         $this->render('feed_usages/index', $data);
     }
 
@@ -929,7 +1003,11 @@ class Livestock extends MX_Controller
     public function vaccines()
     {
         $data['title']    = $this->phrase('vaccines', 'Vaccines');
-        $data['vaccines'] = $this->livestock_model->get_vaccines();
+        $totalRows = $this->livestock_model->count_vaccines();
+        list($perPage, $offset, $links) = $this->configure_pagination('vaccines', $totalRows);
+        $data['vaccines'] = $this->livestock_model->get_vaccines($perPage, $offset);
+        $data['links']    = $links;
+        $data['offset']   = $offset;
         $this->render('vaccines/index', $data);
     }
 
@@ -1000,7 +1078,11 @@ class Livestock extends MX_Controller
     public function vaccine_usages()
     {
         $data['title']          = $this->phrase('vaccine_usages', 'Vaccine Usages');
-        $data['vaccine_usages'] = $this->livestock_model->get_vaccine_usages();
+        $totalRows = $this->livestock_model->count_vaccine_usages();
+        list($perPage, $offset, $links) = $this->configure_pagination('vaccine-usages', $totalRows);
+        $data['vaccine_usages'] = $this->livestock_model->get_vaccine_usages($perPage, $offset);
+        $data['links']          = $links;
+        $data['offset']         = $offset;
         $this->render('vaccine_usages/index', $data);
     }
 

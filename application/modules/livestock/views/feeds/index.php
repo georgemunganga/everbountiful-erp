@@ -41,7 +41,7 @@
                             <?php if (!empty($feeds)): ?>
                                 <?php foreach ($feeds as $index => $feed): ?>
                                     <tr>
-                                        <td><?php echo $index + 1; ?></td>
+                                        <td><?php echo (isset($offset) ? $offset : 0) + $index + 1; ?></td>
                                         <td><?php echo html_escape($feed['name']); ?></td>
                                         <td><?php echo html_escape($feed['unit_name']); ?></td>
                                         <td><?php echo html_escape($feed['assigned_batch']); ?></td>
@@ -66,6 +66,13 @@
                         </tbody>
                     </table>
                 </div>
+                <?php if (!empty($links)): ?>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <?php echo $links; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

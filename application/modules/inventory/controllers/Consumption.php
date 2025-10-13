@@ -29,12 +29,40 @@ class Consumption extends MX_Controller
 
     public function index()
     {
-        redirect('stock/consumption');
+        $this->form();
     }
 
     public function form()
     {
-        redirect('stock/consumption');
+        // Permission: stock_consumption create
+        if (isset($this->permission1) && method_exists($this->permission1, 'method')) {
+            if (!$this->permission1->method('stock_consumption', 'create')->access()) {
+                $this->session->set_flashdata('exception', display('unauthorized') ?: 'Unauthorized');
+                redirect('home');
+            }
+        }
+        $data = array();
+        $data['title'] = display('inventory_consumption') ?: 'Inventory Consumption';
+        $data['lots'] = $this->Inventory_model->get_available_lots();
+        $data['locations'] = $this->Inventory_model->get_active_locations();
+        $data['products'] = $this->Inventory_model->get_consumable_products();
+        $data['reasons'] = $this->reasonOptions;
+        $data['recent_consumption'] = $this->Inventory_model->get_recent_consumption(10);
+        $data['recent_notifications'] = $this->Inventory_model->get_recent_notifications(10);
+
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            // Permission: stock_override for allowing negative
+            if ($this->input->post('allow_override') && isset($this->permission1) && method_exists($this->permission1, 'method')) {
+                if (!$this->permission1->method('stock_override', 'create')->access()) {
+                    $this->session->set_flashdata('exception', display('unauthorized') ?: 'Unauthorized');
+                    redirect('inventory/consumption');
+                }
+            }
+            $this->process_form($data);
+            return;
+        }
+
+        $this->render('consumption/form', $data);
     }
 
     private function process_form(array $data)

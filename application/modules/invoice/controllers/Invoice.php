@@ -41,8 +41,19 @@ class Invoice extends MX_Controller
         $walking_customer = $this->invoice_model->pos_customer_setup();
         $data['all_pmethod'] = $this->invoice_model->pmethod_dropdown();
 
-        $data['customer_name'] = $walking_customer[0]['customer_name'];
-        $data['customer_id'] = $walking_customer[0]['customer_id'];
+        $selectedCustomer = $walking_customer[0];
+        $prefillCustomerId = $this->input->get('customer_id', true);
+        if ($prefillCustomerId) {
+            $customerRecord = $this->customer_model->singledata($prefillCustomerId);
+            if ($customerRecord) {
+                $selectedCustomer = array(
+                    'customer_id'   => $customerRecord->customer_id,
+                    'customer_name' => $customerRecord->customer_name,
+                );
+            }
+        }
+        $data['customer_name'] = $selectedCustomer['customer_name'];
+        $data['customer_id'] = $selectedCustomer['customer_id'];
         $data['invoice_no'] = $this->number_generator();
         $data['title'] = display('add_invoice');
         $data['taxes'] = $this->invoice_model->tax_fileds();

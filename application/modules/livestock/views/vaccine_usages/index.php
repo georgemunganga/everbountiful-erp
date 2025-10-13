@@ -44,7 +44,7 @@
                             <?php if (!empty($vaccine_usages)): ?>
                                 <?php foreach ($vaccine_usages as $index => $usage): ?>
                                     <tr>
-                                        <td><?php echo $index + 1; ?></td>
+                                        <td><?php echo (isset($offset) ? $offset : 0) + $index + 1; ?></td>
                                         <td><?php echo html_escape($usage['vaccine_name']); ?></td>
                                         <td><?php echo html_escape($usage['shed_name']); ?></td>
                                         <td><?php echo html_escape($usage['usage_date']); ?></td>
@@ -72,6 +72,13 @@
                         </tbody>
                     </table>
                 </div>
+                <?php if (!empty($links)): ?>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <?php echo $links; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

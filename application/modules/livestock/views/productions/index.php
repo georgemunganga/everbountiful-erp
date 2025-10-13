@@ -45,7 +45,7 @@
                             <?php if (!empty($productions)): ?>
                                 <?php foreach ($productions as $index => $production): ?>
                                     <tr>
-                                        <td><?php echo $index + 1; ?></td>
+                                        <td><?php echo (isset($offset) ? $offset : 0) + $index + 1; ?></td>
                                         <td><?php echo html_escape($production['name']); ?></td>
                                         <td><?php echo html_escape($production['shed_name']); ?></td>
                                         <td><?php echo html_escape($production['produced_total_qty']); ?></td>
@@ -74,6 +74,13 @@
                         </tbody>
                     </table>
                 </div>
+                <?php if (!empty($links)): ?>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <?php echo $links; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

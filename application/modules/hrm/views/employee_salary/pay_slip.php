@@ -48,10 +48,12 @@
         <div class="panel-body">
 
             <div class="text-right" id="print">
-                <button type="button" class="btn btn-warning" id="btnPrint" onclick="printPageArea('printArea');"><i
-                        class="fa fa-print"></i></button>
-
-
+                <a href="<?php echo base_url('salary_pay_slip_pdf/' . (isset($salary_info->id) ? (int) $salary_info->id : 0)); ?>" class="btn btn-info" id="btnDownloadPdf">
+                    <i class="fa fa-download"></i>
+                </a>
+                <button type="button" class="btn btn-warning" id="btnPrint" onclick="printPageArea('printArea');">
+                    <i class="fa fa-print"></i>
+                </button>
             </div>
 
             <br>
@@ -118,6 +120,12 @@
                                     <td><?php echo $to_date; ?></td>
                                 </tr>
                                 <tr style="text-align: left;">
+                                    <th>Worked Days</th>
+                                    <td><?php echo html_escape(isset($worked_days) && $worked_days !== '' ? $worked_days : ''); ?></td>
+                                    <td>Leave Days</td>
+                                    <td><?php echo isset($leave_days) && (float)$leave_days > 0 ? html_escape(number_format((float)$leave_days, 2)) : '0'; ?></td>
+                                </tr>
+                                <tr style="text-align: left;">
                                     <th>Address</th>
                                     <td><?php echo $employee_info->address_line_1; ?></td>
                                     <td></td>
@@ -165,7 +173,6 @@
                     $component_ded_total = isset($component_ded_total) ? (float) $component_ded_total : (float) $component_breakdown['deduction_total'];
                     $component_add_total_display = round($component_add_total, 2);
                     $component_ded_total_display = round($component_ded_total, 2);
-                    $loan_total_display = isset($loan_total) ? (float) $loan_total : (isset($salary_info->loan_deduct) ? (float) $salary_info->loan_deduct : 0.0);
                     $office_loan_display = isset($office_loan_total) ? (float) $office_loan_total : (isset($salary_info->office_loan_deduct) ? (float) $salary_info->office_loan_deduct : 0.0);
                     $net_salary_display = isset($net_salary_calculated) ? (float) $net_salary_calculated : (isset($salary_info->net_salary) ? (float) $salary_info->net_salary : 0.0);
                     $post_gross_total_display = isset($post_gross_total) ? (float) $post_gross_total : ((isset($salary_info->gross_salary) ? (float) $salary_info->gross_salary : 0.0) + $component_add_total);
@@ -182,7 +189,7 @@
                                     <th>Description</th>
                                     <th>Gross Amount</th>
                                     <th>Rate</th>
-                                    <th>#VALUE</th>
+                                    <th><?php echo display('additions') ? display('additions') : 'Additions'; ?></th>
                                     <th>Deduction</th>
                                 </tr>
                             </thead>
@@ -209,15 +216,6 @@
                                     <td></td>
                                     <td></td>
                                 </tr>
-                                <tr style="text-align: left;">
-                                    <th>Gross Salary</th>
-                                    <th></th>
-                                    <th></th>
-                                    <th><?php echo $curncy_symbol . ' ' . number_format($salary_info->gross_salary, 2); ?>
-                                    </th>
-                                    <th></th>
-
-                                </tr>
                                 <?php if (!empty($component_earnings)) { ?>
                                 <?php foreach ($component_earnings as $earning) { ?>
                                 <tr style="text-align: left;">
@@ -235,6 +233,15 @@
                                     <th><?php echo $curncy_symbol . ' ' . number_format($component_add_total_display, 2); ?></th>
                                     <th></th>
                                 </tr>
+                                <?php } ?>
+                                <tr style="text-align: left;">
+                                    <th>Gross Salary</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th><?php echo $curncy_symbol . ' ' . number_format($salary_info->gross_salary, 2); ?></th>
+                                    <th></th>
+                                </tr>
+                                <?php if (!empty($component_earnings)) { ?>
                                 <tr style="text-align: left;">
                                     <th>Subtotal Before Deductions</th>
                                     <th></th>
@@ -263,14 +270,6 @@
                                 </tr>
                                 <?php } ?>
 
-                                <tr style="text-align: left !important;">
-                                    <th style="text-align: left !important;">Loan Deduction</th>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($loan_total_display,2);?></td>
-                                </tr>
-                                
                                 <?php 
                                 if ($office_loan_display > 0) { ?>
                                 <tr style="text-align: left !important;">
@@ -290,23 +289,6 @@
                                         <?php echo $curncy_symbol . ' ' . number_format($total_deductions, 2); ?>
                                     </th>
                                 </tr>
-                                <tr style="text-align: left;">
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-
-                                <tr style="text-align: left;">
-                                    <th colspan="3" align="left">Total Social Security</th>
-
-                                    <th></th>
-                                    <th align="left">
-                                        <?php echo $curncy_symbol . ' ' . number_format($social_security_combined_display, 2); ?>
-                                    </th>
-                                </tr>
-
                                 <tr style="text-align: left;">
                                     <th colspan="3" align="left">NET SALARY</th>
 
@@ -382,6 +364,5 @@
         WinPrint.document.close();
         WinPrint.focus();
         WinPrint.print();
-        WinPrint.close();
     }
 </script>
