@@ -11,6 +11,8 @@ function setInvoiceSaleType(type) {
     var multiPayInputs = $('.number.pay');
     var multiPayContainer = $('#add_new_payment');
     var addPaymentBtn = $('#add_new_payment_type');
+    var bankSelect = $('#bank_id');
+    var paymentSelects = $('.card_typesl');
 
     if (isCredit) {
         paidField.prop('readonly', true).val('').data('user-set', false).addClass('bg-light');
@@ -22,14 +24,45 @@ function setInvoiceSaleType(type) {
             addPaymentBtn.prop('disabled', true);
         }
         $('#pamount_by_method').val('');
+        if (bankSelect.length) {
+            bankSelect.prop('disabled', true).prop('required', false).val('').trigger('change');
+        }
+        $('.invoice-payment-controls').each(function () {
+            var $controls = $(this);
+            $controls.find('.card_typesl').each(function () {
+                var $select = $(this);
+                var creditOption = $select.find('option[value="0"]').length ? '0' : '';
+                $select.val(creditOption).trigger('change');
+            });
+            $controls.find('.number.pay').val('').prop('disabled', true);
+        });
     } else {
         paidField.prop('readonly', false).removeClass('bg-light');
         multiPayInputs.prop('disabled', false);
         if (addPaymentBtn.length) {
             addPaymentBtn.prop('disabled', false);
         }
+        if (bankSelect.length) {
+            bankSelect.prop('disabled', false).prop('required', true);
+        }
+        $('.invoice-payment-controls').each(function () {
+            var $controls = $(this);
+            $controls.find('.card_typesl').each(function () {
+                var $select = $(this);
+                if ($select.val() === '0') {
+                    var firstNonZero = $select.find('option[value!="0"]').first().val() || '';
+                    $select.val(firstNonZero).trigger('change');
+                }
+            });
+            $controls.find('.number.pay').prop('disabled', false);
+        });
     }
     $('.invoice-payment-row, .invoice-payment-controls').toggle(!isCredit);
+    $('.sale-type-option[value="' + normalizedType + '"]').prop('checked', true);
+    $('.sale-type-select').val(normalizedType);
+    if (typeof check_creditsale === 'function') {
+        check_creditsale();
+    }
     invoice_calculateSum();
 }
 
@@ -1030,6 +1063,9 @@ $(document).ready(function(){
             $(this).data('user-set', true);
         });
         $('.sale-type-option').on('change', function () {
+            setInvoiceSaleType($(this).val());
+        });
+        $('.sale-type-select').on('change', function () {
             setInvoiceSaleType($(this).val());
         });
         if ($('#sale_type').length) {

@@ -219,23 +219,26 @@
     <!-- Account Summary -->
     <div class="summary-section">
         <div class="summary-title">Account Summary</div>
+        <?php
+            $summary = isset($statement['summary']) && is_array($statement['summary']) ? $statement['summary'] : array('beginning'=>0,'invoiced'=>0,'paid'=>0,'balance_due'=>0);
+            $lines = isset($statement['lines']) && is_array($statement['lines']) ? $statement['lines'] : array();
+        ?>
         <table class="summary-table">
-            <?php $s = $statement['summary']; ?>
             <tr>
                 <td class="label">Beginning Balance:</td>
-                <td class="amount">K<?php echo number_format($s['beginning'], 2); ?></td>
+                <td class="amount">K<?php echo number_format($summary['beginning'], 2); ?></td>
             </tr>
             <tr>
                 <td class="label">Invoiced Amount:</td>
-                <td class="amount">K<?php echo number_format($s['invoiced'], 2); ?></td>
+                <td class="amount">K<?php echo number_format($summary['invoiced'], 2); ?></td>
             </tr>
             <tr>
                 <td class="label">Amount Paid:</td>
-                <td class="amount">K<?php echo number_format($s['paid'], 2); ?></td>
+                <td class="amount">K<?php echo number_format($summary['paid'], 2); ?></td>
             </tr>
             <tr style="background-color: #e3f2fd;">
                 <td class="label" style="font-size: 14px;"><strong>Balance Due:</strong></td>
-                <td class="amount" style="font-size: 14px; color: #007bff;"><strong>K<?php echo number_format($s['balance_due'], 2); ?></strong></td>
+                <td class="amount" style="font-size: 14px; color: #007bff;"><strong>K<?php echo number_format($summary['balance_due'], 2); ?></strong></td>
             </tr>
         </table>
     </div>
@@ -248,19 +251,23 @@
                 <tr>
                     <th style="width: 15%;">Date</th>
                     <th style="width: 45%;">Details</th>
-                    <th style="width: 15%;">Amount</th>
-                    <th style="width: 15%;">Payments</th>
+                    <th style="width: 15%;">Debit</th>
+                    <th style="width: 15%;">Credit</th>
                     <th style="width: 15%;">Balance</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($statement['lines'] as $line) { ?>
+                <?php if (!empty($lines)) { foreach ($lines as $line) { ?>
                     <tr>
-                        <td><?php echo html_escape($line['date']); ?></td>
-                        <td><?php echo html_escape($line['details']); ?></td>
-                        <td class="amount-cell"><?php echo $line['amount'] ? '$' . $line['amount'] : ''; ?></td>
-                        <td class="amount-cell"><?php echo $line['payments'] ? '$' . $line['payments'] : ''; ?></td>
-                        <td class="amount-cell"><strong>K<?php echo $line['balance']; ?></strong></td>
+                        <td><?php echo html_escape(date('d-m-Y', strtotime($line['date']))); ?></td>
+                        <td><?php echo html_escape($line['description']); ?></td>
+                        <td class="amount-cell"><?php echo $line['debit'] > 0 ? 'K' . number_format($line['debit'], 2) : ''; ?></td>
+                        <td class="amount-cell"><?php echo $line['credit'] > 0 ? 'K' . number_format($line['credit'], 2) : ''; ?></td>
+                        <td class="amount-cell"><strong>K<?php echo number_format($line['balance'], 2); ?></strong></td>
+                    </tr>
+                <?php } } else { ?>
+                    <tr>
+                        <td colspan="5" style="text-align:center;">No activity for selected period.</td>
                     </tr>
                 <?php } ?>
             </tbody>
@@ -270,7 +277,7 @@
     <!-- Balance Due Highlight -->
     <div class="balance-due">
         <div class="balance-due-label">Total Balance Due</div>
-        <div class="balance-due-amount">K<?php echo number_format($s['balance_due'], 2); ?></div>
+        <div class="balance-due-amount">K<?php echo number_format($summary['balance_due'], 2); ?></div>
     </div>
 
     <!-- Footer -->

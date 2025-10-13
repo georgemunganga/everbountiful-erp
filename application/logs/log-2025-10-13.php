@@ -27853,3 +27853,2184 @@ INFO - 2025-10-13 20:07:20 --> Session: Class initialized using 'files' driver.
 INFO - 2025-10-13 20:07:20 --> Form Validation Class Initialized
 INFO - 2025-10-13 20:07:20 --> Language file loaded: language/english/pagination_lang.php
 INFO - 2025-10-13 20:07:20 --> Pagination Class Initialized
+INFO - 2025-10-13 20:13:05 --> Config Class Initialized
+INFO - 2025-10-13 20:13:05 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:13:05 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:13:05 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:13:05 --> URI Class Initialized
+DEBUG - 2025-10-13 20:13:05 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:13:05 --> Router Class Initialized
+INFO - 2025-10-13 20:13:05 --> Output Class Initialized
+INFO - 2025-10-13 20:13:05 --> Security Class Initialized
+DEBUG - 2025-10-13 20:13:05 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:13:05 --> Input Class Initialized
+INFO - 2025-10-13 20:13:05 --> Language Class Initialized
+INFO - 2025-10-13 20:13:05 --> Language Class Initialized
+INFO - 2025-10-13 20:13:05 --> Config Class Initialized
+INFO - 2025-10-13 20:13:05 --> Loader Class Initialized
+INFO - 2025-10-13 20:13:05 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:13:05 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:13:05 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:13:05 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:13:05 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:13:05 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:13:05 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:13:05 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:13:05 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:13:05 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:13:05 --> Email Class Initialized
+INFO - 2025-10-13 20:13:05 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:13:05 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:13:05 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:13:05 --> Pagination Class Initialized
+INFO - 2025-10-13 20:13:06 --> Config Class Initialized
+INFO - 2025-10-13 20:13:06 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:13:06 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:13:06 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:13:06 --> URI Class Initialized
+INFO - 2025-10-13 20:13:06 --> Router Class Initialized
+INFO - 2025-10-13 20:13:06 --> Output Class Initialized
+INFO - 2025-10-13 20:13:06 --> Security Class Initialized
+DEBUG - 2025-10-13 20:13:06 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:13:06 --> Input Class Initialized
+INFO - 2025-10-13 20:13:06 --> Config Class Initialized
+INFO - 2025-10-13 20:13:06 --> Language Class Initialized
+INFO - 2025-10-13 20:13:06 --> Hooks Class Initialized
+ERROR - 2025-10-13 20:13:06 --> 404 Page Not Found: /index
+DEBUG - 2025-10-13 20:13:06 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:13:06 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:13:06 --> URI Class Initialized
+INFO - 2025-10-13 20:13:06 --> Router Class Initialized
+INFO - 2025-10-13 20:13:06 --> Output Class Initialized
+INFO - 2025-10-13 20:13:06 --> Security Class Initialized
+DEBUG - 2025-10-13 20:13:06 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:13:06 --> Input Class Initialized
+INFO - 2025-10-13 20:13:06 --> Language Class Initialized
+ERROR - 2025-10-13 20:13:06 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:17:02 --> Config Class Initialized
+INFO - 2025-10-13 20:17:02 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:17:02 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:17:02 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:17:02 --> URI Class Initialized
+DEBUG - 2025-10-13 20:17:02 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:17:02 --> Router Class Initialized
+INFO - 2025-10-13 20:17:02 --> Output Class Initialized
+INFO - 2025-10-13 20:17:02 --> Security Class Initialized
+DEBUG - 2025-10-13 20:17:02 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:17:02 --> Input Class Initialized
+INFO - 2025-10-13 20:17:02 --> Language Class Initialized
+INFO - 2025-10-13 20:17:02 --> Language Class Initialized
+INFO - 2025-10-13 20:17:02 --> Config Class Initialized
+INFO - 2025-10-13 20:17:02 --> Loader Class Initialized
+INFO - 2025-10-13 20:17:02 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:17:02 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:17:02 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:17:02 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:17:02 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:17:02 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:17:02 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:17:02 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:17:02 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:17:02 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:17:02 --> Email Class Initialized
+INFO - 2025-10-13 20:17:02 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:17:02 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:17:02 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:17:02 --> Pagination Class Initialized
+INFO - 2025-10-13 20:17:03 --> Config Class Initialized
+INFO - 2025-10-13 20:17:03 --> Config Class Initialized
+INFO - 2025-10-13 20:17:03 --> Hooks Class Initialized
+INFO - 2025-10-13 20:17:03 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:17:03 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:17:03 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:17:03 --> URI Class Initialized
+INFO - 2025-10-13 20:17:03 --> Router Class Initialized
+INFO - 2025-10-13 20:17:03 --> Output Class Initialized
+INFO - 2025-10-13 20:17:03 --> Security Class Initialized
+DEBUG - 2025-10-13 20:17:03 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:17:03 --> Input Class Initialized
+INFO - 2025-10-13 20:17:03 --> Language Class Initialized
+ERROR - 2025-10-13 20:17:03 --> 404 Page Not Found: /index
+DEBUG - 2025-10-13 20:17:03 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:17:03 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:17:03 --> URI Class Initialized
+INFO - 2025-10-13 20:17:03 --> Router Class Initialized
+INFO - 2025-10-13 20:17:03 --> Output Class Initialized
+INFO - 2025-10-13 20:17:03 --> Security Class Initialized
+DEBUG - 2025-10-13 20:17:03 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:17:03 --> Input Class Initialized
+INFO - 2025-10-13 20:17:03 --> Language Class Initialized
+ERROR - 2025-10-13 20:17:03 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:19:55 --> Config Class Initialized
+INFO - 2025-10-13 20:19:55 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:19:55 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:19:55 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:19:55 --> URI Class Initialized
+DEBUG - 2025-10-13 20:19:55 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:19:55 --> Router Class Initialized
+INFO - 2025-10-13 20:19:55 --> Output Class Initialized
+INFO - 2025-10-13 20:19:55 --> Security Class Initialized
+DEBUG - 2025-10-13 20:19:55 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:19:55 --> Input Class Initialized
+INFO - 2025-10-13 20:19:55 --> Language Class Initialized
+INFO - 2025-10-13 20:19:55 --> Language Class Initialized
+INFO - 2025-10-13 20:19:55 --> Config Class Initialized
+INFO - 2025-10-13 20:19:55 --> Loader Class Initialized
+INFO - 2025-10-13 20:19:55 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:19:55 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:19:55 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:19:55 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:19:55 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:19:55 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:19:55 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:19:55 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:19:55 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:19:55 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:19:55 --> Email Class Initialized
+INFO - 2025-10-13 20:19:55 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:19:55 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:19:55 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:19:55 --> Pagination Class Initialized
+INFO - 2025-10-13 20:19:56 --> Config Class Initialized
+INFO - 2025-10-13 20:19:56 --> Hooks Class Initialized
+INFO - 2025-10-13 20:19:56 --> Config Class Initialized
+INFO - 2025-10-13 20:19:56 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:19:56 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:19:56 --> Utf8 Class Initialized
+DEBUG - 2025-10-13 20:19:56 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:19:56 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:19:56 --> URI Class Initialized
+INFO - 2025-10-13 20:19:56 --> URI Class Initialized
+INFO - 2025-10-13 20:19:57 --> Router Class Initialized
+INFO - 2025-10-13 20:19:57 --> Router Class Initialized
+INFO - 2025-10-13 20:19:57 --> Output Class Initialized
+INFO - 2025-10-13 20:19:57 --> Output Class Initialized
+INFO - 2025-10-13 20:19:57 --> Security Class Initialized
+INFO - 2025-10-13 20:19:57 --> Security Class Initialized
+DEBUG - 2025-10-13 20:19:57 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:19:57 --> Input Class Initialized
+DEBUG - 2025-10-13 20:19:57 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:19:57 --> Language Class Initialized
+INFO - 2025-10-13 20:19:57 --> Input Class Initialized
+INFO - 2025-10-13 20:19:57 --> Language Class Initialized
+ERROR - 2025-10-13 20:19:57 --> 404 Page Not Found: /index
+ERROR - 2025-10-13 20:19:57 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:22:43 --> Config Class Initialized
+INFO - 2025-10-13 20:22:43 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:22:43 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:22:43 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:22:43 --> URI Class Initialized
+DEBUG - 2025-10-13 20:22:43 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:22:43 --> Router Class Initialized
+INFO - 2025-10-13 20:22:43 --> Output Class Initialized
+INFO - 2025-10-13 20:22:43 --> Security Class Initialized
+DEBUG - 2025-10-13 20:22:43 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:22:43 --> Input Class Initialized
+INFO - 2025-10-13 20:22:43 --> Language Class Initialized
+INFO - 2025-10-13 20:22:43 --> Language Class Initialized
+INFO - 2025-10-13 20:22:43 --> Config Class Initialized
+INFO - 2025-10-13 20:22:43 --> Loader Class Initialized
+INFO - 2025-10-13 20:22:43 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:22:43 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:22:43 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:22:43 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:22:43 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:22:43 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:22:43 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:22:43 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:22:43 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:22:43 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:22:43 --> Email Class Initialized
+INFO - 2025-10-13 20:22:43 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:22:43 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:22:43 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:22:43 --> Pagination Class Initialized
+INFO - 2025-10-13 20:22:45 --> Config Class Initialized
+INFO - 2025-10-13 20:22:45 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:22:45 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:22:45 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:22:45 --> URI Class Initialized
+DEBUG - 2025-10-13 20:22:45 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:22:45 --> Router Class Initialized
+INFO - 2025-10-13 20:22:45 --> Output Class Initialized
+INFO - 2025-10-13 20:22:45 --> Security Class Initialized
+DEBUG - 2025-10-13 20:22:45 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:22:45 --> Input Class Initialized
+INFO - 2025-10-13 20:22:45 --> Language Class Initialized
+INFO - 2025-10-13 20:22:45 --> Language Class Initialized
+INFO - 2025-10-13 20:22:45 --> Config Class Initialized
+INFO - 2025-10-13 20:22:45 --> Loader Class Initialized
+INFO - 2025-10-13 20:22:45 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:22:45 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:22:45 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:22:45 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:22:45 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:22:45 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:22:45 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:22:45 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:22:45 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:22:45 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:22:45 --> Email Class Initialized
+INFO - 2025-10-13 20:22:45 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:22:45 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:22:45 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:22:45 --> Pagination Class Initialized
+INFO - 2025-10-13 20:25:10 --> Config Class Initialized
+INFO - 2025-10-13 20:25:10 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:10 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:10 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:10 --> URI Class Initialized
+DEBUG - 2025-10-13 20:25:11 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:25:11 --> Router Class Initialized
+INFO - 2025-10-13 20:25:11 --> Output Class Initialized
+INFO - 2025-10-13 20:25:11 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:11 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:11 --> Input Class Initialized
+INFO - 2025-10-13 20:25:11 --> Language Class Initialized
+INFO - 2025-10-13 20:25:11 --> Language Class Initialized
+INFO - 2025-10-13 20:25:11 --> Config Class Initialized
+INFO - 2025-10-13 20:25:11 --> Loader Class Initialized
+INFO - 2025-10-13 20:25:11 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:25:11 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:25:11 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:25:11 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:25:11 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:25:11 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:25:11 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:25:11 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:25:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:25:11 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:25:11 --> Email Class Initialized
+INFO - 2025-10-13 20:25:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:25:11 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:25:11 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:25:11 --> Pagination Class Initialized
+INFO - 2025-10-13 20:25:11 --> Config Class Initialized
+INFO - 2025-10-13 20:25:11 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:11 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:11 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:11 --> URI Class Initialized
+INFO - 2025-10-13 20:25:12 --> Config Class Initialized
+INFO - 2025-10-13 20:25:12 --> Hooks Class Initialized
+INFO - 2025-10-13 20:25:12 --> Router Class Initialized
+DEBUG - 2025-10-13 20:25:12 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:12 --> Output Class Initialized
+INFO - 2025-10-13 20:25:12 --> Security Class Initialized
+INFO - 2025-10-13 20:25:12 --> Utf8 Class Initialized
+DEBUG - 2025-10-13 20:25:12 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:12 --> Input Class Initialized
+INFO - 2025-10-13 20:25:12 --> Language Class Initialized
+ERROR - 2025-10-13 20:25:12 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:25:12 --> URI Class Initialized
+INFO - 2025-10-13 20:25:12 --> Router Class Initialized
+INFO - 2025-10-13 20:25:12 --> Output Class Initialized
+INFO - 2025-10-13 20:25:12 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:12 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:12 --> Input Class Initialized
+INFO - 2025-10-13 20:25:12 --> Language Class Initialized
+ERROR - 2025-10-13 20:25:12 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:25:16 --> Config Class Initialized
+INFO - 2025-10-13 20:25:16 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:17 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:17 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:17 --> URI Class Initialized
+DEBUG - 2025-10-13 20:25:17 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:25:17 --> Router Class Initialized
+INFO - 2025-10-13 20:25:17 --> Output Class Initialized
+INFO - 2025-10-13 20:25:17 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:17 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:17 --> Input Class Initialized
+INFO - 2025-10-13 20:25:17 --> Language Class Initialized
+INFO - 2025-10-13 20:25:17 --> Language Class Initialized
+INFO - 2025-10-13 20:25:17 --> Config Class Initialized
+INFO - 2025-10-13 20:25:17 --> Loader Class Initialized
+INFO - 2025-10-13 20:25:17 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:25:17 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:25:17 --> Email Class Initialized
+INFO - 2025-10-13 20:25:17 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:25:17 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:25:17 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:25:17 --> Pagination Class Initialized
+INFO - 2025-10-13 20:25:17 --> Config Class Initialized
+INFO - 2025-10-13 20:25:17 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:17 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:17 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:17 --> URI Class Initialized
+DEBUG - 2025-10-13 20:25:17 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:25:17 --> Router Class Initialized
+INFO - 2025-10-13 20:25:17 --> Output Class Initialized
+INFO - 2025-10-13 20:25:17 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:17 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:17 --> Input Class Initialized
+INFO - 2025-10-13 20:25:17 --> Language Class Initialized
+INFO - 2025-10-13 20:25:17 --> Language Class Initialized
+INFO - 2025-10-13 20:25:17 --> Config Class Initialized
+INFO - 2025-10-13 20:25:17 --> Loader Class Initialized
+INFO - 2025-10-13 20:25:17 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:25:17 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:25:17 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:25:17 --> Email Class Initialized
+INFO - 2025-10-13 20:25:17 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:25:17 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:25:17 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:25:17 --> Pagination Class Initialized
+INFO - 2025-10-13 20:25:18 --> Config Class Initialized
+INFO - 2025-10-13 20:25:18 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:18 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:18 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:18 --> URI Class Initialized
+DEBUG - 2025-10-13 20:25:18 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:25:18 --> Router Class Initialized
+INFO - 2025-10-13 20:25:18 --> Output Class Initialized
+INFO - 2025-10-13 20:25:18 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:18 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:18 --> Input Class Initialized
+INFO - 2025-10-13 20:25:18 --> Language Class Initialized
+INFO - 2025-10-13 20:25:18 --> Language Class Initialized
+INFO - 2025-10-13 20:25:18 --> Config Class Initialized
+INFO - 2025-10-13 20:25:18 --> Loader Class Initialized
+INFO - 2025-10-13 20:25:18 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:25:18 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:25:18 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:25:18 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:25:18 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:25:18 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:25:18 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:25:18 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:25:18 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:25:18 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:25:18 --> Email Class Initialized
+INFO - 2025-10-13 20:25:18 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:25:18 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:25:18 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:25:18 --> Pagination Class Initialized
+INFO - 2025-10-13 20:25:22 --> Config Class Initialized
+INFO - 2025-10-13 20:25:22 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:22 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:22 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:22 --> URI Class Initialized
+DEBUG - 2025-10-13 20:25:22 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:25:22 --> Router Class Initialized
+INFO - 2025-10-13 20:25:22 --> Output Class Initialized
+INFO - 2025-10-13 20:25:22 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:22 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:22 --> Input Class Initialized
+INFO - 2025-10-13 20:25:22 --> Language Class Initialized
+INFO - 2025-10-13 20:25:22 --> Language Class Initialized
+INFO - 2025-10-13 20:25:22 --> Config Class Initialized
+INFO - 2025-10-13 20:25:22 --> Loader Class Initialized
+INFO - 2025-10-13 20:25:22 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:25:22 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:25:22 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:25:22 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:25:22 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:25:22 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:25:22 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:25:22 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:25:22 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:25:22 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:25:22 --> Email Class Initialized
+INFO - 2025-10-13 20:25:22 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:25:22 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:25:22 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:25:22 --> Pagination Class Initialized
+INFO - 2025-10-13 20:25:33 --> Config Class Initialized
+INFO - 2025-10-13 20:25:33 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:33 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:33 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:33 --> URI Class Initialized
+DEBUG - 2025-10-13 20:25:33 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:25:33 --> Router Class Initialized
+INFO - 2025-10-13 20:25:33 --> Output Class Initialized
+INFO - 2025-10-13 20:25:33 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:33 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:33 --> Input Class Initialized
+INFO - 2025-10-13 20:25:33 --> Language Class Initialized
+INFO - 2025-10-13 20:25:33 --> Language Class Initialized
+INFO - 2025-10-13 20:25:33 --> Config Class Initialized
+INFO - 2025-10-13 20:25:33 --> Loader Class Initialized
+INFO - 2025-10-13 20:25:33 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:25:33 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:25:33 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:25:33 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:25:33 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:25:33 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:25:33 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:25:33 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:25:33 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:25:33 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:25:33 --> Email Class Initialized
+INFO - 2025-10-13 20:25:33 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:25:33 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:25:33 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:25:33 --> Pagination Class Initialized
+INFO - 2025-10-13 20:25:34 --> Config Class Initialized
+INFO - 2025-10-13 20:25:34 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:34 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:34 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:34 --> URI Class Initialized
+INFO - 2025-10-13 20:25:34 --> Config Class Initialized
+INFO - 2025-10-13 20:25:34 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:34 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:34 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:34 --> URI Class Initialized
+INFO - 2025-10-13 20:25:34 --> Router Class Initialized
+INFO - 2025-10-13 20:25:34 --> Router Class Initialized
+INFO - 2025-10-13 20:25:34 --> Output Class Initialized
+INFO - 2025-10-13 20:25:34 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:34 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:34 --> Input Class Initialized
+INFO - 2025-10-13 20:25:34 --> Language Class Initialized
+ERROR - 2025-10-13 20:25:34 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:25:34 --> Output Class Initialized
+INFO - 2025-10-13 20:25:34 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:34 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:34 --> Input Class Initialized
+INFO - 2025-10-13 20:25:34 --> Language Class Initialized
+ERROR - 2025-10-13 20:25:34 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:25:43 --> Config Class Initialized
+INFO - 2025-10-13 20:25:43 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:43 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:43 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:43 --> URI Class Initialized
+DEBUG - 2025-10-13 20:25:43 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:25:43 --> Router Class Initialized
+INFO - 2025-10-13 20:25:43 --> Output Class Initialized
+INFO - 2025-10-13 20:25:43 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:43 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:43 --> Input Class Initialized
+INFO - 2025-10-13 20:25:43 --> Language Class Initialized
+INFO - 2025-10-13 20:25:43 --> Language Class Initialized
+INFO - 2025-10-13 20:25:43 --> Config Class Initialized
+INFO - 2025-10-13 20:25:43 --> Loader Class Initialized
+INFO - 2025-10-13 20:25:43 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:25:43 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:25:43 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:25:43 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:25:43 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:25:43 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:25:43 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:25:43 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:25:43 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:25:43 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:25:43 --> Email Class Initialized
+INFO - 2025-10-13 20:25:43 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:25:43 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:25:43 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:25:43 --> Pagination Class Initialized
+INFO - 2025-10-13 20:25:44 --> Config Class Initialized
+INFO - 2025-10-13 20:25:44 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:44 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:44 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:44 --> URI Class Initialized
+DEBUG - 2025-10-13 20:25:44 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:25:44 --> Router Class Initialized
+INFO - 2025-10-13 20:25:44 --> Output Class Initialized
+INFO - 2025-10-13 20:25:44 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:44 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:44 --> Input Class Initialized
+INFO - 2025-10-13 20:25:44 --> Language Class Initialized
+INFO - 2025-10-13 20:25:44 --> Language Class Initialized
+INFO - 2025-10-13 20:25:44 --> Config Class Initialized
+INFO - 2025-10-13 20:25:44 --> Loader Class Initialized
+INFO - 2025-10-13 20:25:44 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:25:44 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:25:44 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:25:44 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:25:44 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:25:44 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:25:44 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:25:44 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:25:44 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:25:44 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:25:44 --> Email Class Initialized
+INFO - 2025-10-13 20:25:44 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:25:44 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:25:44 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:25:44 --> Pagination Class Initialized
+INFO - 2025-10-13 20:25:48 --> Config Class Initialized
+INFO - 2025-10-13 20:25:48 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:25:48 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:25:48 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:25:48 --> URI Class Initialized
+DEBUG - 2025-10-13 20:25:48 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:25:48 --> Router Class Initialized
+INFO - 2025-10-13 20:25:48 --> Output Class Initialized
+INFO - 2025-10-13 20:25:48 --> Security Class Initialized
+DEBUG - 2025-10-13 20:25:48 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:25:48 --> Input Class Initialized
+INFO - 2025-10-13 20:25:48 --> Language Class Initialized
+INFO - 2025-10-13 20:25:48 --> Language Class Initialized
+INFO - 2025-10-13 20:25:48 --> Config Class Initialized
+INFO - 2025-10-13 20:25:48 --> Loader Class Initialized
+INFO - 2025-10-13 20:25:48 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:25:48 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:25:48 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:25:48 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:25:48 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:25:48 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:25:48 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:25:48 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:25:48 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:25:48 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:25:48 --> Email Class Initialized
+INFO - 2025-10-13 20:25:48 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:25:48 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:25:48 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:25:48 --> Pagination Class Initialized
+INFO - 2025-10-13 20:26:56 --> Config Class Initialized
+INFO - 2025-10-13 20:26:56 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:26:56 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:26:56 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:26:56 --> URI Class Initialized
+DEBUG - 2025-10-13 20:26:57 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:26:57 --> Router Class Initialized
+INFO - 2025-10-13 20:26:57 --> Output Class Initialized
+INFO - 2025-10-13 20:26:57 --> Security Class Initialized
+DEBUG - 2025-10-13 20:26:57 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:26:57 --> Input Class Initialized
+INFO - 2025-10-13 20:26:57 --> Language Class Initialized
+INFO - 2025-10-13 20:26:57 --> Language Class Initialized
+INFO - 2025-10-13 20:26:57 --> Config Class Initialized
+INFO - 2025-10-13 20:26:57 --> Loader Class Initialized
+INFO - 2025-10-13 20:26:57 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:26:57 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:26:57 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:26:57 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:26:57 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:26:57 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:26:57 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:26:57 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:26:57 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:26:57 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:26:57 --> Email Class Initialized
+INFO - 2025-10-13 20:26:57 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:26:57 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:26:57 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:26:57 --> Pagination Class Initialized
+INFO - 2025-10-13 20:26:58 --> Config Class Initialized
+INFO - 2025-10-13 20:26:58 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:26:58 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:26:58 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:26:58 --> URI Class Initialized
+INFO - 2025-10-13 20:26:58 --> Config Class Initialized
+INFO - 2025-10-13 20:26:58 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:26:58 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:26:58 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:26:58 --> URI Class Initialized
+INFO - 2025-10-13 20:26:58 --> Router Class Initialized
+INFO - 2025-10-13 20:26:58 --> Router Class Initialized
+INFO - 2025-10-13 20:26:58 --> Output Class Initialized
+INFO - 2025-10-13 20:26:58 --> Security Class Initialized
+DEBUG - 2025-10-13 20:26:58 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:26:58 --> Input Class Initialized
+INFO - 2025-10-13 20:26:58 --> Language Class Initialized
+INFO - 2025-10-13 20:26:58 --> Output Class Initialized
+INFO - 2025-10-13 20:26:58 --> Security Class Initialized
+DEBUG - 2025-10-13 20:26:58 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:26:58 --> Input Class Initialized
+INFO - 2025-10-13 20:26:58 --> Language Class Initialized
+ERROR - 2025-10-13 20:26:58 --> 404 Page Not Found: /index
+ERROR - 2025-10-13 20:26:58 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:27:05 --> Config Class Initialized
+INFO - 2025-10-13 20:27:05 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:27:05 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:27:05 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:27:05 --> URI Class Initialized
+DEBUG - 2025-10-13 20:27:05 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 20:27:05 --> Router Class Initialized
+INFO - 2025-10-13 20:27:05 --> Output Class Initialized
+INFO - 2025-10-13 20:27:05 --> Security Class Initialized
+DEBUG - 2025-10-13 20:27:05 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:27:05 --> Input Class Initialized
+INFO - 2025-10-13 20:27:05 --> Language Class Initialized
+INFO - 2025-10-13 20:27:05 --> Language Class Initialized
+INFO - 2025-10-13 20:27:05 --> Config Class Initialized
+INFO - 2025-10-13 20:27:05 --> Loader Class Initialized
+INFO - 2025-10-13 20:27:05 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:27:05 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:27:05 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:27:05 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:27:05 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:27:05 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:27:05 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:27:05 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:27:05 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:27:05 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:27:05 --> Email Class Initialized
+INFO - 2025-10-13 20:27:05 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:27:05 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:27:05 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:27:05 --> Pagination Class Initialized
+INFO - 2025-10-13 20:27:06 --> Config Class Initialized
+INFO - 2025-10-13 20:27:06 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:27:06 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:27:06 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:27:06 --> URI Class Initialized
+INFO - 2025-10-13 20:27:06 --> Router Class Initialized
+INFO - 2025-10-13 20:27:06 --> Output Class Initialized
+INFO - 2025-10-13 20:27:06 --> Security Class Initialized
+DEBUG - 2025-10-13 20:27:06 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:27:06 --> Input Class Initialized
+INFO - 2025-10-13 20:27:06 --> Language Class Initialized
+ERROR - 2025-10-13 20:27:06 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:27:06 --> Config Class Initialized
+INFO - 2025-10-13 20:27:06 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:27:06 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:27:06 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:27:06 --> URI Class Initialized
+INFO - 2025-10-13 20:27:06 --> Router Class Initialized
+INFO - 2025-10-13 20:27:06 --> Output Class Initialized
+INFO - 2025-10-13 20:27:06 --> Security Class Initialized
+DEBUG - 2025-10-13 20:27:06 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:27:06 --> Input Class Initialized
+INFO - 2025-10-13 20:27:06 --> Language Class Initialized
+ERROR - 2025-10-13 20:27:06 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:27:06 --> Config Class Initialized
+INFO - 2025-10-13 20:27:06 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:27:06 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:27:06 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:27:06 --> URI Class Initialized
+DEBUG - 2025-10-13 20:27:06 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 20:27:06 --> Router Class Initialized
+INFO - 2025-10-13 20:27:06 --> Output Class Initialized
+INFO - 2025-10-13 20:27:06 --> Security Class Initialized
+DEBUG - 2025-10-13 20:27:06 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:27:06 --> Input Class Initialized
+INFO - 2025-10-13 20:27:06 --> Language Class Initialized
+INFO - 2025-10-13 20:27:07 --> Language Class Initialized
+INFO - 2025-10-13 20:27:07 --> Config Class Initialized
+INFO - 2025-10-13 20:27:07 --> Loader Class Initialized
+INFO - 2025-10-13 20:27:07 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:27:07 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:27:07 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:27:07 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:27:07 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:27:07 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:27:07 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:27:07 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:27:07 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:27:07 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:27:07 --> Email Class Initialized
+INFO - 2025-10-13 20:27:07 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:27:07 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:27:07 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:27:07 --> Pagination Class Initialized
+INFO - 2025-10-13 20:27:09 --> Config Class Initialized
+INFO - 2025-10-13 20:27:09 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:27:09 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:27:09 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:27:09 --> URI Class Initialized
+DEBUG - 2025-10-13 20:27:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 20:27:09 --> Router Class Initialized
+INFO - 2025-10-13 20:27:09 --> Output Class Initialized
+INFO - 2025-10-13 20:27:09 --> Security Class Initialized
+DEBUG - 2025-10-13 20:27:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:27:09 --> Input Class Initialized
+INFO - 2025-10-13 20:27:09 --> Language Class Initialized
+INFO - 2025-10-13 20:27:09 --> Language Class Initialized
+INFO - 2025-10-13 20:27:09 --> Config Class Initialized
+INFO - 2025-10-13 20:27:09 --> Loader Class Initialized
+INFO - 2025-10-13 20:27:09 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:27:09 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:27:09 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:27:09 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:27:09 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:27:09 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:27:09 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:27:09 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:27:09 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:27:09 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:27:09 --> Email Class Initialized
+INFO - 2025-10-13 20:27:09 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:27:09 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:27:09 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:27:09 --> Pagination Class Initialized
+INFO - 2025-10-13 20:27:10 --> Config Class Initialized
+INFO - 2025-10-13 20:27:10 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:27:10 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:27:10 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:27:10 --> URI Class Initialized
+INFO - 2025-10-13 20:27:10 --> Router Class Initialized
+INFO - 2025-10-13 20:27:10 --> Output Class Initialized
+INFO - 2025-10-13 20:27:10 --> Security Class Initialized
+DEBUG - 2025-10-13 20:27:10 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:27:10 --> Input Class Initialized
+INFO - 2025-10-13 20:27:10 --> Language Class Initialized
+ERROR - 2025-10-13 20:27:10 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:27:10 --> Config Class Initialized
+INFO - 2025-10-13 20:27:10 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:27:10 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:27:10 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:27:10 --> URI Class Initialized
+INFO - 2025-10-13 20:27:10 --> Router Class Initialized
+INFO - 2025-10-13 20:27:10 --> Output Class Initialized
+INFO - 2025-10-13 20:27:11 --> Security Class Initialized
+DEBUG - 2025-10-13 20:27:11 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:27:11 --> Input Class Initialized
+INFO - 2025-10-13 20:27:11 --> Language Class Initialized
+ERROR - 2025-10-13 20:27:11 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:29:51 --> Config Class Initialized
+INFO - 2025-10-13 20:29:51 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:29:51 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:29:51 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:29:51 --> URI Class Initialized
+DEBUG - 2025-10-13 20:29:51 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 20:29:51 --> Router Class Initialized
+INFO - 2025-10-13 20:29:51 --> Output Class Initialized
+INFO - 2025-10-13 20:29:51 --> Security Class Initialized
+DEBUG - 2025-10-13 20:29:51 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:29:51 --> Input Class Initialized
+INFO - 2025-10-13 20:29:51 --> Language Class Initialized
+INFO - 2025-10-13 20:29:51 --> Language Class Initialized
+INFO - 2025-10-13 20:29:51 --> Config Class Initialized
+INFO - 2025-10-13 20:29:51 --> Loader Class Initialized
+INFO - 2025-10-13 20:29:51 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:29:51 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:29:51 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:29:51 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:29:51 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:29:51 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:29:51 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:29:51 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:29:51 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:29:51 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:29:51 --> Email Class Initialized
+INFO - 2025-10-13 20:29:51 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:29:51 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:29:51 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:29:51 --> Pagination Class Initialized
+INFO - 2025-10-13 20:29:52 --> Config Class Initialized
+INFO - 2025-10-13 20:29:52 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:29:52 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:29:52 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:29:52 --> URI Class Initialized
+INFO - 2025-10-13 20:29:52 --> Config Class Initialized
+INFO - 2025-10-13 20:29:52 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:29:52 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:29:52 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:29:52 --> URI Class Initialized
+INFO - 2025-10-13 20:29:52 --> Router Class Initialized
+INFO - 2025-10-13 20:29:52 --> Router Class Initialized
+INFO - 2025-10-13 20:29:52 --> Output Class Initialized
+INFO - 2025-10-13 20:29:52 --> Output Class Initialized
+INFO - 2025-10-13 20:29:52 --> Security Class Initialized
+INFO - 2025-10-13 20:29:52 --> Security Class Initialized
+DEBUG - 2025-10-13 20:29:52 --> Global POST, GET and COOKIE data sanitized
+DEBUG - 2025-10-13 20:29:52 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:29:52 --> Input Class Initialized
+INFO - 2025-10-13 20:29:52 --> Input Class Initialized
+INFO - 2025-10-13 20:29:52 --> Language Class Initialized
+INFO - 2025-10-13 20:29:52 --> Language Class Initialized
+ERROR - 2025-10-13 20:29:52 --> 404 Page Not Found: /index
+ERROR - 2025-10-13 20:29:52 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:30:32 --> Config Class Initialized
+INFO - 2025-10-13 20:30:32 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:30:32 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:30:32 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:30:32 --> URI Class Initialized
+DEBUG - 2025-10-13 20:30:32 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 20:30:32 --> Router Class Initialized
+INFO - 2025-10-13 20:30:32 --> Output Class Initialized
+INFO - 2025-10-13 20:30:32 --> Security Class Initialized
+DEBUG - 2025-10-13 20:30:32 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:30:32 --> Input Class Initialized
+INFO - 2025-10-13 20:30:32 --> Language Class Initialized
+INFO - 2025-10-13 20:30:32 --> Language Class Initialized
+INFO - 2025-10-13 20:30:32 --> Config Class Initialized
+INFO - 2025-10-13 20:30:32 --> Loader Class Initialized
+INFO - 2025-10-13 20:30:32 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:30:32 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:30:32 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:30:32 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:30:32 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:30:32 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:30:32 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:30:32 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:30:32 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:30:32 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:30:32 --> Email Class Initialized
+INFO - 2025-10-13 20:30:32 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:30:32 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:30:32 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:30:32 --> Pagination Class Initialized
+INFO - 2025-10-13 20:30:32 --> Config Class Initialized
+INFO - 2025-10-13 20:30:32 --> Hooks Class Initialized
+INFO - 2025-10-13 20:30:32 --> Config Class Initialized
+INFO - 2025-10-13 20:30:32 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:30:32 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:30:32 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:30:32 --> URI Class Initialized
+INFO - 2025-10-13 20:30:32 --> Router Class Initialized
+INFO - 2025-10-13 20:30:32 --> Output Class Initialized
+INFO - 2025-10-13 20:30:32 --> Security Class Initialized
+DEBUG - 2025-10-13 20:30:32 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:30:32 --> Input Class Initialized
+INFO - 2025-10-13 20:30:32 --> Language Class Initialized
+ERROR - 2025-10-13 20:30:32 --> 404 Page Not Found: /index
+DEBUG - 2025-10-13 20:30:32 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:30:32 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:30:32 --> URI Class Initialized
+INFO - 2025-10-13 20:30:32 --> Router Class Initialized
+INFO - 2025-10-13 20:30:32 --> Output Class Initialized
+INFO - 2025-10-13 20:30:32 --> Security Class Initialized
+DEBUG - 2025-10-13 20:30:32 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:30:32 --> Input Class Initialized
+INFO - 2025-10-13 20:30:32 --> Language Class Initialized
+ERROR - 2025-10-13 20:30:32 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:40:06 --> Config Class Initialized
+INFO - 2025-10-13 20:40:06 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:06 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:06 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:06 --> URI Class Initialized
+DEBUG - 2025-10-13 20:40:06 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:40:06 --> Router Class Initialized
+INFO - 2025-10-13 20:40:06 --> Output Class Initialized
+INFO - 2025-10-13 20:40:06 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:06 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:06 --> Input Class Initialized
+INFO - 2025-10-13 20:40:06 --> Language Class Initialized
+INFO - 2025-10-13 20:40:06 --> Language Class Initialized
+INFO - 2025-10-13 20:40:06 --> Config Class Initialized
+INFO - 2025-10-13 20:40:06 --> Loader Class Initialized
+INFO - 2025-10-13 20:40:06 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:40:06 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:40:06 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:40:06 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:40:06 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:40:06 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:40:06 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:40:06 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:40:06 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:40:06 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:40:06 --> Email Class Initialized
+INFO - 2025-10-13 20:40:06 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:40:06 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:40:06 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:40:06 --> Pagination Class Initialized
+INFO - 2025-10-13 20:40:07 --> Config Class Initialized
+INFO - 2025-10-13 20:40:07 --> Hooks Class Initialized
+INFO - 2025-10-13 20:40:07 --> Config Class Initialized
+INFO - 2025-10-13 20:40:07 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:07 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:07 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:07 --> URI Class Initialized
+DEBUG - 2025-10-13 20:40:07 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:08 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:08 --> URI Class Initialized
+INFO - 2025-10-13 20:40:08 --> Router Class Initialized
+INFO - 2025-10-13 20:40:08 --> Output Class Initialized
+INFO - 2025-10-13 20:40:08 --> Router Class Initialized
+INFO - 2025-10-13 20:40:08 --> Output Class Initialized
+INFO - 2025-10-13 20:40:08 --> Security Class Initialized
+INFO - 2025-10-13 20:40:08 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:08 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:08 --> Input Class Initialized
+INFO - 2025-10-13 20:40:08 --> Language Class Initialized
+DEBUG - 2025-10-13 20:40:08 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:08 --> Input Class Initialized
+ERROR - 2025-10-13 20:40:08 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:40:08 --> Language Class Initialized
+ERROR - 2025-10-13 20:40:08 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:40:16 --> Config Class Initialized
+INFO - 2025-10-13 20:40:16 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:16 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:16 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:16 --> URI Class Initialized
+DEBUG - 2025-10-13 20:40:16 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:40:16 --> Router Class Initialized
+INFO - 2025-10-13 20:40:16 --> Output Class Initialized
+INFO - 2025-10-13 20:40:16 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:16 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:16 --> Input Class Initialized
+INFO - 2025-10-13 20:40:16 --> Language Class Initialized
+INFO - 2025-10-13 20:40:16 --> Language Class Initialized
+INFO - 2025-10-13 20:40:16 --> Config Class Initialized
+INFO - 2025-10-13 20:40:16 --> Loader Class Initialized
+INFO - 2025-10-13 20:40:16 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:40:16 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:40:16 --> Config Class Initialized
+INFO - 2025-10-13 20:40:16 --> Hooks Class Initialized
+INFO - 2025-10-13 20:40:16 --> Email Class Initialized
+DEBUG - 2025-10-13 20:40:16 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:16 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:16 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:40:16 --> URI Class Initialized
+INFO - 2025-10-13 20:40:16 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:40:16 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:40:16 --> Pagination Class Initialized
+DEBUG - 2025-10-13 20:40:16 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:40:16 --> Router Class Initialized
+INFO - 2025-10-13 20:40:16 --> Output Class Initialized
+INFO - 2025-10-13 20:40:16 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:16 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:16 --> Input Class Initialized
+INFO - 2025-10-13 20:40:16 --> Language Class Initialized
+INFO - 2025-10-13 20:40:16 --> Language Class Initialized
+INFO - 2025-10-13 20:40:16 --> Config Class Initialized
+INFO - 2025-10-13 20:40:16 --> Loader Class Initialized
+INFO - 2025-10-13 20:40:16 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:40:16 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:40:16 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:40:16 --> Email Class Initialized
+INFO - 2025-10-13 20:40:17 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:40:17 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:40:17 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:40:17 --> Pagination Class Initialized
+INFO - 2025-10-13 20:40:18 --> Config Class Initialized
+INFO - 2025-10-13 20:40:18 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:18 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:18 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:18 --> URI Class Initialized
+INFO - 2025-10-13 20:40:18 --> Config Class Initialized
+INFO - 2025-10-13 20:40:18 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:18 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:18 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:18 --> URI Class Initialized
+INFO - 2025-10-13 20:40:18 --> Router Class Initialized
+INFO - 2025-10-13 20:40:18 --> Output Class Initialized
+INFO - 2025-10-13 20:40:18 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:18 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:18 --> Input Class Initialized
+INFO - 2025-10-13 20:40:18 --> Language Class Initialized
+ERROR - 2025-10-13 20:40:18 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:40:18 --> Router Class Initialized
+INFO - 2025-10-13 20:40:18 --> Output Class Initialized
+INFO - 2025-10-13 20:40:18 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:18 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:18 --> Input Class Initialized
+INFO - 2025-10-13 20:40:18 --> Language Class Initialized
+ERROR - 2025-10-13 20:40:18 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:40:41 --> Config Class Initialized
+INFO - 2025-10-13 20:40:41 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:41 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:41 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:41 --> URI Class Initialized
+DEBUG - 2025-10-13 20:40:41 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:40:41 --> Router Class Initialized
+INFO - 2025-10-13 20:40:41 --> Output Class Initialized
+INFO - 2025-10-13 20:40:41 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:41 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:41 --> Input Class Initialized
+INFO - 2025-10-13 20:40:41 --> Language Class Initialized
+INFO - 2025-10-13 20:40:41 --> Language Class Initialized
+INFO - 2025-10-13 20:40:41 --> Config Class Initialized
+INFO - 2025-10-13 20:40:41 --> Loader Class Initialized
+INFO - 2025-10-13 20:40:41 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:40:41 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:40:41 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:40:41 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:40:41 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:40:41 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:40:41 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:40:41 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:40:41 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:40:41 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:40:41 --> Email Class Initialized
+INFO - 2025-10-13 20:40:41 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:40:41 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:40:41 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:40:41 --> Pagination Class Initialized
+INFO - 2025-10-13 20:40:42 --> Config Class Initialized
+INFO - 2025-10-13 20:40:42 --> Hooks Class Initialized
+INFO - 2025-10-13 20:40:42 --> Config Class Initialized
+INFO - 2025-10-13 20:40:42 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:42 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:42 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:42 --> URI Class Initialized
+DEBUG - 2025-10-13 20:40:42 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:42 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:42 --> URI Class Initialized
+INFO - 2025-10-13 20:40:42 --> Router Class Initialized
+INFO - 2025-10-13 20:40:42 --> Output Class Initialized
+INFO - 2025-10-13 20:40:42 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:42 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:42 --> Input Class Initialized
+INFO - 2025-10-13 20:40:42 --> Language Class Initialized
+ERROR - 2025-10-13 20:40:42 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:40:42 --> Router Class Initialized
+INFO - 2025-10-13 20:40:42 --> Config Class Initialized
+INFO - 2025-10-13 20:40:42 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:42 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:42 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:42 --> URI Class Initialized
+INFO - 2025-10-13 20:40:42 --> Output Class Initialized
+INFO - 2025-10-13 20:40:42 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:42 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:40:42 --> Router Class Initialized
+DEBUG - 2025-10-13 20:40:42 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:42 --> Input Class Initialized
+INFO - 2025-10-13 20:40:42 --> Language Class Initialized
+INFO - 2025-10-13 20:40:42 --> Output Class Initialized
+ERROR - 2025-10-13 20:40:42 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:40:42 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:42 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:42 --> Input Class Initialized
+INFO - 2025-10-13 20:40:42 --> Language Class Initialized
+INFO - 2025-10-13 20:40:42 --> Language Class Initialized
+INFO - 2025-10-13 20:40:42 --> Config Class Initialized
+INFO - 2025-10-13 20:40:42 --> Loader Class Initialized
+INFO - 2025-10-13 20:40:42 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:40:42 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:40:42 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:40:42 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:40:42 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:40:42 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:40:42 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:40:42 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:40:42 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:40:42 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:40:42 --> Email Class Initialized
+INFO - 2025-10-13 20:40:42 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:40:42 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:40:42 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:40:42 --> Pagination Class Initialized
+INFO - 2025-10-13 20:40:46 --> Config Class Initialized
+INFO - 2025-10-13 20:40:46 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:46 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:46 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:46 --> URI Class Initialized
+DEBUG - 2025-10-13 20:40:46 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:40:46 --> Router Class Initialized
+INFO - 2025-10-13 20:40:46 --> Output Class Initialized
+INFO - 2025-10-13 20:40:46 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:46 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:46 --> Input Class Initialized
+INFO - 2025-10-13 20:40:46 --> Language Class Initialized
+INFO - 2025-10-13 20:40:46 --> Language Class Initialized
+INFO - 2025-10-13 20:40:46 --> Config Class Initialized
+INFO - 2025-10-13 20:40:46 --> Loader Class Initialized
+INFO - 2025-10-13 20:40:46 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:40:46 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:40:46 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:40:46 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:40:46 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:40:46 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:40:46 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:40:46 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:40:46 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:40:46 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:40:46 --> Email Class Initialized
+INFO - 2025-10-13 20:40:46 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:40:46 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:40:46 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:40:46 --> Pagination Class Initialized
+INFO - 2025-10-13 20:40:47 --> Config Class Initialized
+INFO - 2025-10-13 20:40:47 --> Hooks Class Initialized
+INFO - 2025-10-13 20:40:47 --> Config Class Initialized
+INFO - 2025-10-13 20:40:47 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:47 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:47 --> Utf8 Class Initialized
+DEBUG - 2025-10-13 20:40:47 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:47 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:47 --> URI Class Initialized
+INFO - 2025-10-13 20:40:47 --> URI Class Initialized
+DEBUG - 2025-10-13 20:40:47 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/config/routes.php
+DEBUG - 2025-10-13 20:40:47 --> No URI present. Default controller set.
+INFO - 2025-10-13 20:40:47 --> Router Class Initialized
+INFO - 2025-10-13 20:40:47 --> Router Class Initialized
+INFO - 2025-10-13 20:40:47 --> Output Class Initialized
+INFO - 2025-10-13 20:40:47 --> Output Class Initialized
+INFO - 2025-10-13 20:40:47 --> Security Class Initialized
+INFO - 2025-10-13 20:40:47 --> Config Class Initialized
+INFO - 2025-10-13 20:40:47 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:47 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:47 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:47 --> URI Class Initialized
+INFO - 2025-10-13 20:40:47 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:47 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:47 --> Input Class Initialized
+DEBUG - 2025-10-13 20:40:47 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:47 --> Language Class Initialized
+INFO - 2025-10-13 20:40:47 --> Input Class Initialized
+INFO - 2025-10-13 20:40:47 --> Router Class Initialized
+INFO - 2025-10-13 20:40:47 --> Language Class Initialized
+INFO - 2025-10-13 20:40:47 --> Language Class Initialized
+INFO - 2025-10-13 20:40:47 --> Config Class Initialized
+INFO - 2025-10-13 20:40:47 --> Loader Class Initialized
+INFO - 2025-10-13 20:40:47 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:40:47 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:40:47 --> Email Class Initialized
+INFO - 2025-10-13 20:40:47 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:40:47 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:40:47 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:40:47 --> Pagination Class Initialized
+ERROR - 2025-10-13 20:40:47 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:40:47 --> Output Class Initialized
+INFO - 2025-10-13 20:40:47 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:47 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:47 --> Input Class Initialized
+INFO - 2025-10-13 20:40:47 --> Language Class Initialized
+ERROR - 2025-10-13 20:40:47 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:40:47 --> Config Class Initialized
+INFO - 2025-10-13 20:40:47 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:40:47 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:40:47 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:40:47 --> URI Class Initialized
+DEBUG - 2025-10-13 20:40:47 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/config/routes.php
+INFO - 2025-10-13 20:40:47 --> Router Class Initialized
+INFO - 2025-10-13 20:40:47 --> Output Class Initialized
+INFO - 2025-10-13 20:40:47 --> Security Class Initialized
+DEBUG - 2025-10-13 20:40:47 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:40:47 --> Input Class Initialized
+INFO - 2025-10-13 20:40:47 --> Language Class Initialized
+INFO - 2025-10-13 20:40:47 --> Language Class Initialized
+INFO - 2025-10-13 20:40:47 --> Config Class Initialized
+INFO - 2025-10-13 20:40:47 --> Loader Class Initialized
+INFO - 2025-10-13 20:40:47 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:40:47 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:40:48 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:40:48 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:40:48 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:40:48 --> Email Class Initialized
+INFO - 2025-10-13 20:40:48 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:40:48 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:40:48 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:40:48 --> Pagination Class Initialized
+INFO - 2025-10-13 20:41:31 --> Config Class Initialized
+INFO - 2025-10-13 20:41:31 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:41:31 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:41:31 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:41:31 --> URI Class Initialized
+DEBUG - 2025-10-13 20:41:31 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 20:41:31 --> Router Class Initialized
+INFO - 2025-10-13 20:41:31 --> Output Class Initialized
+INFO - 2025-10-13 20:41:31 --> Security Class Initialized
+DEBUG - 2025-10-13 20:41:31 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:41:31 --> Input Class Initialized
+INFO - 2025-10-13 20:41:31 --> Language Class Initialized
+INFO - 2025-10-13 20:41:31 --> Language Class Initialized
+INFO - 2025-10-13 20:41:31 --> Config Class Initialized
+INFO - 2025-10-13 20:41:31 --> Loader Class Initialized
+INFO - 2025-10-13 20:41:31 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:41:31 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:41:31 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:41:31 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:41:31 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:41:31 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:41:31 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:41:31 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:41:31 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:41:31 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:41:31 --> Email Class Initialized
+INFO - 2025-10-13 20:41:31 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:41:31 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:41:31 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:41:31 --> Pagination Class Initialized
+INFO - 2025-10-13 20:41:32 --> Config Class Initialized
+INFO - 2025-10-13 20:41:32 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:41:32 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:41:32 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:41:32 --> URI Class Initialized
+INFO - 2025-10-13 20:41:32 --> Config Class Initialized
+INFO - 2025-10-13 20:41:32 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:41:32 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:41:32 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:41:32 --> URI Class Initialized
+INFO - 2025-10-13 20:41:32 --> Router Class Initialized
+INFO - 2025-10-13 20:41:32 --> Router Class Initialized
+INFO - 2025-10-13 20:41:32 --> Output Class Initialized
+INFO - 2025-10-13 20:41:32 --> Security Class Initialized
+DEBUG - 2025-10-13 20:41:32 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:41:32 --> Input Class Initialized
+INFO - 2025-10-13 20:41:32 --> Language Class Initialized
+ERROR - 2025-10-13 20:41:32 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:41:32 --> Output Class Initialized
+INFO - 2025-10-13 20:41:32 --> Security Class Initialized
+INFO - 2025-10-13 20:41:32 --> Config Class Initialized
+INFO - 2025-10-13 20:41:32 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:41:32 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:41:32 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:41:32 --> URI Class Initialized
+DEBUG - 2025-10-13 20:41:32 --> Global POST, GET and COOKIE data sanitized
+DEBUG - 2025-10-13 20:41:32 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 20:41:32 --> Router Class Initialized
+INFO - 2025-10-13 20:41:32 --> Output Class Initialized
+INFO - 2025-10-13 20:41:32 --> Security Class Initialized
+DEBUG - 2025-10-13 20:41:32 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:41:32 --> Input Class Initialized
+INFO - 2025-10-13 20:41:32 --> Language Class Initialized
+INFO - 2025-10-13 20:41:32 --> Language Class Initialized
+INFO - 2025-10-13 20:41:32 --> Config Class Initialized
+INFO - 2025-10-13 20:41:32 --> Input Class Initialized
+INFO - 2025-10-13 20:41:32 --> Language Class Initialized
+INFO - 2025-10-13 20:41:32 --> Loader Class Initialized
+ERROR - 2025-10-13 20:41:32 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:41:32 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:41:32 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:41:32 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:41:32 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:41:32 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:41:32 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:41:32 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:41:32 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:41:32 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:41:32 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:41:32 --> Email Class Initialized
+INFO - 2025-10-13 20:41:32 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:41:32 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:41:32 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:41:32 --> Pagination Class Initialized
+INFO - 2025-10-13 20:41:37 --> Config Class Initialized
+INFO - 2025-10-13 20:41:37 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:41:37 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:41:37 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:41:37 --> URI Class Initialized
+DEBUG - 2025-10-13 20:41:37 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 20:41:37 --> Router Class Initialized
+INFO - 2025-10-13 20:41:37 --> Output Class Initialized
+INFO - 2025-10-13 20:41:37 --> Security Class Initialized
+DEBUG - 2025-10-13 20:41:37 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:41:37 --> Input Class Initialized
+INFO - 2025-10-13 20:41:37 --> Language Class Initialized
+INFO - 2025-10-13 20:41:37 --> Language Class Initialized
+INFO - 2025-10-13 20:41:37 --> Config Class Initialized
+INFO - 2025-10-13 20:41:37 --> Loader Class Initialized
+INFO - 2025-10-13 20:41:37 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:41:37 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:41:37 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:41:37 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:41:37 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:41:37 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:41:37 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:41:37 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:41:37 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:41:37 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:41:37 --> Email Class Initialized
+INFO - 2025-10-13 20:41:37 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:41:37 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:41:37 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:41:37 --> Pagination Class Initialized
+INFO - 2025-10-13 20:41:37 --> Config Class Initialized
+INFO - 2025-10-13 20:41:37 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:41:37 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:41:37 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:41:37 --> URI Class Initialized
+INFO - 2025-10-13 20:41:38 --> Router Class Initialized
+INFO - 2025-10-13 20:41:38 --> Config Class Initialized
+INFO - 2025-10-13 20:41:38 --> Hooks Class Initialized
+INFO - 2025-10-13 20:41:38 --> Output Class Initialized
+INFO - 2025-10-13 20:41:38 --> Security Class Initialized
+DEBUG - 2025-10-13 20:41:38 --> UTF-8 Support Enabled
+DEBUG - 2025-10-13 20:41:38 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:41:38 --> Input Class Initialized
+INFO - 2025-10-13 20:41:38 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:41:38 --> Language Class Initialized
+ERROR - 2025-10-13 20:41:38 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:41:38 --> URI Class Initialized
+INFO - 2025-10-13 20:41:38 --> Router Class Initialized
+INFO - 2025-10-13 20:41:38 --> Output Class Initialized
+INFO - 2025-10-13 20:41:38 --> Security Class Initialized
+DEBUG - 2025-10-13 20:41:38 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:41:38 --> Input Class Initialized
+INFO - 2025-10-13 20:41:38 --> Language Class Initialized
+ERROR - 2025-10-13 20:41:38 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:44:52 --> Config Class Initialized
+INFO - 2025-10-13 20:44:52 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:44:52 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:44:52 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:44:52 --> URI Class Initialized
+DEBUG - 2025-10-13 20:44:52 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:44:52 --> Router Class Initialized
+INFO - 2025-10-13 20:44:52 --> Output Class Initialized
+INFO - 2025-10-13 20:44:52 --> Security Class Initialized
+DEBUG - 2025-10-13 20:44:52 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:44:52 --> Input Class Initialized
+INFO - 2025-10-13 20:44:52 --> Language Class Initialized
+INFO - 2025-10-13 20:44:52 --> Language Class Initialized
+INFO - 2025-10-13 20:44:52 --> Config Class Initialized
+INFO - 2025-10-13 20:44:52 --> Loader Class Initialized
+INFO - 2025-10-13 20:44:52 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:44:52 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:44:52 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:44:52 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:44:52 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:44:52 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:44:52 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:44:52 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:44:52 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:44:52 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:44:52 --> Email Class Initialized
+INFO - 2025-10-13 20:44:52 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:44:52 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:44:52 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:44:52 --> Pagination Class Initialized
+INFO - 2025-10-13 20:44:53 --> Config Class Initialized
+INFO - 2025-10-13 20:44:53 --> Hooks Class Initialized
+INFO - 2025-10-13 20:44:53 --> Config Class Initialized
+INFO - 2025-10-13 20:44:53 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:44:53 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:44:53 --> Utf8 Class Initialized
+DEBUG - 2025-10-13 20:44:53 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:44:53 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:44:53 --> URI Class Initialized
+INFO - 2025-10-13 20:44:53 --> URI Class Initialized
+INFO - 2025-10-13 20:44:53 --> Router Class Initialized
+INFO - 2025-10-13 20:44:53 --> Output Class Initialized
+INFO - 2025-10-13 20:44:53 --> Security Class Initialized
+DEBUG - 2025-10-13 20:44:53 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:44:53 --> Input Class Initialized
+INFO - 2025-10-13 20:44:53 --> Language Class Initialized
+ERROR - 2025-10-13 20:44:53 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:44:53 --> Router Class Initialized
+INFO - 2025-10-13 20:44:53 --> Output Class Initialized
+INFO - 2025-10-13 20:44:53 --> Security Class Initialized
+DEBUG - 2025-10-13 20:44:53 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:44:53 --> Input Class Initialized
+INFO - 2025-10-13 20:44:53 --> Language Class Initialized
+ERROR - 2025-10-13 20:44:53 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:45:19 --> Config Class Initialized
+INFO - 2025-10-13 20:45:19 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:45:19 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:45:19 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:45:19 --> URI Class Initialized
+DEBUG - 2025-10-13 20:45:19 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:45:19 --> Router Class Initialized
+INFO - 2025-10-13 20:45:19 --> Output Class Initialized
+INFO - 2025-10-13 20:45:19 --> Security Class Initialized
+DEBUG - 2025-10-13 20:45:19 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:45:19 --> Input Class Initialized
+INFO - 2025-10-13 20:45:19 --> Language Class Initialized
+INFO - 2025-10-13 20:45:19 --> Language Class Initialized
+INFO - 2025-10-13 20:45:19 --> Config Class Initialized
+INFO - 2025-10-13 20:45:19 --> Loader Class Initialized
+INFO - 2025-10-13 20:45:19 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:45:19 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:45:19 --> Email Class Initialized
+INFO - 2025-10-13 20:45:19 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:45:19 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:45:19 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:45:19 --> Pagination Class Initialized
+INFO - 2025-10-13 20:45:19 --> Config Class Initialized
+INFO - 2025-10-13 20:45:19 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:45:19 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:45:19 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:45:19 --> URI Class Initialized
+DEBUG - 2025-10-13 20:45:19 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:45:19 --> Router Class Initialized
+INFO - 2025-10-13 20:45:19 --> Output Class Initialized
+INFO - 2025-10-13 20:45:19 --> Security Class Initialized
+DEBUG - 2025-10-13 20:45:19 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:45:19 --> Input Class Initialized
+INFO - 2025-10-13 20:45:19 --> Language Class Initialized
+INFO - 2025-10-13 20:45:19 --> Language Class Initialized
+INFO - 2025-10-13 20:45:19 --> Config Class Initialized
+INFO - 2025-10-13 20:45:19 --> Loader Class Initialized
+INFO - 2025-10-13 20:45:19 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:45:19 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:45:19 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:45:19 --> Email Class Initialized
+INFO - 2025-10-13 20:45:19 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:45:19 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:45:19 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:45:19 --> Pagination Class Initialized
+INFO - 2025-10-13 20:45:21 --> Config Class Initialized
+INFO - 2025-10-13 20:45:21 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:45:21 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:45:21 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:45:21 --> URI Class Initialized
+DEBUG - 2025-10-13 20:45:21 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:45:21 --> Router Class Initialized
+INFO - 2025-10-13 20:45:21 --> Output Class Initialized
+INFO - 2025-10-13 20:45:21 --> Security Class Initialized
+DEBUG - 2025-10-13 20:45:21 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:45:21 --> Input Class Initialized
+INFO - 2025-10-13 20:45:21 --> Language Class Initialized
+INFO - 2025-10-13 20:45:21 --> Language Class Initialized
+INFO - 2025-10-13 20:45:21 --> Config Class Initialized
+INFO - 2025-10-13 20:45:21 --> Loader Class Initialized
+INFO - 2025-10-13 20:45:21 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:45:21 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:45:21 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:45:21 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:45:21 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:45:21 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:45:21 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:45:21 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:45:21 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:45:21 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:45:21 --> Email Class Initialized
+INFO - 2025-10-13 20:45:21 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:45:21 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:45:21 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:45:21 --> Pagination Class Initialized
+INFO - 2025-10-13 20:45:30 --> Config Class Initialized
+INFO - 2025-10-13 20:45:30 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:45:30 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:45:30 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:45:30 --> URI Class Initialized
+DEBUG - 2025-10-13 20:45:30 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:45:30 --> Router Class Initialized
+INFO - 2025-10-13 20:45:30 --> Output Class Initialized
+INFO - 2025-10-13 20:45:30 --> Security Class Initialized
+DEBUG - 2025-10-13 20:45:30 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:45:30 --> Input Class Initialized
+INFO - 2025-10-13 20:45:30 --> Language Class Initialized
+INFO - 2025-10-13 20:45:30 --> Language Class Initialized
+INFO - 2025-10-13 20:45:30 --> Config Class Initialized
+INFO - 2025-10-13 20:45:30 --> Loader Class Initialized
+INFO - 2025-10-13 20:45:30 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:45:30 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:45:30 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:45:30 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:45:30 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:45:30 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:45:30 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:45:30 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:45:30 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:45:31 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:45:31 --> Email Class Initialized
+INFO - 2025-10-13 20:45:31 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:45:31 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:45:31 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:45:31 --> Pagination Class Initialized
+INFO - 2025-10-13 20:45:33 --> Config Class Initialized
+INFO - 2025-10-13 20:45:33 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:45:33 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:45:33 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:45:33 --> URI Class Initialized
+DEBUG - 2025-10-13 20:45:33 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:45:33 --> Router Class Initialized
+INFO - 2025-10-13 20:45:33 --> Output Class Initialized
+INFO - 2025-10-13 20:45:33 --> Security Class Initialized
+DEBUG - 2025-10-13 20:45:33 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:45:33 --> Input Class Initialized
+INFO - 2025-10-13 20:45:33 --> Language Class Initialized
+INFO - 2025-10-13 20:45:33 --> Language Class Initialized
+INFO - 2025-10-13 20:45:33 --> Config Class Initialized
+INFO - 2025-10-13 20:45:33 --> Loader Class Initialized
+INFO - 2025-10-13 20:45:33 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:45:33 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:45:33 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:45:33 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:45:33 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:45:33 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:45:33 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:45:33 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:45:33 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:45:33 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:45:33 --> Email Class Initialized
+INFO - 2025-10-13 20:45:33 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:45:33 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:45:33 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:45:33 --> Pagination Class Initialized
+INFO - 2025-10-13 20:45:34 --> Config Class Initialized
+INFO - 2025-10-13 20:45:34 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:45:34 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:45:34 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:45:34 --> URI Class Initialized
+INFO - 2025-10-13 20:45:34 --> Router Class Initialized
+INFO - 2025-10-13 20:45:34 --> Output Class Initialized
+INFO - 2025-10-13 20:45:34 --> Security Class Initialized
+DEBUG - 2025-10-13 20:45:34 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:45:34 --> Input Class Initialized
+INFO - 2025-10-13 20:45:34 --> Config Class Initialized
+INFO - 2025-10-13 20:45:35 --> Language Class Initialized
+INFO - 2025-10-13 20:45:35 --> Hooks Class Initialized
+ERROR - 2025-10-13 20:45:35 --> 404 Page Not Found: /index
+DEBUG - 2025-10-13 20:45:35 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:45:35 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:45:35 --> URI Class Initialized
+INFO - 2025-10-13 20:45:35 --> Router Class Initialized
+INFO - 2025-10-13 20:45:35 --> Output Class Initialized
+INFO - 2025-10-13 20:45:35 --> Security Class Initialized
+DEBUG - 2025-10-13 20:45:35 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:45:35 --> Input Class Initialized
+INFO - 2025-10-13 20:45:35 --> Language Class Initialized
+ERROR - 2025-10-13 20:45:35 --> 404 Page Not Found: /index
+INFO - 2025-10-13 20:45:43 --> Config Class Initialized
+INFO - 2025-10-13 20:45:43 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:45:43 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:45:43 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:45:43 --> URI Class Initialized
+DEBUG - 2025-10-13 20:45:43 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:45:43 --> Router Class Initialized
+INFO - 2025-10-13 20:45:43 --> Output Class Initialized
+INFO - 2025-10-13 20:45:43 --> Security Class Initialized
+DEBUG - 2025-10-13 20:45:43 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:45:43 --> Input Class Initialized
+INFO - 2025-10-13 20:45:43 --> Language Class Initialized
+INFO - 2025-10-13 20:45:43 --> Language Class Initialized
+INFO - 2025-10-13 20:45:43 --> Config Class Initialized
+INFO - 2025-10-13 20:45:43 --> Loader Class Initialized
+INFO - 2025-10-13 20:45:43 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:45:43 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:45:43 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:45:43 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:45:43 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:45:43 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:45:43 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:45:43 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:45:43 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:45:43 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:45:43 --> Email Class Initialized
+INFO - 2025-10-13 20:45:43 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:45:43 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:45:43 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:45:43 --> Pagination Class Initialized
+INFO - 2025-10-13 20:45:44 --> Config Class Initialized
+INFO - 2025-10-13 20:45:44 --> Hooks Class Initialized
+DEBUG - 2025-10-13 20:45:44 --> UTF-8 Support Enabled
+INFO - 2025-10-13 20:45:44 --> Utf8 Class Initialized
+INFO - 2025-10-13 20:45:44 --> URI Class Initialized
+DEBUG - 2025-10-13 20:45:44 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 20:45:44 --> Router Class Initialized
+INFO - 2025-10-13 20:45:44 --> Output Class Initialized
+INFO - 2025-10-13 20:45:44 --> Security Class Initialized
+DEBUG - 2025-10-13 20:45:44 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 20:45:44 --> Input Class Initialized
+INFO - 2025-10-13 20:45:44 --> Language Class Initialized
+INFO - 2025-10-13 20:45:44 --> Language Class Initialized
+INFO - 2025-10-13 20:45:44 --> Config Class Initialized
+INFO - 2025-10-13 20:45:44 --> Loader Class Initialized
+INFO - 2025-10-13 20:45:44 --> Helper loaded: url_helper
+INFO - 2025-10-13 20:45:44 --> Helper loaded: file_helper
+INFO - 2025-10-13 20:45:44 --> Helper loaded: html_helper
+INFO - 2025-10-13 20:45:44 --> Helper loaded: form_helper
+INFO - 2025-10-13 20:45:44 --> Helper loaded: text_helper
+INFO - 2025-10-13 20:45:44 --> Helper loaded: lang_helper
+INFO - 2025-10-13 20:45:44 --> Helper loaded: global_helper
+INFO - 2025-10-13 20:45:44 --> Helper loaded: directory_helper
+INFO - 2025-10-13 20:45:44 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 20:45:44 --> Database Driver Class Initialized
+INFO - 2025-10-13 20:45:44 --> Email Class Initialized
+INFO - 2025-10-13 20:45:44 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 20:45:44 --> Form Validation Class Initialized
+INFO - 2025-10-13 20:45:44 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 20:45:44 --> Pagination Class Initialized
+INFO - 2025-10-13 21:03:53 --> Config Class Initialized
+INFO - 2025-10-13 21:03:53 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:03:53 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:03:53 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:03:53 --> URI Class Initialized
+DEBUG - 2025-10-13 21:03:53 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 21:03:53 --> Router Class Initialized
+INFO - 2025-10-13 21:03:53 --> Output Class Initialized
+INFO - 2025-10-13 21:03:53 --> Security Class Initialized
+DEBUG - 2025-10-13 21:03:53 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:03:53 --> Input Class Initialized
+INFO - 2025-10-13 21:03:53 --> Language Class Initialized
+INFO - 2025-10-13 21:03:53 --> Language Class Initialized
+INFO - 2025-10-13 21:03:53 --> Config Class Initialized
+INFO - 2025-10-13 21:03:53 --> Loader Class Initialized
+INFO - 2025-10-13 21:03:53 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:03:53 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:03:53 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:03:53 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:03:53 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:03:53 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:03:53 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:03:53 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:03:53 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:03:53 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:03:53 --> Email Class Initialized
+INFO - 2025-10-13 21:03:54 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:03:54 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:03:54 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:03:54 --> Pagination Class Initialized
+INFO - 2025-10-13 21:03:54 --> Config Class Initialized
+INFO - 2025-10-13 21:03:54 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:03:54 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:03:54 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:03:54 --> URI Class Initialized
+INFO - 2025-10-13 21:03:54 --> Router Class Initialized
+INFO - 2025-10-13 21:03:54 --> Output Class Initialized
+INFO - 2025-10-13 21:03:54 --> Security Class Initialized
+DEBUG - 2025-10-13 21:03:54 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:03:54 --> Input Class Initialized
+INFO - 2025-10-13 21:03:54 --> Language Class Initialized
+ERROR - 2025-10-13 21:03:54 --> 404 Page Not Found: /index
+INFO - 2025-10-13 21:03:54 --> Config Class Initialized
+INFO - 2025-10-13 21:03:55 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:03:55 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:03:55 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:03:55 --> URI Class Initialized
+INFO - 2025-10-13 21:03:55 --> Router Class Initialized
+INFO - 2025-10-13 21:03:55 --> Output Class Initialized
+INFO - 2025-10-13 21:03:55 --> Security Class Initialized
+DEBUG - 2025-10-13 21:03:55 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:03:55 --> Input Class Initialized
+INFO - 2025-10-13 21:03:55 --> Language Class Initialized
+ERROR - 2025-10-13 21:03:55 --> 404 Page Not Found: /index
+INFO - 2025-10-13 21:03:55 --> Config Class Initialized
+INFO - 2025-10-13 21:03:55 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:03:55 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:03:55 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:03:55 --> URI Class Initialized
+DEBUG - 2025-10-13 21:03:55 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 21:03:55 --> Router Class Initialized
+INFO - 2025-10-13 21:03:55 --> Output Class Initialized
+INFO - 2025-10-13 21:03:55 --> Security Class Initialized
+DEBUG - 2025-10-13 21:03:55 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:03:55 --> Input Class Initialized
+INFO - 2025-10-13 21:03:55 --> Language Class Initialized
+INFO - 2025-10-13 21:03:55 --> Language Class Initialized
+INFO - 2025-10-13 21:03:55 --> Config Class Initialized
+INFO - 2025-10-13 21:03:55 --> Loader Class Initialized
+INFO - 2025-10-13 21:03:55 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:03:55 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:03:55 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:03:55 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:03:55 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:03:55 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:03:55 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:03:55 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:03:55 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:03:55 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:03:55 --> Email Class Initialized
+INFO - 2025-10-13 21:03:55 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:03:55 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:03:55 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:03:55 --> Pagination Class Initialized
+INFO - 2025-10-13 21:03:57 --> Config Class Initialized
+INFO - 2025-10-13 21:03:57 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:03:57 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:03:57 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:03:57 --> URI Class Initialized
+DEBUG - 2025-10-13 21:03:57 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 21:03:57 --> Router Class Initialized
+INFO - 2025-10-13 21:03:57 --> Output Class Initialized
+INFO - 2025-10-13 21:03:57 --> Security Class Initialized
+DEBUG - 2025-10-13 21:03:57 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:03:57 --> Input Class Initialized
+INFO - 2025-10-13 21:03:57 --> Language Class Initialized
+INFO - 2025-10-13 21:03:57 --> Language Class Initialized
+INFO - 2025-10-13 21:03:57 --> Config Class Initialized
+INFO - 2025-10-13 21:03:57 --> Loader Class Initialized
+INFO - 2025-10-13 21:03:57 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:03:57 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:03:57 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:03:57 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:03:57 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:03:57 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:03:57 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:03:57 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:03:57 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:03:57 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:03:57 --> Email Class Initialized
+INFO - 2025-10-13 21:03:57 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:03:57 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:03:57 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:03:57 --> Pagination Class Initialized
+INFO - 2025-10-13 21:03:58 --> Config Class Initialized
+INFO - 2025-10-13 21:03:58 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:03:58 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:03:58 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:03:58 --> URI Class Initialized
+INFO - 2025-10-13 21:03:58 --> Config Class Initialized
+INFO - 2025-10-13 21:03:58 --> Hooks Class Initialized
+INFO - 2025-10-13 21:03:58 --> Router Class Initialized
+INFO - 2025-10-13 21:03:58 --> Output Class Initialized
+INFO - 2025-10-13 21:03:58 --> Security Class Initialized
+DEBUG - 2025-10-13 21:03:58 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:03:58 --> Input Class Initialized
+INFO - 2025-10-13 21:03:58 --> Language Class Initialized
+ERROR - 2025-10-13 21:03:58 --> 404 Page Not Found: /index
+DEBUG - 2025-10-13 21:03:58 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:03:58 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:03:58 --> URI Class Initialized
+INFO - 2025-10-13 21:03:58 --> Router Class Initialized
+INFO - 2025-10-13 21:03:58 --> Output Class Initialized
+INFO - 2025-10-13 21:03:58 --> Security Class Initialized
+DEBUG - 2025-10-13 21:03:58 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:03:58 --> Input Class Initialized
+INFO - 2025-10-13 21:03:58 --> Language Class Initialized
+ERROR - 2025-10-13 21:03:58 --> 404 Page Not Found: /index
+INFO - 2025-10-13 21:04:13 --> Config Class Initialized
+INFO - 2025-10-13 21:04:13 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:04:13 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:04:13 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:04:14 --> URI Class Initialized
+DEBUG - 2025-10-13 21:04:14 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 21:04:14 --> Router Class Initialized
+INFO - 2025-10-13 21:04:14 --> Output Class Initialized
+INFO - 2025-10-13 21:04:14 --> Security Class Initialized
+DEBUG - 2025-10-13 21:04:14 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:04:14 --> Input Class Initialized
+INFO - 2025-10-13 21:04:14 --> Language Class Initialized
+INFO - 2025-10-13 21:04:14 --> Language Class Initialized
+INFO - 2025-10-13 21:04:14 --> Config Class Initialized
+INFO - 2025-10-13 21:04:14 --> Loader Class Initialized
+INFO - 2025-10-13 21:04:14 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:04:14 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:04:14 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:04:14 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:04:14 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:04:14 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:04:14 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:04:14 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:04:14 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:04:14 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:04:14 --> Email Class Initialized
+INFO - 2025-10-13 21:04:14 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:04:15 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:04:15 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:04:15 --> Pagination Class Initialized
+INFO - 2025-10-13 21:04:21 --> Config Class Initialized
+INFO - 2025-10-13 21:04:21 --> Hooks Class Initialized
+INFO - 2025-10-13 21:04:21 --> Config Class Initialized
+INFO - 2025-10-13 21:04:21 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:04:21 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:04:21 --> Utf8 Class Initialized
+DEBUG - 2025-10-13 21:04:21 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:04:21 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:04:21 --> URI Class Initialized
+INFO - 2025-10-13 21:04:21 --> URI Class Initialized
+INFO - 2025-10-13 21:04:21 --> Router Class Initialized
+INFO - 2025-10-13 21:04:21 --> Output Class Initialized
+INFO - 2025-10-13 21:04:21 --> Security Class Initialized
+DEBUG - 2025-10-13 21:04:22 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:04:22 --> Input Class Initialized
+INFO - 2025-10-13 21:04:22 --> Language Class Initialized
+ERROR - 2025-10-13 21:04:22 --> 404 Page Not Found: /index
+INFO - 2025-10-13 21:04:22 --> Router Class Initialized
+INFO - 2025-10-13 21:04:22 --> Output Class Initialized
+INFO - 2025-10-13 21:04:22 --> Security Class Initialized
+DEBUG - 2025-10-13 21:04:22 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:04:22 --> Input Class Initialized
+INFO - 2025-10-13 21:04:22 --> Language Class Initialized
+ERROR - 2025-10-13 21:04:22 --> 404 Page Not Found: /index
+INFO - 2025-10-13 21:18:45 --> Config Class Initialized
+INFO - 2025-10-13 21:18:45 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:18:45 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:18:45 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:18:45 --> URI Class Initialized
+DEBUG - 2025-10-13 21:18:45 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 21:18:45 --> Router Class Initialized
+INFO - 2025-10-13 21:18:45 --> Output Class Initialized
+INFO - 2025-10-13 21:18:45 --> Security Class Initialized
+DEBUG - 2025-10-13 21:18:45 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:18:45 --> Input Class Initialized
+INFO - 2025-10-13 21:18:45 --> Language Class Initialized
+INFO - 2025-10-13 21:18:45 --> Language Class Initialized
+INFO - 2025-10-13 21:18:45 --> Config Class Initialized
+INFO - 2025-10-13 21:18:45 --> Loader Class Initialized
+INFO - 2025-10-13 21:18:45 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:18:45 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:18:45 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:18:45 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:18:45 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:18:45 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:18:45 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:18:45 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:18:45 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:18:45 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:18:45 --> Email Class Initialized
+INFO - 2025-10-13 21:18:45 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:18:45 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:18:45 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:18:45 --> Pagination Class Initialized
+INFO - 2025-10-13 21:18:47 --> Config Class Initialized
+INFO - 2025-10-13 21:18:47 --> Hooks Class Initialized
+INFO - 2025-10-13 21:18:47 --> Config Class Initialized
+INFO - 2025-10-13 21:18:47 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:18:47 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:18:47 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:18:47 --> URI Class Initialized
+DEBUG - 2025-10-13 21:18:47 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:18:47 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:18:47 --> URI Class Initialized
+INFO - 2025-10-13 21:18:47 --> Router Class Initialized
+INFO - 2025-10-13 21:18:47 --> Output Class Initialized
+INFO - 2025-10-13 21:18:47 --> Router Class Initialized
+INFO - 2025-10-13 21:18:47 --> Output Class Initialized
+INFO - 2025-10-13 21:18:47 --> Security Class Initialized
+DEBUG - 2025-10-13 21:18:47 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:18:47 --> Input Class Initialized
+INFO - 2025-10-13 21:18:47 --> Security Class Initialized
+INFO - 2025-10-13 21:18:47 --> Language Class Initialized
+ERROR - 2025-10-13 21:18:47 --> 404 Page Not Found: /index
+DEBUG - 2025-10-13 21:18:47 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:18:47 --> Input Class Initialized
+INFO - 2025-10-13 21:18:47 --> Language Class Initialized
+ERROR - 2025-10-13 21:18:47 --> 404 Page Not Found: /index
+INFO - 2025-10-13 21:18:56 --> Config Class Initialized
+INFO - 2025-10-13 21:18:56 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:18:56 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:18:56 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:18:56 --> URI Class Initialized
+DEBUG - 2025-10-13 21:18:56 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 21:18:56 --> Router Class Initialized
+INFO - 2025-10-13 21:18:56 --> Output Class Initialized
+INFO - 2025-10-13 21:18:56 --> Security Class Initialized
+DEBUG - 2025-10-13 21:18:56 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:18:56 --> Input Class Initialized
+INFO - 2025-10-13 21:18:56 --> Language Class Initialized
+INFO - 2025-10-13 21:18:56 --> Language Class Initialized
+INFO - 2025-10-13 21:18:56 --> Config Class Initialized
+INFO - 2025-10-13 21:18:56 --> Loader Class Initialized
+INFO - 2025-10-13 21:18:56 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:18:56 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:18:56 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:18:56 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:18:56 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:18:56 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:18:56 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:18:56 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:18:56 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:18:56 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:18:56 --> Email Class Initialized
+INFO - 2025-10-13 21:18:56 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:18:56 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:18:56 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:18:56 --> Pagination Class Initialized
+INFO - 2025-10-13 21:18:58 --> Config Class Initialized
+INFO - 2025-10-13 21:18:58 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:18:58 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:18:58 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:18:58 --> URI Class Initialized
+INFO - 2025-10-13 21:18:58 --> Router Class Initialized
+INFO - 2025-10-13 21:18:58 --> Config Class Initialized
+INFO - 2025-10-13 21:18:58 --> Output Class Initialized
+INFO - 2025-10-13 21:18:58 --> Hooks Class Initialized
+INFO - 2025-10-13 21:18:58 --> Security Class Initialized
+DEBUG - 2025-10-13 21:18:58 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:18:58 --> Input Class Initialized
+INFO - 2025-10-13 21:18:58 --> Language Class Initialized
+ERROR - 2025-10-13 21:18:58 --> 404 Page Not Found: /index
+DEBUG - 2025-10-13 21:18:58 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:18:58 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:18:58 --> URI Class Initialized
+INFO - 2025-10-13 21:18:58 --> Router Class Initialized
+INFO - 2025-10-13 21:18:58 --> Output Class Initialized
+INFO - 2025-10-13 21:18:58 --> Security Class Initialized
+DEBUG - 2025-10-13 21:18:58 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:18:58 --> Input Class Initialized
+INFO - 2025-10-13 21:18:58 --> Language Class Initialized
+ERROR - 2025-10-13 21:18:58 --> 404 Page Not Found: /index
+INFO - 2025-10-13 21:19:09 --> Config Class Initialized
+INFO - 2025-10-13 21:19:09 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:19:09 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:19:09 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:19:09 --> URI Class Initialized
+DEBUG - 2025-10-13 21:19:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 21:19:09 --> Router Class Initialized
+INFO - 2025-10-13 21:19:09 --> Output Class Initialized
+INFO - 2025-10-13 21:19:09 --> Security Class Initialized
+DEBUG - 2025-10-13 21:19:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:19:09 --> Input Class Initialized
+INFO - 2025-10-13 21:19:09 --> Language Class Initialized
+INFO - 2025-10-13 21:19:09 --> Language Class Initialized
+INFO - 2025-10-13 21:19:09 --> Config Class Initialized
+INFO - 2025-10-13 21:19:09 --> Loader Class Initialized
+INFO - 2025-10-13 21:19:09 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:19:09 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:19:09 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:19:09 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:19:09 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:19:09 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:19:09 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:19:09 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:19:09 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:19:09 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:19:09 --> Email Class Initialized
+INFO - 2025-10-13 21:19:09 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:19:09 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:19:09 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:19:09 --> Pagination Class Initialized
+INFO - 2025-10-13 21:19:10 --> Config Class Initialized
+INFO - 2025-10-13 21:19:10 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:19:10 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:19:10 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:19:10 --> URI Class Initialized
+DEBUG - 2025-10-13 21:19:10 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 21:19:10 --> Router Class Initialized
+INFO - 2025-10-13 21:19:10 --> Output Class Initialized
+INFO - 2025-10-13 21:19:10 --> Security Class Initialized
+DEBUG - 2025-10-13 21:19:10 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:19:10 --> Input Class Initialized
+INFO - 2025-10-13 21:19:10 --> Language Class Initialized
+INFO - 2025-10-13 21:19:10 --> Language Class Initialized
+INFO - 2025-10-13 21:19:10 --> Config Class Initialized
+INFO - 2025-10-13 21:19:10 --> Loader Class Initialized
+INFO - 2025-10-13 21:19:10 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:19:10 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:19:10 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:19:10 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:19:10 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:19:10 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:19:10 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:19:10 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:19:10 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:19:10 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:19:10 --> Email Class Initialized
+INFO - 2025-10-13 21:19:10 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:19:10 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:19:10 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:19:10 --> Pagination Class Initialized
+INFO - 2025-10-13 21:20:01 --> Config Class Initialized
+INFO - 2025-10-13 21:20:01 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:20:01 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:20:01 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:20:01 --> URI Class Initialized
+DEBUG - 2025-10-13 21:20:01 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 21:20:01 --> Router Class Initialized
+INFO - 2025-10-13 21:20:01 --> Output Class Initialized
+INFO - 2025-10-13 21:20:01 --> Security Class Initialized
+DEBUG - 2025-10-13 21:20:01 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:20:01 --> Input Class Initialized
+INFO - 2025-10-13 21:20:01 --> Language Class Initialized
+INFO - 2025-10-13 21:20:01 --> Language Class Initialized
+INFO - 2025-10-13 21:20:01 --> Config Class Initialized
+INFO - 2025-10-13 21:20:01 --> Loader Class Initialized
+INFO - 2025-10-13 21:20:01 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:20:01 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:20:01 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:20:01 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:20:01 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:20:01 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:20:01 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:20:01 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:20:01 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:20:01 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:20:01 --> Email Class Initialized
+INFO - 2025-10-13 21:20:01 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:20:01 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:20:01 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:20:01 --> Pagination Class Initialized
+INFO - 2025-10-13 21:20:04 --> Config Class Initialized
+INFO - 2025-10-13 21:20:04 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:20:04 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:20:04 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:20:04 --> URI Class Initialized
+DEBUG - 2025-10-13 21:20:04 --> File loaded: C:\xampp\htdocs\everb\application\modules/invoice/config/routes.php
+INFO - 2025-10-13 21:20:04 --> Router Class Initialized
+INFO - 2025-10-13 21:20:04 --> Output Class Initialized
+INFO - 2025-10-13 21:20:04 --> Security Class Initialized
+DEBUG - 2025-10-13 21:20:04 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:20:04 --> Input Class Initialized
+INFO - 2025-10-13 21:20:04 --> Language Class Initialized
+INFO - 2025-10-13 21:20:04 --> Language Class Initialized
+INFO - 2025-10-13 21:20:04 --> Config Class Initialized
+INFO - 2025-10-13 21:20:04 --> Loader Class Initialized
+INFO - 2025-10-13 21:20:04 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:20:04 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:20:04 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:20:04 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:20:04 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:20:04 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:20:04 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:20:04 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:20:04 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:20:04 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:20:05 --> Email Class Initialized
+INFO - 2025-10-13 21:20:07 --> Config Class Initialized
+INFO - 2025-10-13 21:20:07 --> Config Class Initialized
+INFO - 2025-10-13 21:20:07 --> Hooks Class Initialized
+INFO - 2025-10-13 21:20:07 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:20:07 --> UTF-8 Support Enabled
+DEBUG - 2025-10-13 21:20:07 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:20:07 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:20:07 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:20:07 --> URI Class Initialized
+INFO - 2025-10-13 21:20:07 --> URI Class Initialized
+INFO - 2025-10-13 21:20:07 --> Router Class Initialized
+INFO - 2025-10-13 21:20:07 --> Output Class Initialized
+INFO - 2025-10-13 21:20:07 --> Security Class Initialized
+DEBUG - 2025-10-13 21:20:07 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:20:07 --> Input Class Initialized
+INFO - 2025-10-13 21:20:07 --> Language Class Initialized
+ERROR - 2025-10-13 21:20:07 --> 404 Page Not Found: /index
+INFO - 2025-10-13 21:20:07 --> Router Class Initialized
+INFO - 2025-10-13 21:20:07 --> Output Class Initialized
+INFO - 2025-10-13 21:20:07 --> Security Class Initialized
+DEBUG - 2025-10-13 21:20:07 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:20:07 --> Input Class Initialized
+INFO - 2025-10-13 21:20:07 --> Language Class Initialized
+ERROR - 2025-10-13 21:20:07 --> 404 Page Not Found: /index
+INFO - 2025-10-13 21:20:29 --> Config Class Initialized
+INFO - 2025-10-13 21:20:29 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:20:29 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:20:29 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:20:29 --> URI Class Initialized
+DEBUG - 2025-10-13 21:20:29 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 21:20:29 --> Router Class Initialized
+INFO - 2025-10-13 21:20:29 --> Output Class Initialized
+INFO - 2025-10-13 21:20:29 --> Security Class Initialized
+DEBUG - 2025-10-13 21:20:29 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:20:29 --> Input Class Initialized
+INFO - 2025-10-13 21:20:29 --> Language Class Initialized
+INFO - 2025-10-13 21:20:29 --> Language Class Initialized
+INFO - 2025-10-13 21:20:29 --> Config Class Initialized
+INFO - 2025-10-13 21:20:29 --> Loader Class Initialized
+INFO - 2025-10-13 21:20:29 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:20:29 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:20:29 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:20:29 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:20:29 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:20:29 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:20:30 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:20:30 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:20:30 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:20:30 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:20:30 --> Email Class Initialized
+INFO - 2025-10-13 21:20:30 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:20:30 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:20:30 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:20:30 --> Pagination Class Initialized
+INFO - 2025-10-13 21:20:35 --> Config Class Initialized
+INFO - 2025-10-13 21:20:35 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:20:35 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:20:35 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:20:35 --> URI Class Initialized
+DEBUG - 2025-10-13 21:20:35 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 21:20:35 --> Router Class Initialized
+INFO - 2025-10-13 21:20:35 --> Output Class Initialized
+INFO - 2025-10-13 21:20:35 --> Security Class Initialized
+DEBUG - 2025-10-13 21:20:35 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:20:35 --> Input Class Initialized
+INFO - 2025-10-13 21:20:35 --> Language Class Initialized
+INFO - 2025-10-13 21:20:35 --> Language Class Initialized
+INFO - 2025-10-13 21:20:35 --> Config Class Initialized
+INFO - 2025-10-13 21:20:35 --> Loader Class Initialized
+INFO - 2025-10-13 21:20:35 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:20:35 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:20:35 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:20:35 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:20:35 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:20:35 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:20:35 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:20:35 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:20:35 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:20:35 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:20:35 --> Email Class Initialized
+INFO - 2025-10-13 21:20:35 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:20:35 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:20:35 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:20:35 --> Pagination Class Initialized
+INFO - 2025-10-13 21:20:36 --> Config Class Initialized
+INFO - 2025-10-13 21:20:36 --> Hooks Class Initialized
+INFO - 2025-10-13 21:20:36 --> Config Class Initialized
+INFO - 2025-10-13 21:20:36 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:20:36 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:20:36 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:20:36 --> URI Class Initialized
+INFO - 2025-10-13 21:20:36 --> Router Class Initialized
+INFO - 2025-10-13 21:20:37 --> Output Class Initialized
+INFO - 2025-10-13 21:20:37 --> Security Class Initialized
+DEBUG - 2025-10-13 21:20:37 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:20:37 --> Input Class Initialized
+INFO - 2025-10-13 21:20:37 --> Language Class Initialized
+ERROR - 2025-10-13 21:20:37 --> 404 Page Not Found: /index
+DEBUG - 2025-10-13 21:20:37 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:20:37 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:20:37 --> URI Class Initialized
+INFO - 2025-10-13 21:20:37 --> Router Class Initialized
+INFO - 2025-10-13 21:20:37 --> Output Class Initialized
+INFO - 2025-10-13 21:20:37 --> Security Class Initialized
+DEBUG - 2025-10-13 21:20:37 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:20:37 --> Input Class Initialized
+INFO - 2025-10-13 21:20:37 --> Language Class Initialized
+ERROR - 2025-10-13 21:20:37 --> 404 Page Not Found: /index
+INFO - 2025-10-13 21:26:34 --> Config Class Initialized
+INFO - 2025-10-13 21:26:34 --> Hooks Class Initialized
+DEBUG - 2025-10-13 21:26:34 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:26:34 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:26:34 --> URI Class Initialized
+DEBUG - 2025-10-13 21:26:34 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-13 21:26:34 --> Router Class Initialized
+INFO - 2025-10-13 21:26:34 --> Output Class Initialized
+INFO - 2025-10-13 21:26:34 --> Security Class Initialized
+DEBUG - 2025-10-13 21:26:34 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:26:34 --> Input Class Initialized
+INFO - 2025-10-13 21:26:34 --> Language Class Initialized
+INFO - 2025-10-13 21:26:34 --> Language Class Initialized
+INFO - 2025-10-13 21:26:34 --> Config Class Initialized
+INFO - 2025-10-13 21:26:34 --> Loader Class Initialized
+INFO - 2025-10-13 21:26:34 --> Helper loaded: url_helper
+INFO - 2025-10-13 21:26:34 --> Helper loaded: file_helper
+INFO - 2025-10-13 21:26:34 --> Helper loaded: html_helper
+INFO - 2025-10-13 21:26:34 --> Helper loaded: form_helper
+INFO - 2025-10-13 21:26:34 --> Helper loaded: text_helper
+INFO - 2025-10-13 21:26:34 --> Helper loaded: lang_helper
+INFO - 2025-10-13 21:26:34 --> Helper loaded: global_helper
+INFO - 2025-10-13 21:26:34 --> Helper loaded: directory_helper
+INFO - 2025-10-13 21:26:34 --> Helper loaded: dompdf_helper
+INFO - 2025-10-13 21:26:34 --> Database Driver Class Initialized
+INFO - 2025-10-13 21:26:34 --> Email Class Initialized
+INFO - 2025-10-13 21:26:35 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-13 21:26:35 --> Form Validation Class Initialized
+INFO - 2025-10-13 21:26:35 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-13 21:26:35 --> Pagination Class Initialized
+INFO - 2025-10-13 21:26:36 --> Config Class Initialized
+INFO - 2025-10-13 21:26:36 --> Hooks Class Initialized
+INFO - 2025-10-13 21:26:36 --> Config Class Initialized
+DEBUG - 2025-10-13 21:26:36 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:26:36 --> Hooks Class Initialized
+INFO - 2025-10-13 21:26:36 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:26:36 --> URI Class Initialized
+DEBUG - 2025-10-13 21:26:36 --> UTF-8 Support Enabled
+INFO - 2025-10-13 21:26:36 --> Utf8 Class Initialized
+INFO - 2025-10-13 21:26:36 --> URI Class Initialized
+INFO - 2025-10-13 21:26:36 --> Router Class Initialized
+INFO - 2025-10-13 21:26:36 --> Output Class Initialized
+INFO - 2025-10-13 21:26:36 --> Security Class Initialized
+DEBUG - 2025-10-13 21:26:36 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:26:36 --> Input Class Initialized
+INFO - 2025-10-13 21:26:36 --> Language Class Initialized
+ERROR - 2025-10-13 21:26:36 --> 404 Page Not Found: /index
+INFO - 2025-10-13 21:26:36 --> Router Class Initialized
+INFO - 2025-10-13 21:26:36 --> Output Class Initialized
+INFO - 2025-10-13 21:26:36 --> Security Class Initialized
+DEBUG - 2025-10-13 21:26:36 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-13 21:26:36 --> Input Class Initialized
+INFO - 2025-10-13 21:26:36 --> Language Class Initialized
+ERROR - 2025-10-13 21:26:36 --> 404 Page Not Found: /index

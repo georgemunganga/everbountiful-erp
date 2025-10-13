@@ -244,23 +244,50 @@
                   </div>
                   <div class="col-sm-8">
                     <h4>Account Statement</h4>
+                    <?php
+                      $statementData = (isset($statement) && is_array($statement)) ? $statement : array('summary' => array(), 'lines' => array());
+                      $statementSummary = isset($statementData['summary']) && is_array($statementData['summary']) ? $statementData['summary'] : array();
+                      $statementLines = isset($statementData['lines']) && is_array($statementData['lines']) ? $statementData['lines'] : array();
+                    ?>
+                    <?php if (!empty($statementSummary)) { ?>
+                      <table class="table table-condensed table-bordered" style="margin-bottom:15px;">
+                        <tr>
+                          <th>Beginning Balance</th>
+                          <td class="text-right"><?php echo $formatCurrency(isset($statementSummary['beginning']) ? $statementSummary['beginning'] : 0); ?></td>
+                        </tr>
+                        <tr>
+                          <th>Total Invoiced</th>
+                          <td class="text-right"><?php echo $formatCurrency(isset($statementSummary['invoiced']) ? $statementSummary['invoiced'] : 0); ?></td>
+                        </tr>
+                        <tr>
+                          <th>Payments Received</th>
+                          <td class="text-right"><?php echo $formatCurrency(isset($statementSummary['paid']) ? $statementSummary['paid'] : 0); ?></td>
+                        </tr>
+                        <tr>
+                          <th>Balance Due</th>
+                          <td class="text-right"><?php echo $formatCurrency(isset($statementSummary['balance_due']) ? $statementSummary['balance_due'] : 0); ?></td>
+                        </tr>
+                      </table>
+                    <?php } ?>
                     <table class="table table-bordered table-striped">
                       <thead><tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th></tr></thead>
                       <tbody>
-                        <?php
-                          $runningBalance = 0;
-                          if (!empty($statement)) {
-                            foreach ($statement as $entry) {
-                              $runningBalance += $entry['debit'] - $entry['credit']; ?>
-                              <tr>
-                                <td><?php echo date('d-m-Y', strtotime($entry['date'])); ?></td>
-                                <td><?php echo html_escape($entry['description']); ?></td>
-                                <td class="text-right"><?php echo $entry['debit'] ? $formatCurrency($entry['debit'], false) : ''; ?></td>
-                                <td class="text-right"><?php echo $entry['credit'] ? $formatCurrency($entry['credit'], false) : ''; ?></td>
-                                <td class="text-right"><?php echo $formatCurrency($runningBalance); ?></td>
-                              </tr>
-                            <?php }
-                          } else { ?>
+                        <?php if (!empty($statementLines)) {
+                          foreach ($statementLines as $entry) {
+                            $entryDate = !empty($entry['date']) ? date('d-m-Y', strtotime($entry['date'])) : '';
+                            $debitAmount = isset($entry['debit']) ? (float)$entry['debit'] : 0.0;
+                            $creditAmount = isset($entry['credit']) ? (float)$entry['credit'] : 0.0;
+                            $balanceAmount = isset($entry['balance']) ? (float)$entry['balance'] : ($debitAmount - $creditAmount);
+                            ?>
+                            <tr>
+                              <td><?php echo html_escape($entryDate); ?></td>
+                              <td><?php echo html_escape($entry['description'] ?? ''); ?></td>
+                              <td class="text-right"><?php echo $debitAmount > 0 ? $formatCurrency($debitAmount, false) : ''; ?></td>
+                              <td class="text-right"><?php echo $creditAmount > 0 ? $formatCurrency($creditAmount, false) : ''; ?></td>
+                              <td class="text-right"><?php echo $formatCurrency($balanceAmount); ?></td>
+                            </tr>
+                          <?php }
+                        } else { ?>
                             <tr><td colspan="5" class="text-center">No activity for selected period.</td></tr>
                           <?php } ?>
                       </tbody>

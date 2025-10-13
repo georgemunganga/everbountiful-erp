@@ -61,6 +61,11 @@
                                 </abbr>
                                 <?php echo $invoice_no?>
                             </div>
+                            <?php if (!empty($status_label)) { ?>
+                            <div class="m-b-10">
+                                <span class="<?php echo html_escape($status_class); ?>"><?php echo html_escape($status_label); ?></span>
+                            </div>
+                            <?php } ?>
                             <div class="m-b-15">
                                 <abbr class="font-bold"><?php echo display('billing_date') ?></abbr>
                                 <?php echo date("d-M-Y",strtotime($final_date));?>

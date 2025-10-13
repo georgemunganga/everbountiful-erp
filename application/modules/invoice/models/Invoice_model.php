@@ -429,11 +429,13 @@ class Invoice_model extends CI_Model
         $currency_details = $this->db->select('*')->from('web_setting')->get()->result_array();
         $quantity = $this->input->post('product_quantity', TRUE);
         $invoice_no_generated = $this->input->post('invoic_no');
-        $changeamount = $this->input->post('change', TRUE);
-        $multipayamount = $this->input->post('pamount_by_method', TRUE);
-        // $multipaytype        = $this->input->post('multipaytype', TRUE);
-        $multipaytype = [0];
-        $paidamount = $this->input->post('paid_amount', TRUE);
+        $multipayamount_input = $this->input->post('pamount_by_method', TRUE);
+        $multipaytype_input = $this->input->post('multipaytype', TRUE);
+        $grand_total = (float)$this->input->post('grand_total_price', TRUE);
+        $posted_paid_amount = (float)$this->input->post('paid_amount', TRUE);
+        $paidamount = max(0, min($grand_total, $posted_paid_amount));
+        $due_amount = max(0, $grand_total - $paidamount);
+        $changeamount = max(0, $posted_paid_amount - $grand_total);
         $draft_invoice = $this->input->post('draft_list', TRUE);
         if ($draft_invoice) {
             $invoice_no = $draft_invoice;
@@ -447,37 +449,48 @@ class Invoice_model extends CI_Model
         $is_cash_sale = $this->input->post('cash_sale') ? true : false;
 
         // Determine payment type
-        $cash_amount = $this->input->post('cash_amount', true);
-        $card_amount = $this->input->post('card_amount', true);
+        $cash_amount = (float)$this->input->post('cash_amount', true);
+        $card_amount = (float)$this->input->post('card_amount', true);
         $payment_type = '';
-        $due_amount = 0;
         $status = 1;
+        $is_draft = 'no';
+        $epsilon = 0.01;
+        $multipaytype = [];
+        $multipayamount = [];
         if ($sale_type == 'cash') {
             $payment_type = 1;
-            $paidamount = $this->input->post('grand_total_price', TRUE);
-            $due_amount = 0;
-            $is_draft = 'no';
+            $status = ($due_amount <= $epsilon) ? 1 : 0;
         } elseif ($sale_type == 'card') {
             $payment_type = 2;
-            $paidamount = $this->input->post('grand_total_price', TRUE);
-            $due_amount = 0;
-            $is_draft = 'no';
+            $status = ($due_amount <= $epsilon) ? 1 : 0;
         } elseif ($sale_type == 'credit_sale') {
             $payment_type = 3;
             $paidamount = 0;
-            $due_amount = $this->input->post('grand_total_price', TRUE);
-            $is_draft = 'no';
+            $due_amount = $grand_total;
+            $status = 0;
+            $multipaytype = [0];
+            $multipayamount = [$due_amount];
         } elseif ($sale_type == 'multi-pay') {
-            $paidamount = $cash_amount + $card_amount;
-            $is_draft = 'no';
             $payment_type = 4;
-            $due_amount = 0;
-        } elseif ($sale_type == 'draft') {
-            $is_draft = 'yes';
             $paidamount = 0;
+            if (is_array($multipaytype_input) && is_array($multipayamount_input)) {
+                foreach ($multipaytype_input as $idx => $typeVal) {
+                    $amountVal = isset($multipayamount_input[$idx]) ? (float)$multipayamount_input[$idx] : 0;
+                    if ($amountVal > 0 && $typeVal !== '') {
+                        $multipaytype[] = $typeVal;
+                        $multipayamount[] = $amountVal;
+                        $paidamount += $amountVal;
+                    }
+                }
+            }
+            $due_amount = max(0, $grand_total - $paidamount);
+            $status = ($due_amount <= $epsilon) ? 1 : 0;
+        } elseif ($sale_type == 'draft') {
             $payment_type = 5;
+            $paidamount = 0;
             $due_amount = 0;
             $status = 0;
+            $is_draft = 'yes';
         }
 
         $bank_id = $this->input->post('bank_id', TRUE);
@@ -486,6 +499,14 @@ class Invoice_model extends CI_Model
             $bankcoaid = $this->db->select('HeadCode')->from('acc_coa')->where('HeadName', $bankname)->get()->row()->HeadCode;
         } else {
             $bankcoaid = '';
+        }
+        if (($sale_type == 'cash' || $sale_type == 'card') && $paidamount > 0 && !empty($bankcoaid)) {
+            $multipaytype = [$bankcoaid];
+            $multipayamount = [$paidamount];
+        }
+
+        if ($due_amount > $epsilon) {
+            $status = 0;
         }
         $available_quantity = $this->input->post('available_quantity', TRUE);
         $result = array();
@@ -522,7 +543,7 @@ class Invoice_model extends CI_Model
         if ($tax_v > 0) {
             $this->db->insert('tax_collection', $taxdata);
         }
-        if ($multipaytype[0] == 0) {
+        if (!empty($multipaytype) && (int)$multipaytype[0] === 0) {
             $is_credit = 1;
         } else {
             $is_credit = '';
@@ -551,7 +572,7 @@ class Invoice_model extends CI_Model
             'invoice_discount' => $this->input->post('invoice_discount', TRUE),
             'total_discount' => $this->input->post('total_discount', TRUE),
             'total_vat_amnt' => $this->input->post('total_vat_amnt', TRUE),
-            'paid_amount' => $this->input->post('grand_total_price', TRUE),
+            'paid_amount' => $paidamount,
             'due_amount' => $due_amount,
             'prevous_due' => $this->input->post('previous', TRUE),
             'shipping_cost' => $this->input->post('shipping_cost', TRUE),
@@ -607,11 +628,21 @@ class Invoice_model extends CI_Model
         $Comment = "Sales Voucher for customer";
         $reVID = $predefine_account->salesCode;
 
-        if ($multipaytype && $multipayamount) {
+        if (empty($multipaytype) && $paidamount > 0) {
+            if (!empty($predefine_account->cashCode)) {
+                $multipaytype = [$predefine_account->cashCode];
+                $multipayamount = [$paidamount];
+            } else {
+                $multipaytype = [0];
+                $multipayamount = [$paidamount];
+            }
+        }
 
-            if ($multipaytype[0] == 0) {
+        if (!empty($multipaytype) && !empty($multipayamount)) {
 
-                $amount_pay = $datainv['total_amount'];
+            if ((int)$multipaytype[0] === 0) {
+
+                $amount_pay = $datainv['due_amount'];
                 $amnt_type = 'Debit';
                 $COAID = $predefine_account->customerCode;
                 $subcode = $this->db->select('*')->from('acc_subcode')->where('referenceNo', $customer_id)->where('subTypeId', 3)->get()->row();
@@ -633,12 +664,13 @@ class Invoice_model extends CI_Model
                     $this->insert_sale_creditvoucher($is_credit, $invoice_no, $COAID, $amnt_type, $amount_pay, $Narration, $Comment, $reVID);
                 }
 
-                if ($this->input->post('due_amount', TRUE) > 0) {
+                if ($due_amount > 0) {
 
                     $amount_pay2 = $datainv['due_amount'];
                     $amnt_type2 = 'Debit';
                     $COAID2 = $predefine_account->customerCode;
-                    $subcode2 = $this->db->select('*')->from('acc_subcode')->where('referenceNo', $customer_id)->where('subTypeId', 3)->get()->row()->id;
+                    $subcodeRow = $this->db->select('*')->from('acc_subcode')->where('referenceNo', $customer_id)->where('subTypeId', 3)->get()->row();
+                    $subcode2 = $subcodeRow ? $subcodeRow->id : null;
                     $this->insert_sale_creditvoucher(1, $invoice_no, $COAID2, $amnt_type2, $amount_pay2, $Narration, $Comment, $reVID, $subcode2);
                 }
             }
@@ -703,7 +735,7 @@ class Invoice_model extends CI_Model
                 'vat_amnt_per' => $vatper,
                 'tax' => $tax,
                 'paid_amount' => $paidamount,
-                'due_amount' => $this->input->post('due_amount', TRUE),
+                'due_amount' => $due_amount,
                 'supplier_rate' => $supplier_rate,
                 'total_price' => $total_price,
                 'status' => $status

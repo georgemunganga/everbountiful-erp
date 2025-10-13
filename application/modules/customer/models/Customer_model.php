@@ -311,17 +311,25 @@ class Customer_model extends CI_Model
   // Statement summary and lines
   public function get_customer_statement($customer_id, $from_date, $to_date)
   {
+    $from_date = date('Y-m-d', strtotime($from_date));
+    $to_date   = date('Y-m-d', strtotime($to_date));
+
     $head = $this->db->select('HeadCode')->from('acc_coa')->where('customer_id', $customer_id)->get()->row();
-    if (!$head) return ['summary' => [], 'lines' => []];
+    $headCode = $head ? $head->HeadCode : null;
 
     // Beginning balance: sum(debit-credit) before from_date
-    $begin_q = $this->db->select('IFNULL(SUM(Debit),0) AS deb, IFNULL(SUM(Credit),0) AS cred')
-      ->from('acc_transaction')
-      ->where('COAID', $head->HeadCode)
-      ->where('IsAppove', 1)
-      ->where('DATE(VDate) <', $from_date)
-      ->get()->row();
-    $beginning = (float)$begin_q->deb - (float)$begin_q->cred;
+    if ($headCode) {
+      $begin_q = $this->db->select('IFNULL(SUM(Debit),0) AS deb, IFNULL(SUM(Credit),0) AS cred')
+        ->from('acc_transaction')
+        ->where('COAID', $headCode)
+        ->where('IsAppove', 1)
+        ->where('DATE(VDate) <', $from_date)
+        ->get()
+        ->row();
+      $beginning = (float)$begin_q->deb - (float)$begin_q->cred;
+    } else {
+      $beginning = 0.0;
+    }
 
     // Invoiced amount within range (sum invoice totals)
     $inv_q = $this->db->select('IFNULL(SUM(total_amount),0) AS total')
@@ -329,59 +337,92 @@ class Customer_model extends CI_Model
       ->where('customer_id', $customer_id)
       ->where('DATE(date) >=', $from_date)
       ->where('DATE(date) <=', $to_date)
-      ->get()->row();
+      ->get()
+      ->row();
     $invoiced = (float)$inv_q->total;
 
-    // Amount paid within range from transactions
-    $pay_q = $this->db->select('IFNULL(SUM(Credit),0) AS paid')
-      ->from('acc_transaction')
-      ->where('COAID', $head->HeadCode)
-      ->where('IsAppove', 1)
-      ->where('DATE(VDate) >=', $from_date)
-      ->where('DATE(VDate) <=', $to_date)
-      ->get()->row();
-    $paid = (float)$pay_q->paid;
-
-    $balance_due = $beginning + $invoiced - $paid;
-
-    // Lines: beginning, invoices, payments
-    $lines = [];
-    $lines[] = [
-      'date' => $from_date,
-      'details' => 'Beginning Balance',
-      'amount' => number_format($beginning, 2),
-      'payments' => '',
-      'balance' => number_format($beginning, 2)
-    ];
+    // Amount paid entries (ledger transactions if available)
+    $entries = [];
     $invoices = $this->get_customer_invoices($customer_id, $from_date, $to_date);
-    $running = $beginning;
     foreach ($invoices as $inv) {
-      $running += (float)$inv['total_amount'];
-      $lines[] = [
-        'date' => date('d-m-Y', strtotime($inv['date'])),
-        'details' => sprintf('Invoice %s - due on %s', $inv['invoice_id'], date('d-m-Y', strtotime('+30 days', strtotime($inv['date'])))),
-        'amount' => number_format($inv['total_amount'], 2),
-        'payments' => '',
-        'balance' => number_format($running, 2)
+      $entries[] = [
+        'date'       => $inv['date'],
+        'description'=> sprintf('Invoice %s', $inv['invoice_no']),
+        'debit'      => (float)$inv['total_amount'],
+        'credit'     => 0.0,
+        'type_sort'  => 1,
+        'sort_ts'    => strtotime($inv['date']),
       ];
+      $paid_on_invoice = isset($inv['paid_amount']) ? (float)$inv['paid_amount'] : 0.0;
+      if ($paid_on_invoice > 0.0001) {
+        $entries[] = [
+          'date'       => $inv['date'],
+          'description'=> sprintf('Payment (Invoice %s)', $inv['invoice_no']),
+          'debit'      => 0.0,
+          'credit'     => min($paid_on_invoice, (float)$inv['total_amount']),
+          'type_sort'  => 2,
+          'sort_ts'    => strtotime($inv['date']) + 0.5,
+        ];
+      }
     }
-    $payments = $this->get_customer_payments($customer_id, $from_date, $to_date);
+
+    $payments = array();
+    if ($headCode) {
+      $payments = $this->get_customer_payments($customer_id, $from_date, $to_date);
+    }
     foreach ($payments as $p) {
-      $running -= (float)$p['Credit'];
-      $lines[] = [
-        'date' => date('d-m-Y', strtotime($p['date'])),
-        'details' => 'Payment ' . $p['voucher_no'],
-        'amount' => '',
-        'payments' => number_format($p['Credit'], 2),
-        'balance' => number_format($running, 2)
+      $entries[] = [
+        'date'       => $p['date'],
+        'description'=> trim('Payment ' . $p['voucher_no'] . ' ' . ($p['Narration'] ?? '')),
+        'debit'      => 0.0,
+        'credit'     => (float)$p['Credit'],
+        'type_sort'  => 2,
+        'sort_ts'    => strtotime($p['date']),
       ];
     }
+
+
+    usort($entries, function ($a, $b) {
+      if ($a['sort_ts'] === $b['sort_ts']) {
+        return $a['type_sort'] <=> $b['type_sort'];
+      }
+      return $a['sort_ts'] <=> $b['sort_ts'];
+    });
+
+    $lines = [];
+    $running = $beginning;
+    $lines[] = [
+      'date'        => $from_date,
+      'description' => 'Beginning Balance',
+      'debit'       => 0.0,
+      'credit'      => 0.0,
+      'balance'     => $running,
+    ];
+
+    foreach ($entries as $entry) {
+      $running += $entry['debit'];
+      $running -= $entry['credit'];
+      $lines[] = [
+        'date'        => $entry['date'],
+        'description' => $entry['description'],
+        'debit'       => $entry['debit'],
+        'credit'      => $entry['credit'],
+        'balance'     => $running,
+      ];
+    }
+
+    $paid_total = 0.0;
+    foreach ($entries as $entry) {
+      $paid_total += $entry['credit'];
+    }
+
+    $balance_due = $running;
 
     return [
       'summary' => [
-        'beginning' => $beginning,
-        'invoiced' => $invoiced,
-        'paid' => $paid,
+        'beginning'   => $beginning,
+        'invoiced'    => $invoiced,
+        'paid'        => $paid_total,
         'balance_due' => $balance_due,
       ],
       'lines' => $lines,
