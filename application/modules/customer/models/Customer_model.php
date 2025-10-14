@@ -247,7 +247,7 @@ class Customer_model extends CI_Model
   // Invoices for a customer within date range
   public function get_customer_invoices($customer_id, $from_date = null, $to_date = null)
   {
-    $this->db->select('i.id, i.invoice_id, i.invoice as invoice_no, i.date, i.total_amount, i.paid_amount, i.due_amount');
+    $this->db->select('i.id, i.invoice_id, i.invoice as invoice_no, i.date, i.total_amount, i.paid_amount, i.due_amount, i.status AS invoice_status');
     $this->db->from('invoice i');
     $this->db->where('i.customer_id', $customer_id);
     if (!empty($from_date)) {
@@ -256,7 +256,8 @@ class Customer_model extends CI_Model
     if (!empty($to_date)) {
       $this->db->where('DATE(i.date) <=', $to_date);
     }
-    $this->db->order_by('i.date', 'asc');
+    $this->db->order_by('i.date', 'desc');
+    $this->db->order_by('i.id', 'desc');
     return $this->db->get()->result_array();
   }
 

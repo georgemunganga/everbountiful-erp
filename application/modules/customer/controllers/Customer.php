@@ -312,17 +312,18 @@ class Customer extends MX_Controller {
         $data['credit_note_form_data'] = $this->session->flashdata('credit_note_form_data') ?: array();
         $data['estimate_form_data'] = $this->session->flashdata('estimate_form_data') ?: array();
         $data['expense_form_data'] = $this->session->flashdata('expense_form_data') ?: array();
-        $invoice_rows = $this->customer_model->get_customer_invoices($customer_id, $from, $to);
+        $invoice_rows_all = $this->customer_model->get_customer_invoices($customer_id);
         $prepared_invoices = array();
-        if (!empty($invoice_rows)) {
-            foreach ($invoice_rows as $row) {
+        if (!empty($invoice_rows_all)) {
+            foreach ($invoice_rows_all as $row) {
                 $total = isset($row['total_amount']) ? (float) $row['total_amount'] : 0.0;
                 $paid  = isset($row['paid_amount']) ? (float) $row['paid_amount'] : 0.0;
                 $due   = isset($row['due_amount']) ? (float) $row['due_amount'] : max(0.0, $total - $paid);
+                $status_flag = isset($row['invoice_status']) ? (int)$row['invoice_status'] : null;
                 $status = 'Unpaid';
                 $status_class = 'label label-danger';
                 $epsilon = 0.01;
-                if ($total <= $epsilon) {
+                if ($status_flag === 1 && $due <= $epsilon) {
                     $status = 'Paid';
                     $status_class = 'label label-success';
                     $due = 0.0;
@@ -330,7 +331,7 @@ class Customer extends MX_Controller {
                     $status = 'Paid';
                     $status_class = 'label label-success';
                     $due = 0.0;
-                } elseif ($paid > $epsilon) {
+                } elseif ($paid > $epsilon && $due > $epsilon) {
                     $status = 'Partially Paid';
                     $status_class = 'label label-warning';
                 }

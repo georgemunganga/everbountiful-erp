@@ -1113,3 +1113,129 @@ DEBUG - 2025-10-14 01:26:36 --> File loaded: C:\xampp\htdocs\everb\application\m
 DEBUG - 2025-10-14 01:26:36 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
 INFO - 2025-10-14 01:26:36 --> Final output sent to browser
 DEBUG - 2025-10-14 01:26:36 --> Total execution time: 1.7449
+INFO - 2025-10-14 01:29:53 --> Controller Class Initialized
+DEBUG - 2025-10-14 01:29:53 --> Customer MX_Controller Initialized
+INFO - 2025-10-14 01:29:53 --> Model Class Initialized
+DEBUG - 2025-10-14 01:29:53 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customer_model.php
+INFO - 2025-10-14 01:29:53 --> Model Class Initialized
+DEBUG - 2025-10-14 01:29:53 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customergroups_model.php
+INFO - 2025-10-14 01:29:53 --> Model Class Initialized
+DEBUG - 2025-10-14 01:29:53 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-14 01:29:53 --> Model Class Initialized
+DEBUG - 2025-10-14 01:29:53 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-14 01:29:53 --> Template MX_Controller Initialized
+DEBUG - 2025-10-14 01:29:53 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-14 01:29:53 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-14 01:29:54 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-14 01:29:54 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+ERROR - 2025-10-14 01:29:54 --> Severity: Warning --> Undefined property: stdClass::$customer_phone C:\xampp\htdocs\everb\application\modules\customer\views\customer_detail_tabs.php 135
+DEBUG - 2025-10-14 01:29:54 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/views/customer_detail_tabs.php
+DEBUG - 2025-10-14 01:29:54 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-14 01:29:54 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-14 01:29:54 --> Final output sent to browser
+DEBUG - 2025-10-14 01:29:54 --> Total execution time: 1.5273
+INFO - 2025-10-14 01:30:15 --> Controller Class Initialized
+DEBUG - 2025-10-14 01:30:15 --> Customer MX_Controller Initialized
+INFO - 2025-10-14 01:30:15 --> Model Class Initialized
+DEBUG - 2025-10-14 01:30:15 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customer_model.php
+INFO - 2025-10-14 01:30:15 --> Model Class Initialized
+DEBUG - 2025-10-14 01:30:15 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customergroups_model.php
+INFO - 2025-10-14 01:30:15 --> Model Class Initialized
+DEBUG - 2025-10-14 01:30:15 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-14 01:30:15 --> Model Class Initialized
+DEBUG - 2025-10-14 01:30:15 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-14 01:30:15 --> Template MX_Controller Initialized
+DEBUG - 2025-10-14 01:30:15 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-14 01:30:15 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-14 01:30:17 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-14 01:30:17 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+ERROR - 2025-10-14 01:30:17 --> Severity: Warning --> Undefined property: stdClass::$customer_phone C:\xampp\htdocs\everb\application\modules\customer\views\customer_detail_tabs.php 135
+DEBUG - 2025-10-14 01:30:17 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/views/customer_detail_tabs.php
+DEBUG - 2025-10-14 01:30:17 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-14 01:30:17 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-14 01:30:17 --> Final output sent to browser
+DEBUG - 2025-10-14 01:30:17 --> Total execution time: 2.2069
+INFO - 2025-10-14 01:30:18 --> Controller Class Initialized
+DEBUG - 2025-10-14 01:30:18 --> Customer MX_Controller Initialized
+INFO - 2025-10-14 01:30:18 --> Model Class Initialized
+DEBUG - 2025-10-14 01:30:18 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customer_model.php
+INFO - 2025-10-14 01:30:18 --> Model Class Initialized
+DEBUG - 2025-10-14 01:30:18 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customergroups_model.php
+INFO - 2025-10-14 01:30:18 --> Model Class Initialized
+DEBUG - 2025-10-14 01:30:18 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-14 01:30:18 --> Model Class Initialized
+DEBUG - 2025-10-14 01:30:18 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-14 01:30:18 --> Template MX_Controller Initialized
+DEBUG - 2025-10-14 01:30:18 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-14 01:30:18 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-14 01:30:20 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-14 01:30:20 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+ERROR - 2025-10-14 01:30:20 --> Severity: Warning --> Undefined property: stdClass::$customer_phone C:\xampp\htdocs\everb\application\modules\customer\views\customer_detail_tabs.php 135
+DEBUG - 2025-10-14 01:30:20 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/views/customer_detail_tabs.php
+DEBUG - 2025-10-14 01:30:20 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-14 01:30:20 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-14 01:30:20 --> Final output sent to browser
+DEBUG - 2025-10-14 01:30:20 --> Total execution time: 2.4809
+INFO - 2025-10-14 01:34:48 --> Controller Class Initialized
+DEBUG - 2025-10-14 01:34:48 --> Customer MX_Controller Initialized
+INFO - 2025-10-14 01:34:48 --> Model Class Initialized
+DEBUG - 2025-10-14 01:34:48 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customer_model.php
+INFO - 2025-10-14 01:34:48 --> Model Class Initialized
+DEBUG - 2025-10-14 01:34:48 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customergroups_model.php
+INFO - 2025-10-14 01:34:48 --> Model Class Initialized
+DEBUG - 2025-10-14 01:34:48 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-14 01:34:48 --> Model Class Initialized
+DEBUG - 2025-10-14 01:34:48 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-14 01:34:48 --> Template MX_Controller Initialized
+DEBUG - 2025-10-14 01:34:48 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-14 01:34:48 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-14 01:34:49 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-14 01:34:49 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+ERROR - 2025-10-14 01:34:49 --> Severity: Warning --> Undefined property: stdClass::$customer_phone C:\xampp\htdocs\everb\application\modules\customer\views\customer_detail_tabs.php 135
+DEBUG - 2025-10-14 01:34:49 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/views/customer_detail_tabs.php
+DEBUG - 2025-10-14 01:34:49 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-14 01:34:49 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-14 01:34:49 --> Final output sent to browser
+DEBUG - 2025-10-14 01:34:49 --> Total execution time: 1.5065
+INFO - 2025-10-14 01:35:30 --> Controller Class Initialized
+DEBUG - 2025-10-14 01:35:30 --> Customer MX_Controller Initialized
+INFO - 2025-10-14 01:35:30 --> Model Class Initialized
+DEBUG - 2025-10-14 01:35:30 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customer_model.php
+INFO - 2025-10-14 01:35:30 --> Model Class Initialized
+DEBUG - 2025-10-14 01:35:30 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customergroups_model.php
+INFO - 2025-10-14 01:35:30 --> Model Class Initialized
+DEBUG - 2025-10-14 01:35:30 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-14 01:35:30 --> Model Class Initialized
+DEBUG - 2025-10-14 01:35:30 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-14 01:35:30 --> Template MX_Controller Initialized
+DEBUG - 2025-10-14 01:35:30 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-14 01:35:31 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-14 01:35:31 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-14 01:35:32 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+ERROR - 2025-10-14 01:35:32 --> Severity: Warning --> Undefined property: stdClass::$customer_phone C:\xampp\htdocs\everb\application\modules\customer\views\customer_detail_tabs.php 135
+DEBUG - 2025-10-14 01:35:32 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/views/customer_detail_tabs.php
+DEBUG - 2025-10-14 01:35:32 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-14 01:35:32 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-14 01:35:32 --> Final output sent to browser
+DEBUG - 2025-10-14 01:35:32 --> Total execution time: 1.3616
+INFO - 2025-10-14 01:42:39 --> Controller Class Initialized
+DEBUG - 2025-10-14 01:42:39 --> Customer MX_Controller Initialized
+INFO - 2025-10-14 01:42:39 --> Model Class Initialized
+DEBUG - 2025-10-14 01:42:39 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customer_model.php
+INFO - 2025-10-14 01:42:39 --> Model Class Initialized
+DEBUG - 2025-10-14 01:42:39 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customergroups_model.php
+INFO - 2025-10-14 01:42:39 --> Model Class Initialized
+DEBUG - 2025-10-14 01:42:39 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-14 01:42:39 --> Model Class Initialized
+DEBUG - 2025-10-14 01:42:39 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-14 01:42:39 --> Template MX_Controller Initialized
+DEBUG - 2025-10-14 01:42:39 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-14 01:42:39 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-14 01:42:40 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-14 01:42:40 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+ERROR - 2025-10-14 01:42:40 --> Severity: Warning --> Undefined property: stdClass::$customer_phone C:\xampp\htdocs\everb\application\modules\customer\views\customer_detail_tabs.php 135
+DEBUG - 2025-10-14 01:42:40 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/views/customer_detail_tabs.php
+DEBUG - 2025-10-14 01:42:40 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-14 01:42:40 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-14 01:42:40 --> Final output sent to browser
+DEBUG - 2025-10-14 01:42:40 --> Total execution time: 1.4704
