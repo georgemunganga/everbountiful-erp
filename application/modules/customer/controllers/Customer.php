@@ -527,9 +527,39 @@ class Customer extends MX_Controller {
         redirect('customer/customer/customer_detail/' . $customer_id . '?tab=expenses');
     }
     // Statement HTML view (optional separate route)
-    public function customer_statement($customer_id)
+    public function customer_statement($customer_id = null)
     {
-        $customer = $this->customer_model->singledata($customer_id);
+        $customerId = $customer_id !== null ? (int) $customer_id : null;
+        $selectedId = (int) $this->input->get('customer_id', true);
+
+        if (!$customerId && $selectedId > 0) {
+            $query = array();
+            $fromParam = $this->input->get('from_date', true);
+            $toParam   = $this->input->get('to_date', true);
+            if (!empty($fromParam)) {
+                $query['from_date'] = $fromParam;
+            }
+            if (!empty($toParam)) {
+                $query['to_date'] = $toParam;
+            }
+            $queryString = !empty($query) ? '?' . http_build_query($query) : '';
+            redirect('customer/customer_statement/' . $selectedId . $queryString);
+            return;
+        }
+
+        if (!$customerId) {
+            $data['title']     = 'Customer Statement';
+            $data['module']    = 'customer';
+            $data['page']      = 'customer_statement_select';
+            $data['customers'] = $this->customer_model->customer_dropdown();
+            $data['from_date'] = $this->input->get('from_date', true) ?: date('Y-m-01');
+            $data['to_date']   = $this->input->get('to_date', true) ?: date('Y-m-t');
+            $data['selected_customer_id'] = $selectedId > 0 ? $selectedId : '';
+            echo Modules::run('template/layout', $data);
+            return;
+        }
+
+        $customer = $this->customer_model->singledata($customerId);
         if (!$customer) {
             show_404();
             return;
@@ -539,7 +569,7 @@ class Customer extends MX_Controller {
         $data['customer']  = $customer;
         $data['from_date'] = $from;
         $data['to_date']   = $to;
-        $data['statement'] = $this->customer_model->get_customer_statement($customer_id, $from, $to);
+        $data['statement'] = $this->customer_model->get_customer_statement($customerId, $from, $to);
         $data['title']     = 'Customer Statement';
         $data['module']    = 'customer';
         $data['page']      = 'customer_statement';
@@ -549,7 +579,8 @@ class Customer extends MX_Controller {
     // Statement PDF
     public function customer_statement_pdf($customer_id)
     {
-        $customer = $this->customer_model->singledata($customer_id);
+        $customerId = (int) $customer_id;
+        $customer = $this->customer_model->singledata($customerId);
         if (!$customer) {
             show_404();
             return;
@@ -559,7 +590,7 @@ class Customer extends MX_Controller {
         $data['customer']  = $customer;
         $data['from_date'] = $from;
         $data['to_date']   = $to;
-        $data['statement'] = $this->customer_model->get_customer_statement($customer_id, $from, $to);
+        $data['statement'] = $this->customer_model->get_customer_statement($customerId, $from, $to);
 
         // Render HTML using a simple view and then stream via Dompdf
         $html = $this->load->view('customer_statement_pdf', $data, true);

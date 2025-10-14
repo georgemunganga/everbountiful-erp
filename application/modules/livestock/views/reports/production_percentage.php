@@ -1,4 +1,4 @@
-<div class="row">
+﻿<div class="row">
     <div class="col-sm-12">
         <div class="panel panel-bd lobidrag">
             <div class="panel-heading">
@@ -92,13 +92,28 @@
     </div>
 </div>
 
-<?php if (!empty($selected_product_id) && !empty($summary)): ?>
+<?php
+    $summaryData = (isset($summary) && is_array($summary)) ? $summary : array();
+    $seriesData  = (isset($series) && is_array($series)) ? $series : array();
+    $hasSummary  = (!empty($selected_product_id) && !empty($summaryData));
+    $assetsEntered = (isset($asset_count) && is_numeric($asset_count)) ? (float) $asset_count : null;
+    $selectedLivestockName = '';
+    if (!empty($selected_livestock) && is_array($selected_livestock)) {
+        $selectedLivestockName = trim((string) ($selected_livestock['name'] ?? ''));
+        if ($selectedLivestockName === '') {
+            $labelBase = display('livestock') ?: 'Livestock';
+            $selectedLivestockName = sprintf('%s #%d', $labelBase, (int) ($selected_livestock['id'] ?? 0));
+        }
+    }
+?>
+
+<?php if ($hasSummary): ?>
     <?php
-        $totalOutput    = (float) ($summary['total_output'] ?? 0);
-        $totalMortality = (float) ($summary['total_mortality'] ?? 0);
-        $totalDamaged   = (float) ($summary['total_damaged'] ?? 0);
-        $totalExtras    = (float) ($summary['total_extras'] ?? 0);
-        $batches        = (int) ($summary['batch_count'] ?? 0);
+        $totalOutput    = (float) ($summaryData['total_output'] ?? 0);
+        $totalMortality = (float) ($summaryData['total_mortality'] ?? 0);
+        $totalDamaged   = (float) ($summaryData['total_damaged'] ?? 0);
+        $totalExtras    = (float) ($summaryData['total_extras'] ?? 0);
+        $batches        = (int) ($summaryData['batch_count'] ?? 0);
         $usableOutput   = max(0.0, $totalOutput - $totalMortality - $totalDamaged);
 
         $percent = function ($portion, $total) {
@@ -109,16 +124,7 @@
         $damagedPct   = $percent($totalDamaged, $totalOutput);
         $extrasPct    = $percent($totalExtras, $totalOutput);
         $yieldPct     = $percent($usableOutput, $totalOutput);
-        $productionPct = $production_percent ?? null;
-        $assetsEntered = $asset_count ?? null;
-        $selectedLivestockName = '';
-        if (!empty($selected_livestock)) {
-            $selectedLivestockName = trim((string) ($selected_livestock['name'] ?? ''));
-            if ($selectedLivestockName === '') {
-                $labelBase = display('livestock') ?: 'Livestock';
-                $selectedLivestockName = sprintf('%s #%d', $labelBase, (int) ($selected_livestock['id'] ?? 0));
-            }
-        }
+        $productionPct = isset($production_percent) && is_numeric($production_percent) ? (float) $production_percent : null;
     ?>
     <div class="row">
         <div class="col-sm-12">
@@ -173,7 +179,7 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <p class="help-block"><?php echo html_escape(display('production_percentage_formula') ?: '(Units produced ÷ Number of assets) × 100'); ?></p>
+                        <p class="help-block"><?php echo html_escape(display('production_percentage_formula') ?: '(Units produced / Number of assets) x 100'); ?></p>
                     </div>
                 </div>
             </div>
@@ -297,7 +303,7 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                    <?php if (!empty($series)): ?>
+                    <?php if (!empty($seriesData)): ?>
                         <div class="table-responsive">
                             <table class="table table-striped table-sm">
                                 <thead>
@@ -315,7 +321,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($series as $row): ?>
+                                    <?php foreach ($seriesData as $row): ?>
                                         <?php
                                             $periodOutput   = (float) ($row['total_output'] ?? 0);
                                             $periodMort     = (float) ($row['total_mortality'] ?? 0);
@@ -335,7 +341,7 @@
                                             <td class="text-right"><?php echo number_format($periodYieldPct, 2); ?>%</td>
                                             <?php if ($assetsEntered): ?>
                                                 <td class="text-right">
-                                                    <?php echo ($periodProductionPct !== null) ? number_format($periodProductionPct, 2) . '%' : '—'; ?>
+                                                    <?php echo ($periodProductionPct !== null) ? number_format($periodProductionPct, 2) . '%' : '&mdash;'; ?>
                                                 </td>
                                             <?php endif; ?>
                                         </tr>
@@ -376,15 +382,22 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if (!empty($series)): ?>
-                                    <?php foreach ($series as $row): ?>
+                                <?php if (!empty($seriesData)): ?>
+                                    <?php foreach ($seriesData as $row): ?>
+                                        <?php
+                                            $periodLabel = isset($row['period_label']) ? (string) $row['period_label'] : '';
+                                            $rowOutput   = (float) ($row['total_output'] ?? 0);
+                                            $rowPercent  = (isset($row['production_percent']) && is_numeric($row['production_percent']))
+                                                ? (float) $row['production_percent']
+                                                : null;
+                                        ?>
                                         <tr>
-                                            <td><?php echo html_escape($row['period_label']); ?></td>
+                                            <td><?php echo html_escape($periodLabel); ?></td>
                                             <td><?php echo html_escape($selected_product_name !== '' ? $selected_product_name : (display('product') ?: 'Product')); ?></td>
-                                            <td class="text-right"><?php echo $assetsEntered ? number_format($assetsEntered, 2) : '&mdash;'; ?></td>
-                                            <td class="text-right"><?php echo number_format($row['total_output'], 2); ?></td>
+                                            <td class="text-right"><?php echo ($assetsEntered !== null) ? number_format($assetsEntered, 2) : '&mdash;'; ?></td>
+                                            <td class="text-right"><?php echo number_format($rowOutput, 2); ?></td>
                                             <td class="text-right">
-                                                <?php echo ($row['production_percent'] !== null) ? number_format($row['production_percent'], 2) . '%' : '&mdash;'; ?>
+                                                <?php echo ($rowPercent !== null) ? number_format($rowPercent, 2) . '%' : '&mdash;'; ?>
                                             </td>
                                             <td class="text-right">&mdash;</td>
                                             <td>&mdash;</td>
@@ -413,9 +426,9 @@
                 </div>
                 <div class="panel-body">
                     <ul>
-                        <li><?php echo html_escape(display('interpretation_above_100') ?: 'Above 100% → Each biological unit produced more than expected (excellent efficiency).'); ?></li>
-                        <li><?php echo html_escape(display('interpretation_mid') ?: 'Around 80–100% → Normal, healthy production.'); ?></li>
-                        <li><?php echo html_escape(display('interpretation_low') ?: 'Below 70% → Potential stress, disease, or input constraints. Investigate immediately.'); ?></li>
+                        <li><?php echo html_escape(display('interpretation_above_100') ?: 'Above 100% -> Each biological unit produced more than expected (excellent efficiency).'); ?></li>
+                        <li><?php echo html_escape(display('interpretation_mid') ?: 'Around 80-100% -> Normal, healthy production.'); ?></li>
+                        <li><?php echo html_escape(display('interpretation_low') ?: 'Below 70% -> Potential stress, disease, or input constraints. Investigate immediately.'); ?></li>
                     </ul>
                 </div>
             </div>
@@ -432,9 +445,9 @@
                 </div>
                 <div class="panel-body">
                     <ul>
-                        <li><?php echo html_escape(display('yield_per_area') ?: 'Yield per unit area (crops): Total yield ÷ Area planted.'); ?></li>
-                        <li><?php echo html_escape(display('conversion_ratios') ?: 'Conversion ratios (livestock): Feed input ÷ Weight gain.'); ?></li>
-                        <li><?php echo html_escape(display('economic_efficiency') ?: 'Economic efficiency: (Value of output ÷ Cost of inputs) × 100.'); ?></li>
+                        <li><?php echo html_escape(display('yield_per_area') ?: 'Yield per unit area (crops): Total yield / Area planted.'); ?></li>
+                        <li><?php echo html_escape(display('conversion_ratios') ?: 'Conversion ratios (livestock): Feed input / Weight gain.'); ?></li>
+                        <li><?php echo html_escape(display('economic_efficiency') ?: 'Economic efficiency: (Value of output / Cost of inputs) x 100.'); ?></li>
                     </ul>
                 </div>
             </div>

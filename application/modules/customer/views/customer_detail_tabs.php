@@ -239,17 +239,43 @@
                         <input type="date" name="to_date" class="form-control" value="<?php echo html_escape($to_date ?? ''); ?>">
                       </div>
                       <button type="submit" class="btn btn-primary">Filter</button>
-                      <a href="<?php echo base_url('customer/customer_statement_pdf/'.$customer->customer_id); ?>?from_date=<?php echo urlencode($from_date ?? ''); ?>&to_date=<?php echo urlencode($to_date ?? ''); ?>" target="_blank" class="btn btn-default">Download PDF</a>
+                      <a href="<?php echo base_url('customer/statement/'.$customer->customer_id.'/pdf'); ?>?from_date=<?php echo urlencode($from_date ?? ''); ?>&to_date=<?php echo urlencode($to_date ?? ''); ?>" target="_blank" class="btn btn-default">Download PDF</a>
                     </form>
                   </div>
                   <div class="col-sm-8">
                     <h4>Account Statement</h4>
                     <?php
                       $statementData = (isset($statement) && is_array($statement)) ? $statement : array('summary' => array(), 'lines' => array());
-                      $statementSummary = isset($statementData['summary']) && is_array($statementData['summary']) ? $statementData['summary'] : array();
-                      $statementLines = isset($statementData['lines']) && is_array($statementData['lines']) ? $statementData['lines'] : array();
+                      $summaryDefaults = array(
+                        'beginning'   => 0.0,
+                        'invoiced'    => 0.0,
+                        'paid'        => 0.0,
+                        'balance_due' => 0.0,
+                      );
+                      $statementSummaryRaw = isset($statementData['summary']) && is_array($statementData['summary']) ? $statementData['summary'] : array();
+                      $hasStatementSummary = !empty($statementSummaryRaw);
+                      $statementSummary = array_merge($summaryDefaults, array_intersect_key($statementSummaryRaw, $summaryDefaults));
+                      foreach ($statementSummary as $key => $value) {
+                        $statementSummary[$key] = is_numeric($value) ? (float) $value : 0.0;
+                      }
+
+                      $statementLines = array();
+                      if (isset($statementData['lines']) && is_array($statementData['lines'])) {
+                        foreach ($statementData['lines'] as $entry) {
+                          if (!is_array($entry)) {
+                            continue;
+                          }
+                          $statementLines[] = array(
+                            'date'        => isset($entry['date']) ? $entry['date'] : '',
+                            'description' => isset($entry['description']) ? $entry['description'] : '',
+                            'debit'       => isset($entry['debit']) && is_numeric($entry['debit']) ? (float) $entry['debit'] : 0.0,
+                            'credit'      => isset($entry['credit']) && is_numeric($entry['credit']) ? (float) $entry['credit'] : 0.0,
+                            'balance'     => isset($entry['balance']) && is_numeric($entry['balance']) ? (float) $entry['balance'] : 0.0,
+                          );
+                        }
+                      }
                     ?>
-                    <?php if (!empty($statementSummary)) { ?>
+                    <?php if ($hasStatementSummary) { ?>
                       <table class="table table-condensed table-bordered" style="margin-bottom:15px;">
                         <tr>
                           <th>Beginning Balance</th>

@@ -26,7 +26,7 @@
             </a>
         </li>
 
-        <li class="treeview <?php echo in_array($this->uri->segment(1), array('sheds', 'livestock-groups', 'livestocks', 'productions', 'feeds', 'feed-usages', 'vaccines', 'vaccine-usages', 'farm-reports')) ? "active" : null; ?>">
+        <li class="treeview <?php echo in_array($this->uri->segment(1), array('sheds', 'livestock-groups', 'livestocks', 'productions', 'feeds', 'feed-usages', 'vaccines', 'vaccine-usages', 'farm-reports', 'production-percentage')) ? "active" : null; ?>">
             <a href="#">
                 <i class="fa fa-paw"></i>
                 <span><?php echo display('livestock_management') ?: 'Livestock Management'; ?></span>
@@ -61,6 +61,9 @@
                 </li>
                 <li class="<?php echo ($this->uri->segment(1) == 'farm-reports') ? 'active' : null; ?>">
                     <a href="<?php echo base_url('farm-reports'); ?>"><?php echo display('farm_reports') ?: 'Farm Reports'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'production-percentage') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('production-percentage'); ?>"><?php echo display('production_percentage_report') ?: 'Production Percentage'; ?></a>
                 </li>
             </ul>
         </li>
@@ -166,7 +169,7 @@
 
         <?php if ($this->permission1->method('add_customer', 'create')->access() || $this->permission1->method('manage_customer', 'read')->access() || $this->permission1->method('credit_customer', 'read')->access() || $this->permission1->method('paid_customer', 'read')->access() || $this->permission1->method('customer_ledger', 'read')->access() || $this->permission1->method('customer_advance', 'create')->access()) { ?>
             <li
-                class="treeview <?php echo (($this->uri->segment(1) == "add_customer" || $this->uri->segment(1) == "customer_list" || $this->uri->segment(1) == "credit_customer" || $this->uri->segment(1) == "paid_customer" || $this->uri->segment(1) == "edit_customer" || $this->uri->segment(1) == "customer_ledgerdata" || $this->uri->segment(1) == "customer_ledger" || $this->uri->segment(1) == "advance_receipt" || $this->uri->segment(1) == "customer_advance") ? "active" : '') ?>">
+                class="treeview <?php echo (($this->uri->segment(1) == "add_customer" || $this->uri->segment(1) == "customer_list" || $this->uri->segment(1) == "credit_customer" || $this->uri->segment(1) == "paid_customer" || $this->uri->segment(1) == "edit_customer" || $this->uri->segment(1) == "customer_ledgerdata" || $this->uri->segment(1) == "customer_ledger" || $this->uri->segment(1) == "advance_receipt" || $this->uri->segment(1) == "customer_advance" || ($this->uri->segment(1) == "customer" && in_array($this->uri->segment(2), array("customer_statement", "statement", "customer_groups", "customer_detail")))) ? "active" : '') ?>">
 
                 <a href="javascript:void(0)">
 
@@ -217,6 +220,13 @@
                         <li class="<?php echo (($this->uri->segment(1) == "customer_ledger") ? "active" : '') ?>">
                             <a href="<?php echo base_url('customer_ledger') ?>">
                                 <?php echo display('customer_ledger') ?>
+                            </a>
+                        </li>
+                    <?php } ?>
+                    <?php if ($this->permission1->method('customer_ledger', 'read')->access()) { ?>
+                        <li class="<?php echo (($this->uri->segment(1) == "customer" && in_array($this->uri->segment(2), array("customer_statement", "statement"))) ? "active" : '') ?>">
+                            <a href="<?php echo base_url('customer/customer_statement'); ?>">
+                                <?php echo display('customer_statement') ?: 'Customer Statement'; ?>
                             </a>
                         </li>
                     <?php } ?>

@@ -220,8 +220,33 @@
     <div class="summary-section">
         <div class="summary-title">Account Summary</div>
         <?php
-            $summary = isset($statement['summary']) && is_array($statement['summary']) ? $statement['summary'] : array('beginning'=>0,'invoiced'=>0,'paid'=>0,'balance_due'=>0);
-            $lines = isset($statement['lines']) && is_array($statement['lines']) ? $statement['lines'] : array();
+            $summaryRaw = (isset($statement['summary']) && is_array($statement['summary'])) ? $statement['summary'] : array();
+            $summaryDefaults = array(
+                'beginning'   => 0.0,
+                'invoiced'    => 0.0,
+                'paid'        => 0.0,
+                'balance_due' => 0.0,
+            );
+            $summary = array_merge($summaryDefaults, array_intersect_key($summaryRaw, $summaryDefaults));
+            foreach ($summary as $key => $value) {
+                $summary[$key] = is_numeric($value) ? (float) $value : 0.0;
+            }
+
+            $lines = array();
+            if (isset($statement['lines']) && is_array($statement['lines'])) {
+                foreach ($statement['lines'] as $rawLine) {
+                    if (!is_array($rawLine)) {
+                        continue;
+                    }
+                    $lines[] = array(
+                        'date'        => isset($rawLine['date']) ? $rawLine['date'] : '',
+                        'description' => isset($rawLine['description']) ? $rawLine['description'] : '',
+                        'debit'       => isset($rawLine['debit']) && is_numeric($rawLine['debit']) ? (float) $rawLine['debit'] : 0.0,
+                        'credit'      => isset($rawLine['credit']) && is_numeric($rawLine['credit']) ? (float) $rawLine['credit'] : 0.0,
+                        'balance'     => isset($rawLine['balance']) && is_numeric($rawLine['balance']) ? (float) $rawLine['balance'] : 0.0,
+                    );
+                }
+            }
         ?>
         <table class="summary-table">
             <tr>
@@ -257,13 +282,23 @@
                 </tr>
             </thead>
             <tbody>
-                <?php if (!empty($lines)) { foreach ($lines as $line) { ?>
+                <?php if (!empty($lines)) { foreach ($lines as $line) {
+                    $dateText = '';
+                    if (!empty($line['date'])) {
+                        $timestamp = strtotime($line['date']);
+                        $dateText = $timestamp ? date('d-m-Y', $timestamp) : '';
+                    }
+                    $description = isset($line['description']) ? $line['description'] : '';
+                    $debitAmount = isset($line['debit']) ? (float) $line['debit'] : 0.0;
+                    $creditAmount = isset($line['credit']) ? (float) $line['credit'] : 0.0;
+                    $balanceAmount = isset($line['balance']) ? (float) $line['balance'] : ($debitAmount - $creditAmount);
+                ?>
                     <tr>
-                        <td><?php echo html_escape(date('d-m-Y', strtotime($line['date']))); ?></td>
-                        <td><?php echo html_escape($line['description']); ?></td>
-                        <td class="amount-cell"><?php echo $line['debit'] > 0 ? 'K' . number_format($line['debit'], 2) : ''; ?></td>
-                        <td class="amount-cell"><?php echo $line['credit'] > 0 ? 'K' . number_format($line['credit'], 2) : ''; ?></td>
-                        <td class="amount-cell"><strong>K<?php echo number_format($line['balance'], 2); ?></strong></td>
+                        <td><?php echo html_escape($dateText); ?></td>
+                        <td><?php echo html_escape($description); ?></td>
+                        <td class="amount-cell"><?php echo $debitAmount > 0 ? 'K' . number_format($debitAmount, 2) : ''; ?></td>
+                        <td class="amount-cell"><?php echo $creditAmount > 0 ? 'K' . number_format($creditAmount, 2) : ''; ?></td>
+                        <td class="amount-cell"><strong>K<?php echo number_format($balanceAmount, 2); ?></strong></td>
                     </tr>
                 <?php } } else { ?>
                     <tr>
