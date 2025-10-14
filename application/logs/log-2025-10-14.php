@@ -1239,3 +1239,888 @@ DEBUG - 2025-10-14 01:42:40 --> File loaded: C:\xampp\htdocs\everb\application\m
 DEBUG - 2025-10-14 01:42:40 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
 INFO - 2025-10-14 01:42:40 --> Final output sent to browser
 DEBUG - 2025-10-14 01:42:40 --> Total execution time: 1.4704
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:06 --> Config Class Initialized
+INFO - 2025-10-14 15:14:06 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:07 --> Config Class Initialized
+INFO - 2025-10-14 15:14:07 --> Hooks Class Initialized
+INFO - 2025-10-14 15:14:07 --> Config Class Initialized
+INFO - 2025-10-14 15:14:07 --> Hooks Class Initialized
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+DEBUG - 2025-10-14 15:14:07 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:14:07 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+INFO - 2025-10-14 15:14:07 --> URI Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/config/routes.php
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+INFO - 2025-10-14 15:14:09 --> Router Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Output Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+INFO - 2025-10-14 15:14:09 --> Security Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+DEBUG - 2025-10-14 15:14:09 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+INFO - 2025-10-14 15:14:09 --> Input Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:09 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Language Class Initialized
+INFO - 2025-10-14 15:14:10 --> Config Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:10 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Email Class Initialized
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:11 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:11 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:11 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:11 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:11 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 15:14:12 --> Pagination Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+INFO - 2025-10-14 19:14:12 --> Controller Class Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Payroll MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:12 --> Customer MX_Controller Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customer_model.php
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:12 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+INFO - 2025-10-14 19:14:12 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Payroll_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/hrm/models/Leave_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 15:14:13 --> Config Class Initialized
+INFO - 2025-10-14 15:14:13 --> Hooks Class Initialized
+DEBUG - 2025-10-14 15:14:13 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:14:13 --> Utf8 Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customergroups_model.php
+INFO - 2025-10-14 15:14:13 --> URI Class Initialized
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 15:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/config/routes.php
+INFO - 2025-10-14 15:14:13 --> Router Class Initialized
+INFO - 2025-10-14 15:14:13 --> Output Class Initialized
+INFO - 2025-10-14 15:14:13 --> Security Class Initialized
+DEBUG - 2025-10-14 15:14:13 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:14:13 --> Input Class Initialized
+INFO - 2025-10-14 15:14:13 --> Language Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 15:14:13 --> Language Class Initialized
+INFO - 2025-10-14 15:14:13 --> Config Class Initialized
+INFO - 2025-10-14 15:14:13 --> Loader Class Initialized
+INFO - 2025-10-14 15:14:13 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:14:13 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:14:13 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:14:13 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:14:13 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:14:13 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:14:13 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:14:13 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:14:13 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:14:13 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:14:13 --> Email Class Initialized
+INFO - 2025-10-14 15:14:13 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:14:13 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:14:13 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:14:13 --> Pagination Class Initialized
+INFO - 2025-10-14 19:14:13 --> Controller Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> Auth MX_Controller Initialized
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/models/Auth_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+INFO - 2025-10-14 19:14:13 --> Database Driver Class Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-14 19:14:13 --> Template MX_Controller Initialized
+DEBUG - 2025-10-14 19:14:13 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-14 19:14:13 --> Model Class Initialized
+DEBUG - 2025-10-14 19:14:14 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/login.php
+INFO - 2025-10-14 19:14:14 --> Final output sent to browser
+DEBUG - 2025-10-14 19:14:14 --> Total execution time: 1.2420
+INFO - 2025-10-14 15:19:30 --> Config Class Initialized
+INFO - 2025-10-14 15:19:30 --> Hooks Class Initialized
+DEBUG - 2025-10-14 15:19:30 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:19:30 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:19:30 --> URI Class Initialized
+DEBUG - 2025-10-14 15:19:30 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/config/routes.php
+INFO - 2025-10-14 15:19:30 --> Router Class Initialized
+INFO - 2025-10-14 15:19:30 --> Output Class Initialized
+INFO - 2025-10-14 15:19:30 --> Security Class Initialized
+DEBUG - 2025-10-14 15:19:30 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:19:30 --> Input Class Initialized
+INFO - 2025-10-14 15:19:30 --> Language Class Initialized
+INFO - 2025-10-14 15:19:30 --> Language Class Initialized
+INFO - 2025-10-14 15:19:30 --> Config Class Initialized
+INFO - 2025-10-14 15:19:30 --> Loader Class Initialized
+INFO - 2025-10-14 15:19:30 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:19:30 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:19:30 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:19:30 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:19:30 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:19:30 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:19:30 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:19:30 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:19:30 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:19:30 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:19:30 --> Email Class Initialized
+INFO - 2025-10-14 15:19:30 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:19:30 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:19:30 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:19:30 --> Pagination Class Initialized
+INFO - 2025-10-14 19:19:30 --> Controller Class Initialized
+DEBUG - 2025-10-14 19:19:30 --> Auth MX_Controller Initialized
+INFO - 2025-10-14 19:19:30 --> Model Class Initialized
+DEBUG - 2025-10-14 19:19:30 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/models/Auth_model.php
+INFO - 2025-10-14 19:19:30 --> Model Class Initialized
+INFO - 2025-10-14 19:19:30 --> Database Driver Class Initialized
+INFO - 2025-10-14 19:19:31 --> Language file loaded: language/english/form_validation_lang.php
+INFO - 2025-10-14 15:19:31 --> Config Class Initialized
+INFO - 2025-10-14 15:19:31 --> Hooks Class Initialized
+DEBUG - 2025-10-14 15:19:31 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:19:31 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:19:31 --> URI Class Initialized
+DEBUG - 2025-10-14 15:19:31 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/config/routes.php
+INFO - 2025-10-14 15:19:31 --> Router Class Initialized
+INFO - 2025-10-14 15:19:31 --> Output Class Initialized
+INFO - 2025-10-14 15:19:31 --> Security Class Initialized
+DEBUG - 2025-10-14 15:19:31 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:19:31 --> Input Class Initialized
+INFO - 2025-10-14 15:19:31 --> Language Class Initialized
+INFO - 2025-10-14 15:19:31 --> Language Class Initialized
+INFO - 2025-10-14 15:19:31 --> Config Class Initialized
+INFO - 2025-10-14 15:19:31 --> Loader Class Initialized
+INFO - 2025-10-14 15:19:31 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:19:31 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:19:31 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:19:31 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:19:31 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:19:31 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:19:31 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:19:31 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:19:31 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:19:31 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:19:31 --> Email Class Initialized
+INFO - 2025-10-14 15:19:31 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:19:31 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:19:31 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:19:31 --> Pagination Class Initialized
+INFO - 2025-10-14 19:19:31 --> Controller Class Initialized
+DEBUG - 2025-10-14 19:19:31 --> Home MX_Controller Initialized
+INFO - 2025-10-14 19:19:31 --> Model Class Initialized
+DEBUG - 2025-10-14 19:19:31 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/models/Home_model.php
+INFO - 2025-10-14 19:19:31 --> Model Class Initialized
+DEBUG - 2025-10-14 19:19:31 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-14 19:19:31 --> Template MX_Controller Initialized
+DEBUG - 2025-10-14 19:19:31 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-14 19:19:31 --> Model Class Initialized
+DEBUG - 2025-10-14 19:19:32 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-14 19:19:33 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-14 19:19:39 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-14 19:19:39 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+DEBUG - 2025-10-14 19:19:40 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/views/home/home.php
+DEBUG - 2025-10-14 19:19:40 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-14 19:19:40 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-14 19:19:40 --> Final output sent to browser
+DEBUG - 2025-10-14 19:19:40 --> Total execution time: 9.3951
+INFO - 2025-10-14 15:19:40 --> Config Class Initialized
+INFO - 2025-10-14 15:19:40 --> Hooks Class Initialized
+DEBUG - 2025-10-14 15:19:41 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:19:41 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:19:41 --> URI Class Initialized
+INFO - 2025-10-14 15:19:41 --> Config Class Initialized
+INFO - 2025-10-14 15:19:41 --> Hooks Class Initialized
+DEBUG - 2025-10-14 15:19:41 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:19:41 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:19:41 --> URI Class Initialized
+INFO - 2025-10-14 15:19:41 --> Router Class Initialized
+INFO - 2025-10-14 15:19:41 --> Output Class Initialized
+INFO - 2025-10-14 15:19:41 --> Security Class Initialized
+DEBUG - 2025-10-14 15:19:41 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:19:41 --> Input Class Initialized
+INFO - 2025-10-14 15:19:41 --> Language Class Initialized
+INFO - 2025-10-14 15:19:41 --> Router Class Initialized
+INFO - 2025-10-14 15:19:41 --> Output Class Initialized
+INFO - 2025-10-14 15:19:41 --> Security Class Initialized
+DEBUG - 2025-10-14 15:19:41 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:19:41 --> Input Class Initialized
+ERROR - 2025-10-14 15:19:41 --> 404 Page Not Found: /index
+INFO - 2025-10-14 15:19:41 --> Language Class Initialized
+ERROR - 2025-10-14 15:19:41 --> 404 Page Not Found: /index
+INFO - 2025-10-14 15:21:46 --> Config Class Initialized
+INFO - 2025-10-14 15:21:46 --> Hooks Class Initialized
+DEBUG - 2025-10-14 15:21:46 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:21:46 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:21:46 --> URI Class Initialized
+DEBUG - 2025-10-14 15:21:46 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/config/routes.php
+DEBUG - 2025-10-14 15:21:46 --> No URI present. Default controller set.
+INFO - 2025-10-14 15:21:46 --> Router Class Initialized
+INFO - 2025-10-14 15:21:46 --> Output Class Initialized
+INFO - 2025-10-14 15:21:46 --> Security Class Initialized
+DEBUG - 2025-10-14 15:21:46 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:21:46 --> Input Class Initialized
+INFO - 2025-10-14 15:21:46 --> Language Class Initialized
+INFO - 2025-10-14 15:21:46 --> Language Class Initialized
+INFO - 2025-10-14 15:21:46 --> Config Class Initialized
+INFO - 2025-10-14 15:21:46 --> Loader Class Initialized
+INFO - 2025-10-14 15:21:46 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:21:46 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:21:46 --> Email Class Initialized
+INFO - 2025-10-14 15:21:46 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:21:46 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:21:46 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:21:46 --> Pagination Class Initialized
+INFO - 2025-10-14 19:21:46 --> Controller Class Initialized
+DEBUG - 2025-10-14 19:21:46 --> Auth MX_Controller Initialized
+INFO - 2025-10-14 19:21:46 --> Model Class Initialized
+DEBUG - 2025-10-14 19:21:46 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/models/Auth_model.php
+INFO - 2025-10-14 19:21:46 --> Model Class Initialized
+INFO - 2025-10-14 19:21:46 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:21:46 --> Config Class Initialized
+INFO - 2025-10-14 15:21:46 --> Hooks Class Initialized
+DEBUG - 2025-10-14 15:21:46 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:21:46 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:21:46 --> URI Class Initialized
+DEBUG - 2025-10-14 15:21:46 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/config/routes.php
+INFO - 2025-10-14 15:21:46 --> Router Class Initialized
+INFO - 2025-10-14 15:21:46 --> Output Class Initialized
+INFO - 2025-10-14 15:21:46 --> Security Class Initialized
+DEBUG - 2025-10-14 15:21:46 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:21:46 --> Input Class Initialized
+INFO - 2025-10-14 15:21:46 --> Language Class Initialized
+INFO - 2025-10-14 15:21:46 --> Language Class Initialized
+INFO - 2025-10-14 15:21:46 --> Config Class Initialized
+INFO - 2025-10-14 15:21:46 --> Loader Class Initialized
+INFO - 2025-10-14 15:21:46 --> Helper loaded: url_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: file_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: html_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: form_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: text_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: lang_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: global_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: directory_helper
+INFO - 2025-10-14 15:21:46 --> Helper loaded: dompdf_helper
+INFO - 2025-10-14 15:21:46 --> Database Driver Class Initialized
+INFO - 2025-10-14 15:21:46 --> Email Class Initialized
+INFO - 2025-10-14 15:21:46 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-14 15:21:46 --> Form Validation Class Initialized
+INFO - 2025-10-14 15:21:46 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-14 15:21:46 --> Pagination Class Initialized
+INFO - 2025-10-14 19:21:46 --> Controller Class Initialized
+DEBUG - 2025-10-14 19:21:46 --> Home MX_Controller Initialized
+INFO - 2025-10-14 19:21:46 --> Model Class Initialized
+DEBUG - 2025-10-14 19:21:46 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/models/Home_model.php
+INFO - 2025-10-14 19:21:46 --> Model Class Initialized
+DEBUG - 2025-10-14 19:21:46 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-14 19:21:46 --> Template MX_Controller Initialized
+DEBUG - 2025-10-14 19:21:46 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-14 19:21:46 --> Model Class Initialized
+DEBUG - 2025-10-14 19:21:58 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-14 19:21:59 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-14 19:22:00 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-14 19:22:00 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+DEBUG - 2025-10-14 19:22:01 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/views/home/home.php
+DEBUG - 2025-10-14 19:22:01 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-14 19:22:01 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-14 19:22:01 --> Final output sent to browser
+DEBUG - 2025-10-14 19:22:01 --> Total execution time: 14.9475
+INFO - 2025-10-14 15:22:03 --> Config Class Initialized
+INFO - 2025-10-14 15:22:03 --> Hooks Class Initialized
+INFO - 2025-10-14 15:22:03 --> Config Class Initialized
+INFO - 2025-10-14 15:22:03 --> Hooks Class Initialized
+DEBUG - 2025-10-14 15:22:03 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:22:03 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:22:03 --> URI Class Initialized
+DEBUG - 2025-10-14 15:22:03 --> UTF-8 Support Enabled
+INFO - 2025-10-14 15:22:03 --> Utf8 Class Initialized
+INFO - 2025-10-14 15:22:03 --> URI Class Initialized
+INFO - 2025-10-14 15:22:03 --> Router Class Initialized
+INFO - 2025-10-14 15:22:03 --> Router Class Initialized
+INFO - 2025-10-14 15:22:03 --> Output Class Initialized
+INFO - 2025-10-14 15:22:03 --> Output Class Initialized
+INFO - 2025-10-14 15:22:03 --> Security Class Initialized
+DEBUG - 2025-10-14 15:22:03 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:22:03 --> Security Class Initialized
+DEBUG - 2025-10-14 15:22:03 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-14 15:22:03 --> Input Class Initialized
+INFO - 2025-10-14 15:22:03 --> Input Class Initialized
+INFO - 2025-10-14 15:22:03 --> Language Class Initialized
+INFO - 2025-10-14 15:22:03 --> Language Class Initialized
+ERROR - 2025-10-14 15:22:03 --> 404 Page Not Found: /index
+ERROR - 2025-10-14 15:22:03 --> 404 Page Not Found: /index
