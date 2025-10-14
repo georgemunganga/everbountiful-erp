@@ -9,6 +9,7 @@
         border-collapse: collapse;
         border: 0;
     }
+
     table.payrollDatatableReport td, table.payrollDatatableReport th {
         padding: 6px 15px;
     }
@@ -145,8 +146,6 @@
                     $component_ded_total = isset($component_ded_total) ? (float) $component_ded_total : (float) $component_breakdown['deduction_total'];
                     $component_add_total_display = round($component_add_total, 2);
                     $component_ded_total_display = round($component_ded_total, 2);
-                    $loan_total_display = isset($loan_total) ? (float) $loan_total : (isset($salary_info->loan_deduct) ? (float) $salary_info->loan_deduct : 0.0);
-                    $salary_advance_display = isset($salary_advance_total) ? (float) $salary_advance_total : (isset($salary_info->salary_advance) ? (float) $salary_info->salary_advance : 0.0);
                     $office_loan_display = isset($office_loan_total) ? (float) $office_loan_total : (isset($salary_info->office_loan_deduct) ? (float) $salary_info->office_loan_deduct : 0.0);
                     $net_salary_display = isset($net_salary_calculated) ? (float) $net_salary_calculated : (isset($salary_info->net_salary) ? (float) $salary_info->net_salary : 0.0);
                     $post_gross_total_display = isset($post_gross_total) ? (float) $post_gross_total : ((isset($salary_info->gross_salary) ? (float) $salary_info->gross_salary : 0.0) + $component_add_total);
@@ -162,7 +161,7 @@
                                     <th>Description</th>
                                     <th>Gross Amount</th>
                                     <th>Rate</th>
-                                    <th>#VALUE</th>
+                                    <th><?php echo display('additions') ? display('additions') : 'Additions'; ?></th>
                                     <th>Deduction</th>
                                 </tr>
                             </thead>
@@ -188,14 +187,6 @@
                                     <td></td>
                                     <td></td>
                                 </tr>
-                                <tr style="text-align: left !important;">
-                                    <th style="text-align: left !important;">Gross Salary</th>
-                                    <td></td>
-                                    <td></td>
-                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($salary_info->gross_salary,2);?></td>
-                                    <td></td>
-
-                                </tr>
                                 <?php if (!empty($component_earnings)) { ?>
                                 <?php foreach ($component_earnings as $earning) { ?>
                                 <tr style="text-align: left !important;">
@@ -213,6 +204,15 @@
                                     <th><?php echo $curncy_symbol.' '.number_format($component_add_total_display,2);?></th>
                                     <th></th>
                                 </tr>
+                                <?php } ?>
+                                <tr style="text-align: left !important;">
+                                    <th style="text-align: left !important;">Gross Salary</th>
+                                    <td></td>
+                                    <td></td>
+                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($salary_info->gross_salary,2);?></td>
+                                    <td></td>
+                                </tr>
+                                <?php if (!empty($component_earnings)) { ?>
                                 <tr style="text-align: left !important;">
                                     <th>Subtotal Before Deductions</th>
                                     <th></th>
@@ -241,13 +241,6 @@
                                 </tr>
                                 <?php } ?>
 
-                                <tr style="text-align: left !important;">
-                                    <th style="text-align: left !important;">Loan Deduction</th>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($loan_total_display,2);?></td>
-                                </tr>
                                 <?php if ($office_loan_display > 0) { ?>
                                 <tr style="text-align: left !important;">
                                     <th style="text-align: left !important;">Office Loan Deduction</th>
@@ -258,34 +251,12 @@
                                 </tr>
                                 <?php } ?>
                                 <tr style="text-align: left !important;">
-                                    <th style="text-align: left !important;">Salary Advance</th>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($salary_advance_display,2);?></td>
-                                </tr>
-                                <tr style="text-align: left !important;">
                                     <th style="text-align: left !important;">Total Deductions</th>
                                     <td></td>
                                     <td></td>
                                     <td></td>
                                     <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($total_deductions,2);?></td>
                                 </tr>
-                                <tr style="text-align: left !important;">
-                                    <th></th>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-
-                                <tr style="text-align: left !important;">
-                                    <th colspan="3" style="text-align: left !important;">Total Social Security</th>
-
-                                    <td></td>
-                                    <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($social_security_combined_display,2);?></td>
-                                </tr>
-
                                 <tr style="text-align: left !important;">
                                     <th colspan="3"  style="text-align: left !important;">NET SALARY</th>
 

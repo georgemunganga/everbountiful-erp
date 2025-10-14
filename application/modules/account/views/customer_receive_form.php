@@ -13,6 +13,7 @@
             <div class="panel-body">
 
                 <?php echo  form_open_multipart('account/accounts/create_customer_receive','id="customer_receive_form"') ?>
+                <input type="hidden" name="return_to" value="<?php echo html_escape($return_to ?? ''); ?>">
 
                 <div class="form-group row">
                     <label for="date" class="col-sm-2 col-form-label"><?php echo display('date')?><i
@@ -50,12 +51,12 @@
                                 <td class="" width="300">
                                     <select name="customer_id" id="customer_id_1" class="form-control"
                                         onchange="load_customer_code(this.value,1)" required>
-                                        <<option value="">Select Customer</option>}
-                                            option
-                                            <?php foreach ($customer_list as $customer) {?>
-                                            <option value="<?php echo html_escape($customer->customer_id);?>">
+                                        <option value=""><?php echo display('select_option'); ?></option>
+                                        <?php foreach ($customer_list as $customer) {?>
+                                            <option value="<?php echo html_escape($customer->customer_id);?>"
+                                                <?php echo (!empty($prefill_customer_id) && (string)$prefill_customer_id === (string)$customer->customer_id) ? 'selected' : ''; ?>>
                                                 <?php echo html_escape($customer->customer_name);?></option>
-                                            <?php }?>
+                                        <?php }?>
                                     </select>
 
                                 </td>
@@ -153,3 +154,10 @@
     </div>
 </div>
 <script src="<?php echo base_url('my-assets/js/admin_js/customer_receive_form.js') ?>" type="text/javascript"></script>
+<?php if (!empty($prefill_customer_id)) : ?>
+<script>
+    $(function () {
+        load_customer_code('<?php echo html_escape($prefill_customer_id); ?>', 1);
+    });
+</script>
+<?php endif; ?>

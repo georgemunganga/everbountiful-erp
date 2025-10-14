@@ -18,12 +18,14 @@ $route['datewise_attendance_report']= "hrm/attendance/bdtask_datewiseattendancer
 $route['userwise_attendance_report']= "hrm/attendance/employeewise_att_report";
 /*payroll part*/
 
-$route['salary_advance_view']     = "hrm/salary_advance/salary_advance_view";
-$route['manage_salary_advance']     = "hrm/salary_advance/manage_salary_advance";
 $route['employee_salary_generate']= "hrm/payroll/employee_salary_generate";
 $route['employee_salary_payment_view']= "hrm/payroll/employee_salary_payment_view";
 $route['tax_slabs']               = "hrm/payroll/tax_slabs";
 $route['salary_components']       = "hrm/payroll/salary_components";
+$route['salary_groups']           = "hrm/payroll/salary_groups";
+$route['save_salary_group']       = "hrm/payroll/save_salary_group";
+$route['delete_salary_group/(:num)'] = "hrm/payroll/delete_salary_group/$1";
+$route['salary_pay_slip_pdf/(:num)'] = "hrm/payroll/salary_pay_slip_pdf/$1";
 $route['add_beneficials']         = "hrm/payroll/bdtask_beneficial_form";
 $route['manage_benefits']         = "hrm/payroll/manage_benefits";
 $route['edit_beneficial/(:num)']  = "hrm/payroll/benefits_update_form/$1";
@@ -39,6 +41,11 @@ $route['payslip/(:num)']          = "hrm/payroll/payslip/$1";
 $route['employee_salary_approval/(:num)'] = "hrm/payroll/gmb_employee_salary_approval/$1";
 $route['employee_salary_chart/(:num)'] = "hrm/payroll/gmb_employee_salary_chart/$1";
 $route['salary_pay_slip/(:num)'] = "hrm/payroll/salary_pay_slip/$1";
+$route['leaves']                  = "hrm/leave/index";
+$route['leaves/(:num)']           = "hrm/leave/index/$1";
+$route['leaves/create']           = "hrm/leave/create";
+$route['leaves/create/(:num)']    = "hrm/leave/create/$1";
+$route['leaves/delete/(:num)']    = "hrm/leave/delete/$1";
 /*expense part*/
 $route['add_expense_item']        = "hrm/expense/bdtask_expense_item_form";
 $route['manage_expense_item']     = "hrm/expense/bdtask_expense_item_list";
@@ -53,6 +60,7 @@ $route['manage_office_loans/(:num)'] = "hrm/loan/manage_office_loans/$1";
 $route['office_loan_person_ledger/(:any)'] = "hrm/loan/office_loan_person_ledger/$1";
 $route['office_loan_overview/(:any)']      = "hrm/loan/office_loan_overview/$1";
 $route['office_loan_person_ledgerdata']    = "hrm/loan/office_loan_ledger_search";
+$route['office_loan/person_loans/(:any)']  = "hrm/loan/get_person_office_loans/$1";
 $route['add_office_loan']          = "hrm/loan/bdtask_add_office_loan";
 $route['add_office_loan_payment']  = "hrm/loan/bdtask_add_office_loan_payment";
 $route['bdtask_edit_office_loan/(:any)']= "hrm/loan/bdtask_edit_office_loan/$1";

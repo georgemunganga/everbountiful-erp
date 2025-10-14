@@ -85,16 +85,15 @@ table.payrollDatatableReport td.noborder {
                                 <tr>
                                     <th class="text-left" width="2%">Sl</th>
                                     <th class="text-left" width="5%">Employee Name</th>
-                                    <th class="text-left" width="8%">Basic Salary</th>
-                                    <th class="text-left" width="8%">Total Benefit</th>
-                                    <th class="text-left" width="9%">Transport Allowance</th>
-                                    <th class="text-left" width="8%">Gross Salary</th>
+                                    <th class="text-left" width="10%">Basic Salary</th>
+                                    <th class="text-left" width="10%">Component Additions</th>
+                                    <th class="text-left" width="10%">Gross Salary</th>
+                                    <th class="text-left" width="10%">Component Deductions</th>
                                     <th class="text-left" width="8%">State Income Tax</th>
                                     <th class="text-left" width="9%">
-                                        Soc.Sec.NPF<?php echo ' ' . $social_security_tax_percnt . '%'; ?></th>
-                                    <th class="text-left" width="9%">Employer Contribution 10%</th>
-                                    <th class="text-left" width="8%">Loan Deduction</th>
-                                    <th class="text-left" width="8%">Salary Advance</th>
+                                        Soc.Sec.NPF<?php echo $social_security_tax_percnt ? ' ' . $social_security_tax_percnt . '%' : ''; ?></th>
+                                    <th class="text-left" width="9%">Employer Contribution</th>
+                                    <th class="text-left" width="12%">Office Loan Deduction</th>
                                     <th class="text-left" width="10%">Total Deductions</th>
                                     <th class="text-left" width="8%">Net Salary</th>
                                 </tr>
@@ -111,9 +110,10 @@ table.payrollDatatableReport td.noborder {
 
                                 foreach ($employee_salary_charts as $key => $row) {
 
-                                    $total_benefits = floatval($row->medical_benefit) + floatval($row->family_benefit) + floatval($row->transportation_benefit) + floatval($row->other_benefit);
-
-                                    $total_deductions = floatval($row->income_tax) + floatval($row->soc_sec_npf_tax) + floatval($row->loan_deduct) + floatval($row->salary_advance);
+                                    $component_add_total_display = isset($row->component_add_total) ? (float) $row->component_add_total : 0.0;
+                                    $component_ded_total_display = isset($row->component_ded_total) ? (float) $row->component_ded_total : 0.0;
+                                    $office_loan_deduct = isset($row->office_loan_deduct) ? floatval($row->office_loan_deduct) : 0.0;
+                                    $total_deductions = $component_ded_total_display + floatval($row->income_tax) + floatval($row->soc_sec_npf_tax) + $office_loan_deduct;
 
                                 ?>
 
@@ -122,16 +122,14 @@ table.payrollDatatableReport td.noborder {
                                     <td class="text-left"><?php echo $row->first_name . ' ' . $row->last_name; ?></td>
                                     <td class="text-left"><?php echo $currency . ' ' . $row->basic_salary_pro_rated; ?>
                                     </td>
-                                    <td class="text-left"><?php echo $currency . ' ' . $total_benefits; ?></td>
-                                    <td class="text-left">
-                                        <?php echo $currency . ' ' . $row->transport_allowance_pro_rated; ?></td>
+                                    <td class="text-left"><?php echo $currency . ' ' . number_format($component_add_total_display, 2); ?></td>
                                     <td class="text-left"><?php echo $currency . ' ' . $row->gross_salary; ?></td>
+                                    <td class="text-left"><?php echo $currency . ' ' . number_format($component_ded_total_display, 2); ?></td>
                                     <td class="text-left"><?php echo $currency . ' ' . $row->income_tax; ?></td>
                                     <td class="text-left"><?php echo $currency . ' ' . $row->soc_sec_npf_tax; ?></td>
                                     <td class="text-left">
                                         <?php echo $currency . ' ' . floatval($row->employer_contribution); ?></td>
-                                    <td class="text-left"><?php echo $currency . ' ' . $row->loan_deduct; ?></td>
-                                    <td class="text-left"><?php echo $currency . ' ' . $row->salary_advance; ?></td>
+                                    <td class="text-left"><?php echo $currency . ' ' . number_format($office_loan_deduct, 2); ?></td>
 
                                     <td class="text-left"><?php echo $currency . ' ' . $total_deductions; ?></td>
 
@@ -149,7 +147,7 @@ table.payrollDatatableReport td.noborder {
 
                             <tfoot>
                                 <tr>
-                                    <td colspan="13" class="noborder">
+                                    <td colspan="12" class="noborder">
                                         <table border="0" width="100%"
                                             style="padding-top: 100px;border: none !important;">
                                             <tr>

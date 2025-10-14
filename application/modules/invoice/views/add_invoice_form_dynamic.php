@@ -24,6 +24,8 @@
 
             <div class="panel-body">
                 <?php echo form_open_multipart('invoice/invoice/bdtask_manual_sales_insert',array('class' => 'form-vertical', 'id' => 'insert_sale','name' => 'insert_sale'))?>
+                <?php $sale_type_value = set_value('sale_type', 'cash'); ?>
+                <input type="hidden" name="sale_type" id="sale_type" value="<?php echo html_escape($sale_type_value); ?>">
                 <div class="row">
 
                     <div class="col-sm-6" id="payment_from_1">
@@ -49,6 +51,21 @@
                         </div>
                     </div>
 
+                </div>
+
+                <?php $show_payment_sections = ($sale_type_value !== 'credit_sale'); ?>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group row">
+                            <label for="sale_type_selector" class="col-sm-3 col-form-label">Payment Timing</label>
+                            <div class="col-sm-9">
+                                <select id="sale_type_selector" name="sale_type_option" class="form-control sale-type-select">
+                                    <option value="cash" <?php echo ($sale_type_value !== 'credit_sale') ? 'selected' : ''; ?>>Pay Now</option>
+                                    <option value="credit_sale" <?php echo ($sale_type_value === 'credit_sale') ? 'selected' : ''; ?>>Pay Later</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="row">
@@ -77,14 +94,12 @@
                             </div>
                         </div>
                     </div> -->
-                    <div class="col-sm-6" id="bank_div">
+                    <div class="col-sm-6 invoice-payment-controls" id="bank_div" <?php echo $show_payment_sections ? '' : 'style="display:none;"'; ?>>
                         <div class="form-group row">
-                            <label for="bank" class="col-sm-3 col-form-label"><?php
-                                    echo display('bank');
-                                    ?> <i class="text-danger">*</i></label>
+                            <label for="bank_id" class="col-sm-3 col-form-label">Payment Method <i class="text-danger">*</i></label>
                             <div class="col-sm-6">
                                 <select name="bank_id" class="form-control bankpayment" id="bank_id">
-                                    <option value="">Select Location</option>
+                                    <option value=""><?php echo display('select_option'); ?></option>
                                     <?php foreach($bank_list as $bank){?>
                                     <option value="<?php echo html_escape($bank['bank_id'])?>">
                                         <?php echo html_escape($bank['bank_name']);?></option>
@@ -104,7 +119,6 @@
                                 <th class="text-center product_field"><?php echo display('item_information') ?> <i
                                         class="text-danger">*</i></th>
                                 <th class="text-center"><?php echo display('item_description')?></th>
-                                <th class="text-center"><?php echo display('batch_no')?><i class="text-danger">*</i></th>
                                 <th class="text-center"><?php echo display('available_qnty') ?></th>
                                 <th class="text-center"><?php echo display('unit') ?></th>
                                 <th class="text-center"><?php echo display('quantity') ?> <i class="text-danger">*</i>
@@ -135,16 +149,12 @@
 
                                     <input type="hidden" class="autocomplete_hidden_value product_id_1"
                                         name="product_id[]" id="SchoolHiddenId" />
+                                    <input type="hidden" name="serial_no[]" id="serial_no_1" />
 
                                     <input type="hidden" class="baseUrl" value="<?php echo base_url(); ?>" />
                                 </td>
                                 <td>
                                     <input type="text" name="desc[]" class="form-control text-right " tabindex="6" />
-                                </td>
-                                <td class="invoice_fields">
-                                    <select class="form-control basic-single" onchange="invoice_product_batch(1)" id="serial_no_1" required name="serial_no[]" tabindex="7">
-                                        <option></option>
-                                    </select>
                                 </td>
                                 <td>
                                     <input type="text" name="available_quantity[]"
@@ -300,7 +310,7 @@
                                         value="0" readonly="readonly" placeholder="" />
                                 </td>
                             </tr>
-                            <tr>
+                            <tr class="invoice-payment-row" <?php echo $show_payment_sections ? '' : 'style="display:none;"'; ?>>
                                 <td class="text-right" colspan="9"><b><?php echo display('paid_ammount') ?>:</b></td>
                                 <td class="text-right">
                                     <input type="hidden" name="baseUrl" class="baseUrl"
@@ -310,15 +320,15 @@
                                         tabindex="15" value="" />
                                 </td>
                             </tr>
-                            <tr>
+                            <tr class="invoice-payment-row" <?php echo $show_payment_sections ? '' : 'style="display:none;"'; ?>>
                                 <td class="text-right" colspan="9"><b><?php echo display('due') ?>:</b></td>
                                 <td class="text-right">
                                     <input type="text" id="dueAmmount" class="form-control text-right" name="due_amount"
                                         value="0.00" readonly="readonly" />
                                 </td>
                             </tr>
-                            <tr>
-                                
+                            <tr class="invoice-payment-row" <?php echo $show_payment_sections ? '' : 'style="display:none;"'; ?>>
+
                                 <td colspan="9" class="text-right"><b><?php echo display('change'); ?>:</b></td>
                                 <td class="text-right">
                                     <input type="text" id="change" class="form-control text-right" name="change"
@@ -332,10 +342,10 @@
                     <p hidden id="old-amount"><?php echo 0;?></p>
                     <p hidden id="pay-amount"></p>
                     <p hidden id="change-amount"></p>
-                    <div class="col-sm-6 table-bordered p-20">
+                    <div class="col-sm-6 table-bordered p-20 invoice-payment-controls" <?php echo $show_payment_sections ? '' : 'style="display:none;"'; ?>>
                         <div id="adddiscount" class="display-none">
                             <div class="row no-gutters">
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-6 payment-type-wrapper">
                                     <label for="payments"
                                         class="col-form-label pb-2"><?php echo display('payment_type');?></label>
 

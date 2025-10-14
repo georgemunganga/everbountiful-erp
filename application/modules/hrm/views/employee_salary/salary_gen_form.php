@@ -1,5 +1,7 @@
 <link href="<?php echo base_url('application/modules/addon/assets/css/style.css'); ?>" rel="stylesheet" type="text/css"/>
 
+<?php $salary_groups = isset($salary_groups) ? $salary_groups : array(); ?>
+
 <div class="row">
 
     <div class="col-sm-12 col-md-12">
@@ -19,10 +21,34 @@
 
                     <?php echo form_open('hrm/Payroll/employee_salary_generate','id="salary_form"')?>
 
-                        <div id="salar_month_box" class="form-group has-success row">
-                            <label for="name" class="col-sm-3 col-form-label"><?php echo display('salar_month') ?></label>
+                        <?php $selected_group = set_value('salary_group_id'); ?>
+                        <?php $pay_date_label = display('payment_date'); ?>
+                        <?php $pay_date_label = ($pay_date_label === 'payment_date') ? 'Salary Date' : $pay_date_label; ?>
+                        <?php $group_label = display('group'); ?>
+                        <?php $group_label = ($group_label === 'group') ? 'Group' : $group_label; ?>
+                        <div class="form-group row">
+                            <label for="salary_group_id" class="col-sm-3 col-form-label"><?php echo html_escape($group_label); ?><span class="text-danger">*</span></label>
                             <div class="col-sm-8">
-                            <input type="text" class="form-control form-control-success monthYearPicker" name="name" id="salar_month"  autocomplete="off" placeholder="<?php echo display('salar_month') ?>" id="name">
+                                <select name="salary_group_id" id="salary_group_id" class="form-control" <?php echo empty($salary_groups) ? 'disabled' : ''; ?> required>
+                                    <option value=""><?php echo display('select_one'); ?></option>
+                                    <?php if (!empty($salary_groups)) { ?>
+                                        <?php foreach ($salary_groups as $group) { ?>
+                                            <?php $group_id = isset($group->id) ? (int) $group->id : 0; ?>
+                                            <option value="<?php echo $group_id; ?>" <?php echo ((string) $group_id === (string) $selected_group) ? 'selected' : ''; ?>>
+                                                <?php echo html_escape(isset($group->group_name) ? $group->group_name : $group_id); ?>
+                                            </option>
+                                        <?php } ?>
+                                    <?php } else { ?>
+                                        <option value=""><?php echo display('no_data_found'); ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="salar_month_box" class="form-group has-success row">
+                            <label for="salar_month" class="col-sm-3 col-form-label"><?php echo html_escape($pay_date_label); ?></label>
+                            <div class="col-sm-8">
+                            <input type="date" class="form-control" name="name" id="salar_month"  value="<?php echo html_escape(set_value('name', date('Y-m-d'))); ?>" required>
 
                             <div class="form-feedback"><!-- Success! Almost done it. --></div>
                         
@@ -47,7 +73,8 @@
                             <tr>
                                 <th><?php echo display('sl') ?></th>
                                 <th><?php echo display('sal_name') ?></th>
-                                <th><?php echo display('gdate') ?></th>
+                                <th><?php echo html_escape($group_label); ?></th>
+                                <th><?php echo html_escape($pay_date_label); ?></th>
                                 <th><?php echo display('generate_by') ?></th>
 
                                 <th><?php echo display('status') ?></th>
@@ -65,8 +92,9 @@
                                     <tr class="<?php echo ($sl & 1)?"odd gradeX":"even gradeC" ?>">
                                         <td><?php echo $sl; ?></td>
                                         <td><?php echo $que->name; ?></td>
-                                        <td><?php echo $que->gdate; ?></td>
-                                        <td><?php echo $que->first_name.' '.$que->first_name; ?></td>
+                                        <td><?php echo !empty($que->group_name) ? html_escape($que->group_name) : '-'; ?></td>
+                                        <td><?php echo html_escape(!empty($que->pay_date) ? $que->pay_date : $que->gdate); ?></td>
+                                        <td><?php echo html_escape(trim($que->first_name.' '.$que->last_name)); ?></td>
 
                                         <td><?php echo $que->approved == 1?'<button type="button" class="btn btn-success btn-rounded w-md m-b-5">Approved</button>':'<button type="button" class="btn btn-warning btn-rounded w-md m-b-5">Not Approved</button>'; ?></td>
                                         <td><?php echo $que->approved_date; ?></td>

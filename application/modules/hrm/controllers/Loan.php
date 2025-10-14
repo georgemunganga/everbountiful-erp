@@ -12,12 +12,21 @@ class Loan extends MX_Controller {
     const LOAN_SCHEDULE_META_START = '[[SCHEDULE_META]]';
     const LOAN_SCHEDULE_META_END   = '[[/SCHEDULE_META]]';
 
+    /**
+     * Cached payment channel options.
+     *
+     * @var array|null
+     */
+    private $payment_channel_options_cache = null;
+
     public function __construct()
     {
         parent::__construct();
 
         $this->load->model(array(
-            'loan_model'));
+            'loan_model',
+            'account/accounts_model'
+        ));
         if (! $this->session->userdata('isLogIn'))
             redirect('login');
           
@@ -26,26 +35,43 @@ class Loan extends MX_Controller {
 
     private function get_payment_channel_options()
     {
-        return array(
-            'payroll' => 'Payroll',
-            'cash'    => 'Cash',
-            'bank'    => 'Bank Transfer',
+        if ($this->payment_channel_options_cache !== null) {
+            return $this->payment_channel_options_cache;
+        }
+
+        $channels = array(
+            'cash' => display('cash_payment'),
         );
+
+        $payment_methods = $this->accounts_model->payment_methodlist();
+        if (!empty($payment_methods)) {
+            foreach ($payment_methods as $method) {
+                if (empty($method->HeadCode) || empty($method->HeadName)) {
+                    continue;
+                }
+                $key = 'bank:' . $method->HeadCode;
+                $channels[$key] = $method->HeadName;
+            }
+        }
+
+        $this->payment_channel_options_cache = $channels;
+        return $this->payment_channel_options_cache;
     }
 
     private function normalize_payment_channel($channel)
     {
-        $channel = strtolower((string) $channel);
-        $options = array_keys($this->get_payment_channel_options());
-        if (!in_array($channel, $options, true)) {
-            return 'payroll';
+        $channel = (string) $channel;
+        $options = $this->get_payment_channel_options();
+        if (isset($options[$channel])) {
+            return $channel;
         }
-        return $channel;
+        return 'cash';
     }
 
     private function payment_channel_requires_bank($channel)
     {
-        return $this->normalize_payment_channel($channel) === 'bank';
+        $normalized = $this->normalize_payment_channel($channel);
+        return (strpos($normalized, 'bank:') === 0);
     }
 
     private function payment_channel_label($channel)
@@ -53,6 +79,15 @@ class Loan extends MX_Controller {
         $options = $this->get_payment_channel_options();
         $normalized = $this->normalize_payment_channel($channel);
         return isset($options[$normalized]) ? $options[$normalized] : ucfirst($normalized);
+    }
+
+    private function extract_bank_headcode($channel)
+    {
+        $normalized = $this->normalize_payment_channel($channel);
+        if (strpos($normalized, 'bank:') === 0) {
+            return (int) substr($normalized, 5);
+        }
+        return null;
     }
 
     private function normalize_date_input($date, $fallback = null)
@@ -109,6 +144,40 @@ class Loan extends MX_Controller {
         }
 
         return $this->add_months_to_date($start_date, $period_months - 1);
+    }
+
+    private function calculate_period_months($start_date, $end_date)
+    {
+        $start_date = $this->normalize_date_input($start_date, null);
+        $end_date   = $this->normalize_date_input($end_date, null);
+
+        if (empty($start_date) || empty($end_date)) {
+            return 1;
+        }
+
+        $start_time = strtotime($start_date);
+        $end_time   = strtotime($end_date);
+
+        if ($start_time === false || $end_time === false || $end_time <= $start_time) {
+            return 1;
+        }
+
+        $period = 1;
+        $limit  = 600;
+
+        while ($period <= $limit) {
+            $candidate      = $this->add_months_to_date($start_date, $period - 1);
+            $candidate_time = strtotime($candidate);
+            if ($candidate_time === $end_time) {
+                return $period;
+            }
+            if ($candidate_time > $end_time) {
+                return max(1, $period - 1);
+            }
+            $period++;
+        }
+
+        return $period;
     }
 
     private function build_schedule_payload(array $overrides = array(), $fallback_disbursement = null)
@@ -492,6 +561,22 @@ class Loan extends MX_Controller {
         }
     }
 
+    private function normalize_amount_input($value)
+    {
+        if (is_array($value)) {
+            $value = reset($value);
+        }
+        if ($value === null) {
+            return 0.0;
+        }
+        $normalized = preg_replace('/[^0-9\.\-]/', '', str_replace(',', '', (string) $value));
+        if ($normalized === '' || $normalized === '-' || $normalized === '.'
+            || $normalized === '-.' || $normalized === '.-') {
+            return 0.0;
+        }
+        return round((float) $normalized, 2);
+    }
+
     private function ensure_person_for_employee($employee_id)
     {
         if (empty($employee_id)) {
@@ -591,7 +676,8 @@ class Loan extends MX_Controller {
     }
 
 
-        public function manage_office_loans() {
+    public function manage_office_loans() {
+        // dd('here');
         #pagination starts
         $data['title']     = display('manage_loan');
         $config["base_url"] = base_url('manage_office_loans/');
@@ -623,8 +709,35 @@ class Loan extends MX_Controller {
         if (!empty($loan_list)) {
             foreach ($loan_list as $key => $loan) {
                 $loan_list[$key]['date'] = $this->occational->dateConvert($loan['date']);
-                $loan_list[$key]['debit'] = (float) $loan['debit'];
-                $total_amount += $loan_list[$key]['debit'];
+                $principal_amount = isset($loan['principal_amount']) ? (float) $loan['principal_amount'] : (float) $loan['debit'];
+                $loan_list[$key]['debit'] = $principal_amount;
+                $loan_list[$key]['total_credit'] = (float) $loan['total_credit'];
+                $loan_list[$key]['outstanding'] = max(0, round($principal_amount - $loan_list[$key]['total_credit'], 2));
+                $loan_list[$key]['employee_display_name'] = !empty($loan['employee_full_name']) ? $loan['employee_full_name'] : $loan['person_name'];
+
+                $parsed_schedule = $this->parse_schedule_from_details(isset($loan['details']) ? $loan['details'] : '');
+                $loan_list[$key]['details'] = $parsed_schedule['details'];
+
+                if (!empty($parsed_schedule['schedule'])) {
+                    $schedule_meta = $parsed_schedule['schedule'];
+                    if (empty($loan_list[$key]['disbursement_date']) && !empty($schedule_meta['disbursement_date'])) {
+                        $loan_list[$key]['disbursement_date'] = $schedule_meta['disbursement_date'];
+                    }
+                    if (empty($loan_list[$key]['repayment_start_date']) && !empty($schedule_meta['repayment_start_date'])) {
+                        $loan_list[$key]['repayment_start_date'] = $schedule_meta['repayment_start_date'];
+                    }
+                    if (empty($loan_list[$key]['repayment_end_date']) && !empty($schedule_meta['repayment_end_date'])) {
+                        $loan_list[$key]['repayment_end_date'] = $schedule_meta['repayment_end_date'];
+                    }
+                    if (empty($loan_list[$key]['repayment_period']) && !empty($schedule_meta['repayment_period'])) {
+                        $loan_list[$key]['repayment_period'] = $schedule_meta['repayment_period'];
+                    }
+                    if (!empty($schedule_meta['payment_channel_label'])) {
+                        $loan_list[$key]['payment_channel_label'] = $schedule_meta['payment_channel_label'];
+                    }
+                }
+
+                $total_amount += $principal_amount;
             }
         }
 
@@ -637,7 +750,9 @@ class Loan extends MX_Controller {
 
 
     public function office_loan_overview($person_id) {
+       
         $person_details = $this->loan_model->select_person_by_id($person_id);
+        // dd($person_details);
         if (empty($person_details)) {
             $this->session->set_flashdata(array('exception' => display('not_found')));
             redirect(base_url('manage_office_loans'));
@@ -662,6 +777,10 @@ class Loan extends MX_Controller {
 
         if (!empty($ledger)) {
             foreach ($ledger as $key => $entry) {
+                $parsed = $this->parse_schedule_from_details(isset($entry['details']) ? $entry['details'] : '');
+                $ledger[$key]['details'] = $parsed['details'];
+                $ledger[$key]['schedule_meta'] = $parsed['schedule'];
+
                 if (empty($primary_detail) && (float) $entry['debit'] > 0) {
                     $detail_candidate = $this->loan_model->get_office_loan_detail($entry['transaction_id']);
                     if (!empty($detail_candidate)) {
@@ -847,31 +966,14 @@ class Loan extends MX_Controller {
         echo modules::run('template/layout', $data);
     }
 
-       public function bdtask_add_office_loan() {
-<<<<<<< HEAD
-       $data['title']       = display('add_office_loan');
-       $data['employees']   = $this->db->select('id, first_name, last_name, phone, address_line_1')
-=======
-        $data['title']       = display('add_office_loan');
-        $data['employees']   = $this->db->select('id, first_name, last_name, phone, address_line_1')
->>>>>>> final
-            ->from('employee_history')
-            ->order_by('first_name', 'asc')
-            ->order_by('last_name', 'asc')
-            ->get()
-            ->result();
-<<<<<<< HEAD
-        $data['bank_list']   = $this->db->select('bank_id, bank_name')
-            ->from('bank_add')
-            ->order_by('bank_name', 'asc')
-            ->get()
-            ->result_array();
+    public function bdtask_add_office_loan()
+    {
+        $data['title']            = display('add_office_loan');
+        $data['employees']        = $this->loan_model->employees_without_open_office_loan();
         $data['payment_channels'] = $this->get_payment_channel_options();
-        $data['schedule'] = $this->build_schedule_payload();
-=======
->>>>>>> final
-        $data['module']      = "hrm";
-        $data['page']        = "office_loan/add_office_loan";
+        $data['schedule']         = $this->build_schedule_payload();
+        $data['module']           = "hrm";
+        $data['page']             = "office_loan/add_office_loan";
         echo modules::run('template/layout', $data);
     }
 
@@ -880,13 +982,22 @@ class Loan extends MX_Controller {
      public function bdtask_insert_office_loan() {
         log_message('error', 'bdtask_insert_office_loan payload: ' . json_encode($this->input->post(NULL, TRUE)));
         $employee_id = $this->input->post('employee_id', TRUE);
-        $amount      = (float) $this->input->post('ammount', TRUE);
+        $amount      = $this->normalize_amount_input($this->input->post('ammount', TRUE));
+        $amount_formatted = number_format($amount, 2, '.', '');
         $date        = $this->input->post('date', TRUE);
         $details     = $this->input->post('details', TRUE);
-        $paytype     = (int) $this->input->post('paytype', TRUE);
+        $selected_channel_raw = $this->input->post('paytype', TRUE);
+        $payment_channel = $this->normalize_payment_channel($selected_channel_raw);
+        $paytype     = $this->payment_channel_requires_bank($payment_channel) ? 2 : 1;
         $bank_id     = $this->input->post('bank_id', TRUE);
 
-        $disbursement_date = $this->sanitize_date($this->input->post('disbursement_date', TRUE), $entry_date);
+        $entry_date = $this->sanitize_date($date, date('Y-m-d'));
+        if (empty($entry_date)) {
+            $entry_date = date('Y-m-d');
+        }
+
+        $disbursement_raw = $this->input->post('disbursement_date', TRUE);
+        $disbursement_date = $this->sanitize_date($disbursement_raw, $entry_date);
         if (empty($disbursement_date)) {
             $disbursement_date = $entry_date;
         }
@@ -895,8 +1006,6 @@ class Loan extends MX_Controller {
         if ($repayment_period < 1) {
             $repayment_period = 1;
         }
-
-        $monthly_installment = round($amount / max(1, $repayment_period), 2);
         $default_start_date = date('Y-m-d', strtotime('+1 month', strtotime($disbursement_date)));
         $repayment_start_date = $this->sanitize_date($this->input->post('repayment_start_date', TRUE), $default_start_date);
         if (strtotime($repayment_start_date) === false) {
@@ -906,17 +1015,43 @@ class Loan extends MX_Controller {
             $repayment_start_date = $default_start_date;
         }
 
-        $calculated_end_date = date('Y-m-d', strtotime('+' . ($repayment_period - 1) . ' month', strtotime($repayment_start_date)));
-        $repayment_end_date_input = $this->sanitize_date($this->input->post('repayment_end_date', TRUE), $calculated_end_date);
-        $repayment_end_date = ($repayment_end_date_input === $calculated_end_date) ? $repayment_end_date_input : $calculated_end_date;
+        $requested_due_raw = $this->input->post('repayment_end_date', TRUE);
+        $requested_due_clean = $this->sanitize_date($requested_due_raw, null);
+        $due_adjusted = false;
+
+        if ($requested_due_raw !== '' && (empty($requested_due_clean) || strtotime($requested_due_clean) === false)) {
+            $due_adjusted = true;
+            $repayment_end_date = $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        } elseif (!empty($requested_due_clean) && strtotime($requested_due_clean) < strtotime($repayment_start_date)) {
+            $due_adjusted = true;
+            $repayment_end_date = $repayment_start_date;
+        } else {
+            $repayment_end_date = $requested_due_clean ?: $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        }
+
+        $repayment_period = max(1, (int) $this->calculate_period_months($repayment_start_date, $repayment_end_date));
+        $repayment_end_date = $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        if (!empty($requested_due_clean) && strtotime($requested_due_clean) !== false) {
+            if (strtotime($requested_due_clean) !== strtotime($repayment_end_date)) {
+                $due_adjusted = true;
+            }
+        }
+
+        $monthly_installment = round($amount / max(1, $repayment_period), 2);
+        $monthly_installment_formatted = number_format($monthly_installment, 2, '.', '');
+
+        $next_due_input = $this->sanitize_date($this->input->post('next_due_date', TRUE), $repayment_start_date);
+        if (empty($next_due_input) || strtotime($next_due_input) === false || strtotime($next_due_input) < strtotime($repayment_start_date)) {
+            $next_due_date = $repayment_start_date;
+        } else {
+            $next_due_date = $next_due_input;
+        }
 
         if (empty($entry_date)) {
             $entry_date = date('Y-m-d');
         }
         $details = !empty($details) ? $details : '';
         if ($paytype !== 2) {
-            $paytype = 1;
->>>>>>> final
             $bank_id = '';
         }
 
@@ -929,6 +1064,11 @@ class Loan extends MX_Controller {
 
         if (empty($person_context) || empty($person_context['person'])) {
             $this->session->set_flashdata(array('exception' => display('not_added')));
+            redirect(base_url('add_office_loan'));
+        }
+
+        if ($this->loan_model->employee_has_open_office_loan($employee_id)) {
+            $this->session->set_flashdata(array('exception' => 'Employee already has an active office loan.'));
             redirect(base_url('add_office_loan'));
         }
 
@@ -971,19 +1111,16 @@ class Loan extends MX_Controller {
         $transaction_id = $this->occational->generator(10);
 
         $bankcoaid = '';
-<<<<<<< HEAD
-        if ($this->payment_channel_requires_bank($channel)) {
-            $bank = $this->db->select('bank_name')
-                ->from('bank_add')
-                ->where('bank_id', $bank_id)
-                ->get()
-                ->row();
-
-=======
+        $channel_bank_headcode = $this->extract_bank_headcode($payment_channel);
+        if ($channel_bank_headcode !== null) {
+            $bankcoaid = $channel_bank_headcode;
+        }
         if ($paytype === 2) {
             if (empty($bank_id)) {
-                $this->session->set_flashdata(array('exception' => display('not_added')));
-                redirect(base_url('add_office_loan'));
+                if ($bankcoaid === '') {
+                    $this->session->set_flashdata(array('exception' => display('not_added')));
+                    redirect(base_url('add_office_loan'));
+                }
             }
 
             $bank = $this->db->select('bank_name')
@@ -992,7 +1129,6 @@ class Loan extends MX_Controller {
                 ->get()
                 ->row();
 
->>>>>>> final
             if (!$bank) {
                 $this->session->set_flashdata(array('exception' => display('not_added')));
                 redirect(base_url('add_office_loan'));
@@ -1006,24 +1142,33 @@ class Loan extends MX_Controller {
 
             if ($bank_head) {
                 $bankcoaid = $bank_head->HeadCode;
-            } else {
+            } elseif ($bankcoaid === '') {
                 $this->session->set_flashdata(array('exception' => display('not_added')));
                 redirect(base_url('add_office_loan'));
             }
         }
 
-<<<<<<< HEAD
-        $details_with_schedule = $this->decorate_details_with_schedule($details, $schedule);
+        if ($paytype === 2 && empty($bankcoaid)) {
+            $this->session->set_flashdata(array('exception' => display('not_added')));
+            redirect(base_url('add_office_loan'));
+        }
 
-=======
->>>>>>> final
+        $schedule_payload = $this->build_schedule_payload(array(
+            'disbursement_date'    => $disbursement_date,
+            'repayment_period'     => $repayment_period,
+            'repayment_start_date' => $repayment_start_date,
+            'repayment_end_date'   => $repayment_end_date,
+            'payment_channel'      => $payment_channel,
+        ), $disbursement_date);
+        $details_with_schedule = $this->decorate_details_with_schedule($details, $schedule_payload);
+
         $ledger_data = array(
             'transaction_id' => $transaction_id,
             'person_id'      => $personinfo->person_id,
-            'debit'          => $amount,
+            'debit'          => $amount_formatted,
             'date'           => $date,
-            'details'        => $details,
->>>>>>> final
+            'details'        => $details_with_schedule,
+
             'status'         => 1
         );
 
@@ -1032,12 +1177,8 @@ class Loan extends MX_Controller {
           'Vtype'          =>  'LNR',
           'VDate'          =>  $entry_date,
           'COAID'          =>  $headcode,
-<<<<<<< HEAD
-          'Narration'      =>  'Loan for '.$personinfo->person_name,
-=======
           'Narration'      =>  'Loan for .'.$personinfo->person_name,
->>>>>>> final
-          'Debit'          =>  $amount,
+          'Debit'          =>  $amount_formatted,
           'Credit'         =>  0,
           'IsPosted'       =>  1,
           'CreateBy'       =>  $this->session->userdata('id'),
@@ -1045,15 +1186,18 @@ class Loan extends MX_Controller {
           'IsAppove'       =>  1
         );
 
+        $credit_coaid = ($paytype === 2) ? $bankcoaid : 111000002;
+        $credit_narration = ($paytype === 2 ? 'Loan for .' : 'Cash in Hand Credit For ') . $personinfo->person_name;
+
         $credit_entry = array(
           'VNo'            =>  $transaction_id,
           'Vtype'          =>  'LNR',
           'VDate'          =>  $date,
-          'COAID'          =>  $paytype === 2 ? $bankcoaid : 111000002,
-          'Narration'      =>  ($paytype === 2 ? 'Loan for .' : 'Cash in Hand Credit For ').$personinfo->person_name,
->>>>>>> final
+          'COAID'          =>  $credit_coaid,
+          'Narration'      =>  $credit_narration,
+
           'Debit'          =>  0,
-          'Credit'         =>  $amount,
+          'Credit'         =>  $amount_formatted,
           'IsPosted'       =>  1,
           'CreateBy'       =>  $this->session->userdata('id'),
           'CreateDate'     =>  date('Y-m-d H:i:s'),
@@ -1070,16 +1214,19 @@ class Loan extends MX_Controller {
                 'repayment_period'     => $repayment_period,
                 'repayment_start_date' => $repayment_start_date,
                 'repayment_end_date'   => $repayment_end_date,
-                'principal_amount'     => $amount,
-                'monthly_installment'  => $monthly_installment,
+                'principal_amount'     => $amount_formatted,
+                'monthly_installment'  => $monthly_installment_formatted,
                 'total_paid'           => 0.0,
-                'next_due_date'        => $repayment_start_date,
+                'next_due_date'        => $next_due_date,
             ));
 
             $this->db->insert('acc_transaction',$loan);
             $this->db->insert('acc_transaction',$credit_entry);
             $this->session->set_flashdata(array('message' => display('successfully_added')));
-            redirect(base_url('add_office_loan'));
+            if ($due_adjusted) {
+                $this->session->set_flashdata('warning', 'Repayment due date was adjusted to align with the monthly repayment schedule.');
+            }
+            redirect(base_url('manage_office_loans'));
         } else {
             $this->session->set_flashdata(array('exception' => display('not_added')));
             redirect(base_url('add_office_loan'));
@@ -1101,14 +1248,6 @@ class Loan extends MX_Controller {
             redirect(base_url('manage_office_loans'));
         }
 
-<<<<<<< HEAD
-        $parsed_details = $this->parse_schedule_from_details($loan['details']);
-        $loan['details'] = $parsed_details['details'];
-        $schedule = $this->build_schedule_payload($parsed_details['schedule'], $loan['date']);
-        $loan['date'] = $schedule['disbursement_date'];
-
-=======
->>>>>>> final
         $credit_entry = $this->db->select('a.COAID, b.HeadName')
             ->from('acc_transaction a')
             ->join('acc_coa b', 'b.HeadCode = a.COAID', 'left')
@@ -1117,15 +1256,10 @@ class Loan extends MX_Controller {
             ->get()
             ->row();
 
-<<<<<<< HEAD
-        $bank_id  = '';
-        if ($credit_entry && (int) $credit_entry->COAID !== 111000002) {
-=======
         $paytype  = 1;
         $bank_id  = '';
         if ($credit_entry && (int) $credit_entry->COAID !== 111000002) {
             $paytype = 2;
->>>>>>> final
             if (!empty($credit_entry->HeadName)) {
                 $bank = $this->db->select('bank_id')
                     ->from('bank_add')
@@ -1138,24 +1272,6 @@ class Loan extends MX_Controller {
             }
         }
 
-<<<<<<< HEAD
-        if (empty($parsed_details['schedule'])) {
-            $schedule['payment_channel'] = ($credit_entry && (int) $credit_entry->COAID !== 111000002) ? 'bank' : 'cash';
-        }
-
-        if ($schedule['payment_channel'] === 'bank' && empty($bank_id) && $credit_entry && !empty($credit_entry->HeadName)) {
-            $bank = $this->db->select('bank_id')
-                ->from('bank_add')
-                ->where('bank_name', $credit_entry->HeadName)
-                ->get()
-                ->row();
-            if ($bank) {
-                $bank_id = $bank->bank_id;
-            }
-        }
-
-=======
->>>>>>> final
         $employee_id = '';
         if (!empty($loan['person_id']) && strpos($loan['person_id'], 'EMP') === 0) {
             $employee_id = (int) ltrim(substr($loan['person_id'], 3), '0');
@@ -1181,22 +1297,11 @@ class Loan extends MX_Controller {
         $data['page']         = "office_loan/edit_office_loan";
         $data['loan']         = $loan;
         $data['paytype']      = $paytype;
->>>>>>> final
+
         $data['bank_id']      = $bank_id;
         $data['employees']    = $employees;
         $data['employee_id']  = $employee_id;
         $data['transaction_id'] = $transaction_id;
-<<<<<<< HEAD
-        $data['payment_channels'] = $this->get_payment_channel_options();
-        $data['schedule']     = $schedule;
-        $data['paytype']      = $schedule['payment_channel'];
-        $data['bank_list']    = $this->db->select('bank_id, bank_name')
-            ->from('bank_add')
-            ->order_by('bank_name', 'asc')
-            ->get()
-            ->result_array();
-=======
->>>>>>> final
 
         echo modules::run('template/layout', $data);
     }
@@ -1205,11 +1310,18 @@ class Loan extends MX_Controller {
     {
         $transaction_id = $this->input->post('transaction_id', TRUE);
         $employee_id    = $this->input->post('employee_id', TRUE);
-        $amount         = (float) $this->input->post('ammount', TRUE);
+        $amount         = $this->normalize_amount_input($this->input->post('ammount', TRUE));
         $date           = $this->input->post('date', TRUE);
         $details        = $this->input->post('details', TRUE);
-        $paytype        = (int) $this->input->post('paytype', TRUE);
+        $selected_channel_raw = $this->input->post('paytype', TRUE);
+        $payment_channel = $this->normalize_payment_channel($selected_channel_raw);
+        $paytype        = $this->payment_channel_requires_bank($payment_channel) ? 2 : 1;
         $bank_id        = $this->input->post('bank_id', TRUE);
+
+        $entry_date = $this->sanitize_date($date, date('Y-m-d'));
+        if (empty($entry_date)) {
+            $entry_date = date('Y-m-d');
+        }
 
         $disbursement_date = $this->sanitize_date($this->input->post('disbursement_date', TRUE), $entry_date);
         if (empty($disbursement_date)) {
@@ -1221,7 +1333,8 @@ class Loan extends MX_Controller {
             $repayment_period = 1;
         }
 
-        $monthly_installment = round($amount / max(1, $repayment_period), 2);
+        $amount_formatted = number_format($amount, 2, '.', '');
+
         $default_start_date = date('Y-m-d', strtotime('+1 month', strtotime($disbursement_date)));
         $repayment_start_date = $this->sanitize_date($this->input->post('repayment_start_date', TRUE), $default_start_date);
         if (strtotime($repayment_start_date) === false) {
@@ -1231,17 +1344,39 @@ class Loan extends MX_Controller {
             $repayment_start_date = $default_start_date;
         }
 
-        $calculated_end_date = date('Y-m-d', strtotime('+' . ($repayment_period - 1) . ' month', strtotime($repayment_start_date)));
-        $repayment_end_date_input = $this->sanitize_date($this->input->post('repayment_end_date', TRUE), $calculated_end_date);
-        $repayment_end_date = ($repayment_end_date_input === $calculated_end_date) ? $repayment_end_date_input : $calculated_end_date;
+        $requested_due_raw = $this->input->post('repayment_end_date', TRUE);
+        $requested_due_clean = $this->sanitize_date($requested_due_raw, null);
+        $due_adjusted = false;
 
-        if (empty($entry_date)) {
-            $entry_date = date('Y-m-d');
+        if ($requested_due_raw !== '' && (empty($requested_due_clean) || strtotime($requested_due_clean) === false)) {
+            $due_adjusted = true;
+            $repayment_end_date = $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        } elseif (!empty($requested_due_clean) && strtotime($requested_due_clean) < strtotime($repayment_start_date)) {
+            $due_adjusted = true;
+            $repayment_end_date = $repayment_start_date;
+        } else {
+            $repayment_end_date = $requested_due_clean ?: $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        }
+
+        $repayment_period = max(1, (int) $this->calculate_period_months($repayment_start_date, $repayment_end_date));
+        $repayment_end_date = $this->add_months_to_date($repayment_start_date, max($repayment_period - 1, 0));
+        if (!empty($requested_due_clean) && strtotime($requested_due_clean) !== false) {
+            if (strtotime($requested_due_clean) !== strtotime($repayment_end_date)) {
+                $due_adjusted = true;
+            }
+        }
+
+        $monthly_installment = round($amount / max(1, $repayment_period), 2);
+        $monthly_installment_formatted = number_format($monthly_installment, 2, '.', '');
+
+        $next_due_input = $this->sanitize_date($this->input->post('next_due_date', TRUE), $repayment_start_date);
+        if (empty($next_due_input) || strtotime($next_due_input) === false || strtotime($next_due_input) < strtotime($repayment_start_date)) {
+            $next_due_date = $repayment_start_date;
+        } else {
+            $next_due_date = $next_due_input;
         }
         $details = !empty($details) ? $details : '';
         if ($paytype !== 2) {
-            $paytype = 1;
->>>>>>> final
             $bank_id = '';
         }
 
@@ -1293,52 +1428,65 @@ class Loan extends MX_Controller {
         }
 
         $bankcoaid = '';
-<<<<<<< HEAD
-        if ($this->payment_channel_requires_bank($channel)) {
-=======
+        $channel_bank_headcode = $this->extract_bank_headcode($payment_channel);
+        if ($channel_bank_headcode !== null) {
+            $bankcoaid = $channel_bank_headcode;
+        }
         if ($paytype === 2) {
             if (empty($bank_id)) {
-                $this->session->set_flashdata(array('exception' => display('not_added')));
-                redirect(base_url('bdtask_edit_office_loan/' . $transaction_id));
+                if ($bankcoaid === '') {
+                    $this->session->set_flashdata(array('exception' => display('not_added')));
+                    redirect(base_url('bdtask_edit_office_loan/' . $transaction_id));
+                }
             }
 
->>>>>>> final
             $bank = $this->db->select('bank_name')
                 ->from('bank_add')
                 ->where('bank_id', $bank_id)
                 ->get()
                 ->row();
 
-            if (!$bank) {
+            if (!$bank && $bankcoaid === '') {
                 $this->session->set_flashdata(array('exception' => display('not_added')));
                 redirect(base_url('bdtask_edit_office_loan/' . $transaction_id));
             }
 
-            $bank_head = $this->db->select('HeadCode')
-                ->from('acc_coa')
-                ->where('HeadName', $bank->bank_name)
-                ->get()
-                ->row();
+            if ($bank) {
+                $bank_head = $this->db->select('HeadCode')
+                    ->from('acc_coa')
+                    ->where('HeadName', $bank->bank_name)
+                    ->get()
+                    ->row();
 
-            if ($bank_head) {
-                $bankcoaid = $bank_head->HeadCode;
-            } else {
-                $this->session->set_flashdata(array('exception' => display('not_added')));
-                redirect(base_url('bdtask_edit_office_loan/' . $transaction_id));
+                if ($bank_head) {
+                    $bankcoaid = $bank_head->HeadCode;
+                } elseif ($bankcoaid === '') {
+                    $this->session->set_flashdata(array('exception' => display('not_added')));
+                    redirect(base_url('bdtask_edit_office_loan/' . $transaction_id));
+                }
             }
         }
 
-<<<<<<< HEAD
-        $details_with_schedule = $this->decorate_details_with_schedule($details, $schedule);
+        if ($paytype === 2 && empty($bankcoaid)) {
+            $this->session->set_flashdata(array('exception' => display('not_added')));
+            redirect(base_url('bdtask_edit_office_loan/' . $transaction_id));
+        }
 
-=======
->>>>>>> final
+        $schedule_payload = $this->build_schedule_payload(array(
+            'disbursement_date'    => $disbursement_date,
+            'repayment_period'     => $repayment_period,
+            'repayment_start_date' => $repayment_start_date,
+            'repayment_end_date'   => $repayment_end_date,
+            'payment_channel'      => $payment_channel,
+        ), $disbursement_date);
+        $details_with_schedule = $this->decorate_details_with_schedule($details, $schedule_payload);
+
         $ledger_update = array(
             'person_id' => $personinfo->person_id,
-            'debit'     => $amount,
+            'debit'     => $amount_formatted,
             'date'      => $date,
-            'details'   => $details,
->>>>>>> final
+            'details'   => $details_with_schedule,
+
         );
 
         $this->db->where('transaction_id', $transaction_id)
@@ -1351,8 +1499,9 @@ class Loan extends MX_Controller {
             'repayment_period'     => $repayment_period,
             'repayment_start_date' => $repayment_start_date,
             'repayment_end_date'   => $repayment_end_date,
-        'principal_amount'     => $amount,
-        'monthly_installment'  => $monthly_installment,
+            'principal_amount'     => $amount_formatted,
+            'monthly_installment'  => $monthly_installment_formatted,
+            'next_due_date'        => $next_due_date,
         ));
 
         $loan = array(
@@ -1360,12 +1509,8 @@ class Loan extends MX_Controller {
           'Vtype'          =>  'LNR',
           'VDate'          =>  $entry_date,
           'COAID'          =>  $headcode,
-<<<<<<< HEAD
-          'Narration'      =>  'Loan for '.$personinfo->person_name,
-=======
           'Narration'      =>  'Loan for .'.$personinfo->person_name,
->>>>>>> final
-          'Debit'          =>  $amount,
+          'Debit'          =>  $amount_formatted,
           'Credit'         =>  0,
           'IsPosted'       =>  1,
           'CreateBy'       =>  $this->session->userdata('id'),
@@ -1373,15 +1518,18 @@ class Loan extends MX_Controller {
           'IsAppove'       =>  1
         );
 
+        $credit_coaid = ($paytype === 2) ? $bankcoaid : 111000002;
+        $credit_narration = ($paytype === 2 ? 'Loan for .' : 'Cash in Hand Credit For ') . $personinfo->person_name;
+
         $credit_entry = array(
           'VNo'            =>  $transaction_id,
           'Vtype'          =>  'LNR',
           'VDate'          =>  $date,
-          'COAID'          =>  $paytype === 2 ? $bankcoaid : 111000002,
-          'Narration'      =>  ($paytype === 2 ? 'Loan for .' : 'Cash in Hand Credit For ').$personinfo->person_name,
->>>>>>> final
+          'COAID'          =>  $credit_coaid,
+          'Narration'      =>  $credit_narration,
+
           'Debit'          =>  0,
-          'Credit'         =>  $amount,
+          'Credit'         =>  $amount_formatted,
           'IsPosted'       =>  1,
           'CreateBy'       =>  $this->session->userdata('id'),
           'CreateDate'     =>  date('Y-m-d H:i:s'),
@@ -1393,6 +1541,9 @@ class Loan extends MX_Controller {
         $this->db->insert('acc_transaction', $credit_entry);
 
         $this->session->set_flashdata(array('message' => display('successfully_updated')));
+        if ($due_adjusted) {
+            $this->session->set_flashdata('warning', 'Repayment due date was adjusted to align with the monthly repayment schedule.');
+        }
         redirect(base_url('manage_office_loans'));
     }
 
@@ -1424,7 +1575,8 @@ class Loan extends MX_Controller {
     }
 
 
-        public function bdtask_add_office_loan_payment() {
+	public function bdtask_add_office_loan_payment() {
+        $this->permission1->method('add_office_loan_payment','create')->access();
         $data['title']       = display('add_payment');
         $data['person_list'] = $this->loan_model->office_loan_persons();
         $data['module']      = "hrm";
@@ -1432,51 +1584,146 @@ class Loan extends MX_Controller {
         echo modules::run('template/layout', $data);
     }
 
+	public function get_person_office_loans($person_id = null)
+    {
+        $this->permission1->method('add_office_loan_payment','create')->access();
 
-        public function bdtask_submit_payment() {
-        $personid       = $this->input->post('person_id',TRUE);
-        $personinfo     = $this->db->select('person_name')->from('person_information')->where('person_id',$personid)->get()->row();
-        $headname       = $personid.'-'.$personinfo->person_name;
-        $headcid        = $this->db->select('HeadCode')->from('acc_coa')->where('HeadName',$headname)->get()->row()->HeadCode;
+        if ($person_id === null) {
+            $person_id = $this->input->get('person_id', true);
+        }
+
+        $response = array(
+            'status' => 'success',
+            'loans'  => array(),
+        );
+
+        if (!empty($person_id)) {
+            $loans = $this->loan_model->get_person_active_office_loans($person_id);
+            foreach ($loans as $loan) {
+                $remaining = max(0.0, floatval($loan->principal_amount) - floatval($loan->total_paid));
+                $response['loans'][] = array(
+                    'transaction_id'      => $loan->transaction_id,
+                    'remaining_balance'   => number_format($remaining, 2, '.', ''),
+                    'monthly_installment' => number_format((float) $loan->monthly_installment, 2, '.', ''),
+                    'next_due_date'       => $loan->next_due_date,
+                    'repayment_start'     => $loan->repayment_start_date,
+                    'repayment_end'       => $loan->repayment_end_date,
+                    'disbursement_date'   => $loan->disbursement_date,
+                );
+            }
+        } else {
+            $response['status'] = 'error';
+            $response['message'] = 'Invalid person.';
+        }
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($response));
+    }
+
+
+	public function bdtask_submit_payment() {
+        $this->permission1->method('add_office_loan_payment','create')->access();
+
+        $personid = $this->input->post('person_id',TRUE);
+        if (empty($personid)) {
+            $this->session->set_flashdata(array('exception' => display('please_try_again')));
+            redirect(base_url('add_office_loan_payment'));
+        }
+
+        $personinfo = $this->db->select('person_name, person_phone')
+            ->from('person_information')
+            ->where('person_id',$personid)
+            ->where('status',1)
+            ->get()
+            ->row();
+
+        if (empty($personinfo)) {
+            $this->session->set_flashdata(array('exception' => display('please_try_again')));
+            redirect(base_url('add_office_loan_payment'));
+        }
+
+        $loan_transaction_id = $this->input->post('loan_transaction_id', TRUE);
+        if (empty($loan_transaction_id)) {
+            $this->session->set_flashdata(array('exception' => display('select_one')));
+            redirect(base_url('add_office_loan_payment'));
+        }
+
+        $loan_detail = $this->loan_model->get_office_loan_detail($loan_transaction_id);
+        if (empty($loan_detail) || (string) $loan_detail->person_id !== (string) $personid) {
+            $this->session->set_flashdata(array('exception' => display('please_try_again')));
+            redirect(base_url('add_office_loan_payment'));
+        }
+
+        $remaining_balance = max(0.0, floatval($loan_detail->principal_amount) - floatval($loan_detail->total_paid));
+        if ($remaining_balance <= 0) {
+            $this->session->set_flashdata(array('exception' => display('please_try_again')));
+            redirect(base_url('add_office_loan_payment'));
+        }
+
+        $payment_date = $this->sanitize_date($this->input->post('date', TRUE), date('Y-m-d'));
+        $requested_amount = $this->normalize_amount_input($this->input->post('ammount', TRUE));
+
+        if ($requested_amount <= 0) {
+            $this->session->set_flashdata(array('exception' => display('not_added')));
+            redirect(base_url('add_office_loan_payment'));
+        }
+
+        $applied_amount = min($remaining_balance, $requested_amount);
+        $amount_formatted = number_format($applied_amount, 2, '.', '');
+
+        $headname = $personid.'-'.$personinfo->person_name;
+        $head = $this->db->select('HeadCode')->from('acc_coa')->where('HeadName',$headname)->get()->row();
+        if (empty($head)) {
+            $this->session->set_flashdata(array('exception' => display('please_try_again')));
+            redirect(base_url('add_office_loan_payment'));
+        }
+        $headcid = $head->HeadCode;
+
         $transaction_id = $this->occational->generator(10);
+        $paytype = (int) $this->input->post('paytype',TRUE);
 
-   $bank_id = $this->input->post('bank_id',TRUE);
-        if(!empty($bank_id)){
-       $bankname = $this->db->select('bank_name')->from('bank_add')->where('bank_id',$bank_id)->get()->row()->bank_name;
-    
-       $bankcoaid = $this->db->select('HeadCode')->from('acc_coa')->where('HeadName',$bankname)->get()->row()->HeadCode;
-       }else{
-        $bankcoaid='';
-       }
+        $bankcoaid = '';
+        if ($paytype === 2) {
+            $bank_id = $this->input->post('bank_id',TRUE);
+            if(!empty($bank_id)){
+                $bankname = $this->db->select('bank_name')->from('bank_add')->where('bank_id',$bank_id)->get()->row();
+                if ($bankname) {
+                    $bankcoa = $this->db->select('HeadCode')->from('acc_coa')->where('HeadName',$bankname->bank_name)->get()->row();
+                    if ($bankcoa) {
+                        $bankcoaid = $bankcoa->HeadCode;
+                    }
+                }
+            }
+        }
 
-        $data = array(
+        $ledger_payload = array(
             'transaction_id' => $transaction_id,
-            'person_id'      => $this->input->post('person_id',TRUE),
-            'credit'         => $this->input->post('ammount',TRUE),
-            'date'           => $this->input->post('date',TRUE),
+            'person_id'      => $personid,
+            'credit'         => $amount_formatted,
+            'date'           => $payment_date,
             'details'        => $this->input->post('details',TRUE),
             'status'         => 2
         );
+
         $paidloan = array(
           'VNo'            =>  $transaction_id,
           'Vtype'          =>  'LNP',
-          'VDate'          =>  $this->input->post('date',TRUE),
+          'VDate'          =>  $payment_date,
           'COAID'          =>  $headcid,
-          'Narration'      =>  'Loan Payment from .'.$personinfo->person_name,
+          'Narration'      =>  'Loan Payment from '.$personinfo->person_name,
           'Debit'          =>  0,
-          'Credit'         =>  $this->input->post('ammount',TRUE),
+          'Credit'         =>  $amount_formatted,
           'IsPosted'       =>  1,
           'CreateBy'       =>  $this->session->userdata('id'),
           'CreateDate'     =>  date('Y-m-d H:i:s'),
           'IsAppove'       =>  1
         ); 
-         $cc = array(
+         $cash_entry = array(
       'VNo'            =>  $transaction_id,
       'Vtype'          =>  'LNR',
-      'VDate'          =>  $this->input->post('date',TRUE),
+      'VDate'          =>  $payment_date,
       'COAID'          =>  111000002,
       'Narration'      =>  'Cash in Hand Debit For '.$personinfo->person_name,
-      'Debit'          =>  $this->input->post('ammount',TRUE),
+      'Debit'          =>  $amount_formatted,
       'Credit'         =>  0,
       'IsPosted'       =>  1,
       'CreateBy'       =>  $this->session->userdata('id'),
@@ -1486,13 +1733,13 @@ class Loan extends MX_Controller {
 
 
    // bank ledger
-   $bankc = array(
+   $bank_entry = array(
       'VNo'            =>  $transaction_id,
       'Vtype'          =>  'LNR',
-      'VDate'          =>  $this->input->post('date',TRUE),
+      'VDate'          =>  $payment_date,
       'COAID'          =>  $bankcoaid,
-      'Narration'      =>  'Loan for .'.$personinfo->person_name,
-      'Debit'          =>  $this->input->post('ammount',TRUE),
+      'Narration'      =>  'Loan Payment from '.$personinfo->person_name,
+      'Debit'          =>  $amount_formatted,
       'Credit'         =>  0,
       'IsPosted'       =>  1,
       'CreateBy'       =>  $this->session->userdata('id'),
@@ -1502,38 +1749,34 @@ class Loan extends MX_Controller {
 
 
 
-        $result = $this->loan_model->submit_payment($data);
+        $this->db->trans_start();
+        $result = $this->loan_model->submit_payment($ledger_payload);
         if ($result) {
             $this->db->insert('acc_transaction',$paidloan);
-            if($this->input->post('paytype',TRUE) == 2){
-        $this->db->insert('acc_transaction',$bankc);
+            if($paytype === 2 && !empty($bankcoaid)){
+        $this->db->insert('acc_transaction',$bank_entry);
        
-        }
-            if($this->input->post('paytype',TRUE) == 1){
-        $this->db->insert('acc_transaction',$cc);
-        }
-            $this->session->set_flashdata(array('message' => display('successfully_added')));
-            redirect(base_url('add_office_loan_payment'));
         } else {
+        $this->db->insert('acc_transaction',$cash_entry);
+        }
+            $this->loan_model->apply_office_loan_payment($loan_transaction_id, $applied_amount, $payment_date);
+        }
+        $this->db->trans_complete();
+
+        if (!$result || $this->db->trans_status() === false) {
             $this->session->set_flashdata(array('exception' => display('not_added')));
             redirect(base_url('add_office_loan_payment'));
         }
+
+        $message = display('successfully_added');
+        if ($requested_amount > $applied_amount) {
+            $message .= ' ('.sprintf('%0.2f/%0.2f', $applied_amount, $requested_amount).')';
+        }
+
+        $this->session->set_flashdata(array('message' => $message));
+        redirect(base_url('add_office_loan_payment'));
     }
 
-            public function bdtask_edit_office_person($person_id) {
-        $person_list = $this->loan_model->select_person_by_id($person_id);
-        $data = array(
-            'title'          => display('personal_edit'),
-            'person_id'      => $person_list[0]['person_id'],
-            'person_name'    => $person_list[0]['person_name'],
-            'person_phone'   => $person_list[0]['person_phone'],
-            'person_address' => $person_list[0]['person_address'],
-        );
-
-        $data['module']       = "hrm";
-        $data['page']         = "office_loan/person_edit"; 
-        echo modules::run('template/layout', $data);
-    }
 
 
         public function update_person($person_id) {

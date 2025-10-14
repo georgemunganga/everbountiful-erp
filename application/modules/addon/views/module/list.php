@@ -56,7 +56,7 @@
                                       <div class="caption">
                                         <h3><span class="addon_title"> <?php echo html_escape($livemod->module_name); ?></span>
 
-                                        <span class="price addon_price">$<?php echo number_format($livemod->price,2); ?></span>
+                                        <span class="price addon_price">K<?php echo number_format($livemod->price,2); ?></span>
 
                                         </h3>
                                       

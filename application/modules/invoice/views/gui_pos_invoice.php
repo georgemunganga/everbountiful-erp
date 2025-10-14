@@ -288,7 +288,7 @@
                                                     src="http://localhost/www/salesERPphp8.2/assets/static-img/bKash-logo.png"
                                                     alt="">
                                                 <span>Card</span></button>
-                                            <strong>Total Payable: </strong> <strong id="total_payable">$</strong>
+                                            <strong>Total Payable: </strong> <strong id="total_payable">K</strong>
                                         </div>
                                         <div class="col-sm-12 mb-3">
                                             <div class="input-group d-flex gap-10 position-relative">
@@ -1306,7 +1306,9 @@ $('#draft_list').on('change', function() {
                 <input type="hidden" class="form-control autocomplete_hidden_value product_id_${product_id}" name="product_id[]" id="SchoolHiddenId_${product_id}" value="${product_id}"/>
             </td>
             <td>
-                <input type="text" name="batch_id[]" class="form-control batch_id_td" value="${batch_id}" readonly>
+                <select name="issue_location_id[]" class="form-control issue_location_td" data-role="issue-location">
+                    <option value="">Select Location</option>
+                </select>
             </td>
             <td>
                 <input type="text" name="available_quantity[]" class="form-control available_quantity_td text-right available_quantity_${product_id}" 

@@ -17,6 +17,7 @@ class Purchase extends MX_Controller {
             'purchase_model',
             'account/Accounts_model'
         )); 
+        $this->load->library('InventoryLedger');
         if (! $this->session->userdata('isLogIn'))
             redirect('login');
           
@@ -27,6 +28,7 @@ class Purchase extends MX_Controller {
         $data['title']       = display('add_purchase');
         $data['all_supplier']= $this->purchase_model->supplier_list();
         $data['all_pmethod'] = $this->purchase_model->pmethod_dropdown();
+        $data['stock_locations'] = $this->purchase_model->get_stock_locations();
         $data['module']      = "purchase";
         $data['page']        = "add_purchase_form"; 
         echo modules::run('template/layout', $data);
@@ -136,12 +138,14 @@ public function bdtask_purchase_edit_form($purchase_id = null){
             'due_amount'        => $purchase_detail[0]['due_amount'],
             'multi_paytype'     => $multi_pay_data,
             'is_credit'         => $purchase_detail[0]['is_credit'],
+            'stock_location_id' => $purchase_detail[0]['stock_location_id'],
         );
-        
+
         $data['all_pmethod']    = $this->purchase_model->pmethod_dropdown_new();
 
-        
+
         $data['all_pmethodwith_cr'] = $this->purchase_model->pmethod_dropdown();
+        $data['stock_locations'] = $this->purchase_model->get_stock_locations();
         $data['module']         = "purchase";
         $data['page']           = "edit_purchase_form"; 
         echo modules::run('template/layout', $data);
@@ -164,9 +168,11 @@ public function bdtask_purchase_edit_form($purchase_id = null){
         $this->form_validation->set_rules('supplier_id', display('supplier') ,'required|max_length[15]');
         $this->form_validation->set_rules('chalan_no', display('invoice_no') ,'required|max_length[20]|is_unique[product_purchase.chalan_no]');
         $this->form_validation->set_rules('product_id[]',display('product'),'required|max_length[20]');
-        $this->form_validation->set_rules('multipaytype[]',display('payment_type'),'required');
-        $this->form_validation->set_rules('product_quantity[]',display('quantity'),'required|max_length[20]');
-        $this->form_validation->set_rules('product_rate[]',display('rate'),'required|max_length[20]');
+      $this->form_validation->set_rules('multipaytype[]',display('payment_type'),'required');
+      $this->form_validation->set_rules('product_quantity[]',display('quantity'),'required|max_length[20]');
+      $this->form_validation->set_rules('product_rate[]',display('rate'),'required|max_length[20]');
+      $this->form_validation->set_rules('stock_location_id', 'Location','required|integer');
+        $this->form_validation->set_rules('stock_location_id', 'Location','required|integer');
         $discount_per = $this->input->post('discount_per',TRUE);
         $finyear = $this->input->post('finyear',true);
 
@@ -239,6 +245,15 @@ public function bdtask_purchase_edit_form($purchase_id = null){
             $multipayamount = $this->input->post('pamount_by_method',TRUE);
             $multipaytype = $this->input->post('multipaytype',TRUE);
 
+            $this->db->trans_begin();
+
+            $stock_location_id = $this->inventoryledger->resolveLocationId($this->input->post('stock_location_id', true));
+            if (!$stock_location_id) {
+                $this->db->trans_rollback();
+                $this->session->set_flashdata('exception', display('please_try_again'));
+                redirect("purchase_edit/".$purchase_id);
+            }
+
             if ($multipaytype[0] == 0) {
                 $is_credit = 1;
             }
@@ -249,6 +264,7 @@ public function bdtask_purchase_edit_form($purchase_id = null){
                 'purchase_id'        => $purchase_id,
                 'chalan_no'          => $this->input->post('chalan_no',TRUE),
                 'supplier_id'        => $this->input->post('supplier_id',TRUE),
+                'stock_location_id'  => $stock_location_id,
                 'grand_total_amount' => $this->input->post('grand_total_price',TRUE),
                 'total_discount'     => $this->input->post('discount',TRUE),
                 'invoice_discount'   => $this->input->post('total_discount',TRUE),
@@ -279,6 +295,8 @@ public function bdtask_purchase_edit_form($purchase_id = null){
                 $this->db->where('purchase_id', $dbpurs_id);
                 $this->db->delete('product_purchase_details');
             }
+
+            $this->inventoryledger->clearPurchaseReceipt($purchase_id);
 
 
             $multipayamount = $this->input->post('pamount_by_method',TRUE);
@@ -333,23 +351,32 @@ public function bdtask_purchase_edit_form($purchase_id = null){
             $discount = $this->input->post('discount',TRUE);
 
             for ($i = 0, $n = count($p_id); $i < $n; $i++) {
-                $product_quantity = $quantity[$i];
-                $product_rate     = $rate[$i];
+                $product_quantity = isset($quantity[$i]) ? (float) $quantity[$i] : 0;
+                $product_rate     = isset($rate[$i]) ? (float) $rate[$i] : 0;
                 $product_id       = $p_id[$i];
-                $total_price      = $t_price[$i];
-                $disc             = $discount[$i];
-                $ba_no            = $batch_no[$i];
-                $exp_date         = $expiry_date[$i];
-                $dis_per          = $discount_per[$i];
-                $disval           = $discountvalue[$i];
-                $vatper           = $vatpercent[$i];
-                $vatval           = $vatvalue[$i];
-                
+                $total_price      = isset($t_price[$i]) ? (float) $t_price[$i] : 0;
+                $disc             = isset($discount[$i]) ? $discount[$i] : 0;
+                $ba_no            = isset($batch_no[$i]) ? $batch_no[$i] : null;
+                $exp_date         = isset($expiry_date[$i]) ? $expiry_date[$i] : null;
+                $dis_per          = isset($discount_per[$i]) ? $discount_per[$i] : 0;
+                $disval           = isset($discountvalue[$i]) ? $discountvalue[$i] : 0;
+                $vatper           = isset($vatpercent[$i]) ? $vatpercent[$i] : 0;
+                $vatval           = isset($vatvalue[$i]) ? $vatvalue[$i] : 0;
+
+                if ($product_quantity <= 0) {
+                    continue;
+                }
+
+                $purchaseUnitId = $this->inventoryledger->getPreferredPurchaseUnitId($product_id);
+                if (!$purchaseUnitId) {
+                    $purchaseUnitId = $this->inventoryledger->getBaseUnitId($product_id);
+                }
 
                 $data1 = array(
                     'purchase_detail_id' => $this->generator(15),
                     'purchase_id'        => $dbpurs_id,
                     'product_id'         => $product_id,
+                    'unit_id'            => $purchaseUnitId,
                     'quantity'           => $product_quantity,
                     'rate'               => $product_rate,
                     'batch_id'           => $ba_no,
@@ -362,22 +389,49 @@ public function bdtask_purchase_edit_form($purchase_id = null){
                     'status'             => 1
                 );
 
-                $product_price = array(
+                $this->db->insert('product_purchase_details', $data1);
+                $detailRowId = $this->db->insert_id();
 
+                $lotResult = $this->inventoryledger->recordPurchaseReceipt(array(
+                    'product_id'         => $product_id,
+                    'location_id'        => $stock_location_id,
+                    'unit_id'            => $purchaseUnitId,
+                    'quantity'           => $product_quantity,
+                    'batch_no'           => $ba_no,
+                    'expiry_date'        => $exp_date,
+                    'purchase_id'        => $purchase_id,
+                    'purchase_detail_id' => $data1['purchase_detail_id'],
+                    'purchase_date'      => $this->input->post('purchase_date', true),
+                    'total_amount'       => $total_price,
+                    'discount_amount'    => $disval,
+                    'vat_amount'         => $vatval,
+                    'created_by'         => $receive_by,
+                ));
+
+                if ($lotResult === false) {
+                    $this->db->trans_rollback();
+                    $this->session->set_flashdata('exception', display('please_try_again'));
+                    redirect("purchase_edit/".$purchase_id);
+                }
+
+                $this->db->where('id', $detailRowId)->update('product_purchase_details', array('stock_lot_id' => $lotResult['lot_id']));
+
+                $product_price = array(
                     'supplier_price' => $product_rate
                 );
-
-                if (($quantity)) {
-
-                    $this->db->insert('product_purchase_details', $data1);
-                    $this->db->where('product_id', $product_id)->update('supplier_product', $product_price);
-                }
+                $this->db->where('product_id', $product_id)->update('supplier_product', $product_price);
             }
             $setting_data = $this->db->select('is_autoapprove_v')->from('web_setting')->where('setting_id', 1)->get()->result_array();
-            if ($setting_data[0]['is_autoapprove_v'] == 1) {	
-                
+            if ($setting_data[0]['is_autoapprove_v'] == 1) {
                 $new = $this->autoapprove($purchase_id);
             }
+            if ($this->db->trans_status() === false) {
+                $this->db->trans_rollback();
+                $this->session->set_flashdata('exception', display('ooops_something_went_wrong'));
+                redirect("purchase_edit/".$purchase_id);
+            }
+
+            $this->db->trans_commit();
             $this->session->set_flashdata('message', display('update_successfully'));
             redirect("purchase_list");
             } else {

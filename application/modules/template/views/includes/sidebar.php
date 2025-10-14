@@ -26,6 +26,79 @@
             </a>
         </li>
 
+        <li class="treeview <?php echo in_array($this->uri->segment(1), array('sheds', 'livestock-groups', 'livestocks', 'productions', 'feeds', 'feed-usages', 'vaccines', 'vaccine-usages', 'farm-reports')) ? "active" : null; ?>">
+            <a href="#">
+                <i class="fa fa-paw"></i>
+                <span><?php echo display('livestock_management') ?: 'Livestock Management'; ?></span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+            </a>
+            <ul class="treeview-menu">
+                <li class="<?php echo ($this->uri->segment(1) == 'sheds') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('sheds'); ?>"><?php echo display('sheds') ?: 'Sheds'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'productions') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('productions'); ?>"><?php echo display('productions') ?: 'Productions'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'livestock-groups') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('livestock-groups'); ?>"><?php echo display('livestock_groups') ?: 'Livestock Groups'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'livestocks') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('livestocks'); ?>"><?php echo display('livestocks') ?: 'Livestocks'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'feeds') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('feeds'); ?>"><?php echo display('feeds') ?: 'Feeds'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'feed-usages') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('feed-usages'); ?>"><?php echo display('feed_usages') ?: 'Feed Usages'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'vaccines') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('vaccines'); ?>"><?php echo display('vaccines') ?: 'Vaccines'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'vaccine-usages') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('vaccine-usages'); ?>"><?php echo display('vaccine_usages') ?: 'Vaccine Usages'; ?></a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'farm-reports') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('farm-reports'); ?>"><?php echo display('farm_reports') ?: 'Farm Reports'; ?></a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Inventory menu start -->
+        <li class="treeview <?php echo ($this->uri->segment(1) == 'inventory') ? 'active' : null; ?>">
+            <a href="#">
+                <i class="fa fa-archive"></i>
+                <span><?php echo display('inventory') ?: 'Inventory'; ?></span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+            </a>
+            <ul class="treeview-menu">
+                <li class="<?php echo ($this->uri->segment(1) == 'inventory' && $this->uri->segment(2) == 'opening-balance') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('inventory/opening-balance'); ?>">
+                        <?php echo display('inventory_opening_balance') ?: 'Opening Balance'; ?>
+                    </a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'inventory' && $this->uri->segment(2) == 'consumption') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('inventory/consumption'); ?>">
+                        <?php echo display('inventory_consumption') ?: 'Consumption'; ?>
+                    </a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'inventory' && $this->uri->segment(2) == 'waste') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('inventory/waste'); ?>">
+                        <?php echo display('inventory_waste') ?: 'Waste'; ?>
+                    </a>
+                </li>
+                <li class="<?php echo ($this->uri->segment(1) == 'inventory' && $this->uri->segment(2) == 'transfers') ? 'active' : null; ?>">
+                    <a href="<?php echo base_url('inventory/transfers'); ?>">
+                        <?php echo display('inventory_transfer') ?: 'Transfers'; ?>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <!-- Inventory menu end -->
+
         <!-- Invoice menu start -->
         <?php if ($this->permission1->method('new_invoice', 'create')->access() || $this->permission1->method('manage_invoice', 'read')->access() || $this->permission1->method('pos_invoice', 'create')->access() || $this->permission1->method('gui_pos', 'create')->access() || $this->permission1->method('terms_list', 'read')->access()  || $this->permission1->method('terms_add', 'read')->access()) { ?>
             <li class="treeview <?php
@@ -126,6 +199,37 @@
                         </li>
                     <?php } ?>
 
+                    <?php if ($this->permission1->method('credit_customer', 'read')->access()) { ?>
+                        <li class="<?php echo (($this->uri->segment(1) == "credit_customer") ? "active" : '') ?>">
+                            <a href="<?php echo base_url('credit_customer') ?>">
+                                <?php echo display('credit_customer') ?>
+                            </a>
+                        </li>
+                    <?php } ?>
+                    <?php if ($this->permission1->method('paid_customer', 'read')->access()) { ?>
+                        <li class="<?php echo (($this->uri->segment(1) == "paid_customer") ? "active" : '') ?>">
+                            <a href="<?php echo base_url('paid_customer') ?>">
+                                <?php echo display('paid_customer') ?>
+                            </a>
+                        </li>
+                    <?php } ?>
+                    <?php if ($this->permission1->method('customer_ledger', 'read')->access()) { ?>
+                        <li class="<?php echo (($this->uri->segment(1) == "customer_ledger") ? "active" : '') ?>">
+                            <a href="<?php echo base_url('customer_ledger') ?>">
+                                <?php echo display('customer_ledger') ?>
+                            </a>
+                        </li>
+                    <?php } ?>
+                    <?php if ($this->permission1->method('customer_advance', 'create')->access()) { ?>
+                        <li class="<?php echo (($this->uri->segment(1) == "customer_advance") ? "active" : '') ?>">
+                            <a href="<?php echo base_url('customer_advance') ?>">
+                                <?php echo display('customer_advance') ?>
+                            </a>
+                        </li>
+                    <?php } ?>
+                    <li class="<?php echo (($this->uri->segment(2) == "customer_groups") ? "active" : '') ?>">
+                        <a href="<?php echo base_url('customer/customer_groups') ?>">Customer Groups</a>
+                    </li>
 
                 </ul>
 
@@ -829,10 +933,10 @@
         <?php } ?>
         <!-- Report menu end -->
         <!-- human resource management menu start -->
-        <?php if ($this->permission1->method('add_designation', 'create')->access() || $this->permission1->method('manage_designation', 'read')->access() || $this->permission1->method('employee_salary_generate', 'read')->access() || $this->permission1->method('salary_advance_view', 'read')->access() || $this->permission1->method('add_employee', 'create')->access() || $this->permission1->method('manage_employee', 'read')->access() || $this->permission1->method('add_person', 'create')->access() || $this->permission1->method('add_loan', 'create')->access() || $this->permission1->method('add_payment', 'create')->access() || $this->permission1->method('manage_person', 'read')->access() || $this->permission1->method('add_attendance', 'create')->access() || $this->permission1->method('manage_attendance', 'read')->access() || $this->permission1->method('attendance_report', 'read')->access() || $this->permission1->method('add_benefits', 'create')->access() || $this->permission1->method('manage_benefits', 'read')->access() || $this->permission1->method('add_salary_setup', 'create')->access() || $this->permission1->method('manage_salary_setup', 'read')->access() || $this->permission1->method('salary_generate', 'create')->access() || $this->permission1->method('manage_salary_generate', 'read')->access() || $this->permission1->method('salary_payment', 'create')->access() || $this->permission1->method('add_expense_item', 'create')->access() || $this->permission1->method('manage_expense_item', 'read')->access() || $this->permission1->method('add_expense', 'create')->access() || $this->permission1->method('manage_expense', 'read')->access() || $this->permission1->method('add_ofloan_person', 'create')->access() || $this->permission1->method('add_office_loan', 'create')->access() || $this->permission1->method('add_loan_payment', 'create')->access() || $this->permission1->method('manage_office_loan_person', 'read')->access()) { ?>
+        <?php if ($this->permission1->method('add_designation', 'create')->access() || $this->permission1->method('manage_designation', 'read')->access() || $this->permission1->method('employee_salary_generate', 'read')->access() || $this->permission1->method('add_employee', 'create')->access() || $this->permission1->method('manage_employee', 'read')->access() || $this->permission1->method('add_person', 'create')->access() || $this->permission1->method('add_loan', 'create')->access() || $this->permission1->method('add_payment', 'create')->access() || $this->permission1->method('manage_person', 'read')->access() || $this->permission1->method('add_attendance', 'create')->access() || $this->permission1->method('manage_attendance', 'read')->access() || $this->permission1->method('attendance_report', 'read')->access() || $this->permission1->method('add_benefits', 'create')->access() || $this->permission1->method('manage_benefits', 'read')->access() || $this->permission1->method('add_salary_setup', 'create')->access() || $this->permission1->method('manage_salary_setup', 'read')->access() || $this->permission1->method('salary_generate', 'create')->access() || $this->permission1->method('manage_salary_generate', 'read')->access() || $this->permission1->method('salary_payment', 'create')->access() || $this->permission1->method('add_expense_item', 'create')->access() || $this->permission1->method('manage_expense_item', 'read')->access() || $this->permission1->method('add_expense', 'create')->access() || $this->permission1->method('manage_expense', 'read')->access() || $this->permission1->method('add_ofloan_person', 'create')->access() || $this->permission1->method('add_office_loan', 'create')->access() || $this->permission1->method('add_loan_payment', 'create')->access() || $this->permission1->method('manage_office_loan_person', 'read')->access()) { ?>
             <!-- Supplier menu start -->
             <li class="treeview <?php
-                                if ($this->uri->segment('1') == ("designation_form") || $this->uri->segment('1') == ("designation_list") || $this->uri->segment('1') == ("salary_advance_view") || $this->uri->segment('1') == ("salary_pay_slip") || $this->uri->segment('1') == ("employee_salary_chart") || $this->uri->segment('1') == ("manage_salary_advance") || $this->uri->segment('1') == ("employee_salary_approval") || $this->uri->segment('1') == ("employee_form") || $this->uri->segment('1') == ("employee_salary_generate") || $this->uri->segment('1') == ("employee_list") || $this->uri->segment('1') == ("add_attendance") || $this->uri->segment('1') == ("attendance_list") || $this->uri->segment('1') == ("attendance_report") || $this->uri->segment('1') == ("add_beneficials") || $this->uri->segment('1') == ("manage_benefits") || $this->uri->segment('1') == ("salary_setup") || $this->uri->segment('1') == ("manage_salary_setup") || $this->uri->segment('1') == ("salary_generate") || $this->uri->segment('1') == ("manage_salary_generate") || $this->uri->segment('1') == ("salary_payment") || $this->uri->segment('1') == ("tax_slabs") || $this->uri->segment('1') == ("salary_components") || $this->uri->segment('1') == ("employee_salary_payment_view") || $this->uri->segment('1') == ("add_expense_item") || $this->uri->segment('1') == ("manage_expense_item") || $this->uri->segment('1') == ("add_expense") || $this->uri->segment('1') == ("manage_expense") || $this->uri->segment('1') == ("expense_statement") || $this->uri->segment('1') == ("add_office_loan") || $this->uri->segment('1') == ("add_office_loan_payment") || $this->uri->segment('1') == ("manage_office_loans") || $this->uri->segment('1') == ("office_loan_person_ledger") || $this->uri->segment('1') == ("office_loan_person_ledgerdata") || $this->uri->segment('1') == ("edit_office_loan_person") || $this->uri->segment('1') == ("add_person") || $this->uri->segment('1') == ("add_loan") || $this->uri->segment('1') == ("add_payment") || $this->uri->segment('1') == ("manage_person") || $this->uri->segment('1') == ("personal_loan_edit") || $this->uri->segment('1') == ("person_ledger") || $this->uri->segment('1') == ("personal_loan_summary") || $this->uri->segment('1') == ("payslip") || $this->uri->segment('1') == ("edit_attendance")) {
+                                if ($this->uri->segment('1') == ("designation_form") || $this->uri->segment('1') == ("designation_list") || $this->uri->segment('1') == ("salary_pay_slip") || $this->uri->segment('1') == ("employee_salary_chart") || $this->uri->segment('1') == ("employee_salary_approval") || $this->uri->segment('1') == ("employee_form") || $this->uri->segment('1') == ("employee_salary_generate") || $this->uri->segment('1') == ("salary_groups") || $this->uri->segment('1') == ("employee_list") || $this->uri->segment('1') == ("add_attendance") || $this->uri->segment('1') == ("attendance_list") || $this->uri->segment('1') == ("attendance_report") || $this->uri->segment('1') == ("add_beneficials") || $this->uri->segment('1') == ("manage_benefits") || $this->uri->segment('1') == ("salary_setup") || $this->uri->segment('1') == ("manage_salary_setup") || $this->uri->segment('1') == ("salary_generate") || $this->uri->segment('1') == ("manage_salary_generate") || $this->uri->segment('1') == ("salary_payment") || $this->uri->segment('1') == ("tax_slabs") || $this->uri->segment('1') == ("salary_components") || $this->uri->segment('1') == ("employee_salary_payment_view") || $this->uri->segment('1') == ("add_expense_item") || $this->uri->segment('1') == ("manage_expense_item") || $this->uri->segment('1') == ("add_expense") || $this->uri->segment('1') == ("manage_expense") || $this->uri->segment('1') == ("expense_statement") || $this->uri->segment('1') == ("add_office_loan") || $this->uri->segment('1') == ("add_office_loan_payment") || $this->uri->segment('1') == ("manage_office_loans") || $this->uri->segment('1') == ("office_loan_person_ledger") || $this->uri->segment('1') == ("office_loan_person_ledgerdata") || $this->uri->segment('1') == ("edit_office_loan_person") || $this->uri->segment('1') == ("add_person") || $this->uri->segment('1') == ("add_loan") || $this->uri->segment('1') == ("add_payment") || $this->uri->segment('1') == ("manage_person") || $this->uri->segment('1') == ("personal_loan_edit") || $this->uri->segment('1') == ("person_ledger") || $this->uri->segment('1') == ("personal_loan_summary") || $this->uri->segment('1') == ("payslip") || $this->uri->segment('1') == ("edit_attendance")) {
                                     echo "active";
                                 } else {
                                     echo " ";
@@ -945,10 +1049,10 @@
                     <!-- ====================== Attendance menu end ================== -->
 
                     <!-- ========================== Payroll menu start =================== -->
-                    <?php if ($this->permission1->method('add_benefits', 'create')->access() || $this->permission1->method('manage_benefits', 'read')->access() || $this->permission1->method('employee_salary_generate', 'read')->access() || $this->permission1->method('employee_salary_payment_view', 'read')->access() || $this->permission1->method('salary_advance_view', 'read')->access() || $this->permission1->method('add_salary_setup', 'create')->access() || $this->permission1->method('manage_salary_setup', 'read')->access() || $this->permission1->method('salary_generate', 'create')->access() || $this->permission1->method('manage_salary_generate', 'read')->access() || $this->permission1->method('salary_payment', 'create')->access()) { ?>
+                    <?php if ($this->permission1->method('add_benefits', 'create')->access() || $this->permission1->method('manage_benefits', 'read')->access() || $this->permission1->method('employee_salary_generate', 'read')->access() || $this->permission1->method('employee_salary_payment_view', 'read')->access() || $this->permission1->method('add_salary_setup', 'create')->access() || $this->permission1->method('manage_salary_setup', 'read')->access() || $this->permission1->method('salary_generate', 'create')->access() || $this->permission1->method('manage_salary_generate', 'read')->access() || $this->permission1->method('salary_payment', 'create')->access()) { ?>
                         <!-- payroll menu start -->
                         <li class="treeview <?php
-                                            if ($this->uri->segment('1') == ("add_beneficials") || $this->uri->segment('1') == ("salary_pay_slip") || $this->uri->segment('1') == ("manage_benefits") || $this->uri->segment('1') == ("employee_salary_approval") || $this->uri->segment('1') == ("employee_salary_chart") || $this->uri->segment('1') == ("employee_salary_generate") || $this->uri->segment('1') == ("employee_salary_payment_view") || $this->uri->segment('1') == ("salary_setup") || $this->uri->segment('1') == ("salary_advance_view") || $this->uri->segment('1') == ("manage_salary_advance") || $this->uri->segment('1') == ("manage_salary_setup") || $this->uri->segment('1') == ("salary_generate") || $this->uri->segment('1') == ("manage_salary_generate") || $this->uri->segment('1') == ("salary_payment") || $this->uri->segment('1') == ("tax_slabs") || $this->uri->segment('1') == ("salary_components") || $this->uri->segment('1') == ("payslip")) {
+                                            if ($this->uri->segment('1') == ("add_beneficials") || $this->uri->segment('1') == ("salary_pay_slip") || $this->uri->segment('1') == ("manage_benefits") || $this->uri->segment('1') == ("employee_salary_approval") || $this->uri->segment('1') == ("employee_salary_chart") || $this->uri->segment('1') == ("employee_salary_generate") || $this->uri->segment('1') == ("salary_groups") || $this->uri->segment('1') == ("employee_salary_payment_view") || $this->uri->segment('1') == ("salary_setup") || $this->uri->segment('1') == ("manage_salary_setup") || $this->uri->segment('1') == ("salary_generate") || $this->uri->segment('1') == ("manage_salary_generate") || $this->uri->segment('1') == ("salary_payment") || $this->uri->segment('1') == ("tax_slabs") || $this->uri->segment('1') == ("salary_components") || $this->uri->segment('1') == ("payslip")) {
                                                 echo "active";
                                             } else {
                                                 echo " ";
@@ -961,13 +1065,6 @@
                                 </span>
                             </a>
                             <ul class="treeview-menu">
-                                <?php if ($this->permission1->method('salary_advance_view', 'read')->access()) { ?>
-                                    <li class="treeview <?php if ($this->uri->segment('1') == ("salary_advance_view")) {
-                                                            echo "active";
-                                                        } else {
-                                                            echo " ";
-                                                        } ?>"><a href="<?php echo base_url('salary_advance_view') ?>"> <?php echo display('salary_advance_view') ?></a></li>
-                                <?php } ?>
                                 <?php if ($this->permission1->method('employee_salary_generate', 'read')->access()) { ?>
                                     <li class="treeview <?php if ($this->uri->segment('1') == ("employee_salary_generate")) {
                                                             echo "active";
@@ -984,6 +1081,12 @@
                                                         } ?>"><a href="<?php echo base_url('employee_salary_payment_view') ?>"> <?php echo display('employee_salary_payment_view') ?></a></li>
                                 <?php } ?>
 
+                                <li class="treeview <?php if ($this->uri->segment('1') == ("leaves")) {
+                                                        echo "active";
+                                                    } else {
+                                                        echo " ";
+                                                    } ?>"><a href="<?php echo base_url('leaves') ?>"><?php echo display('leave_management') ?: 'Leave Management'; ?></a></li>
+
 
                                 <?php if ($this->permission1->method('employee_salary_generate', 'read')->access()) { ?>
                                     <li class="treeview <?php if ($this->uri->segment('1') == ("tax_slabs")) {
@@ -998,6 +1101,13 @@
                                                         } else {
                                                             echo " ";
                                                         } ?>"><a href="<?php echo base_url('salary_components') ?>">Salary Components</a></li>
+                                <?php } ?>
+                                <?php if ($this->permission1->method('manage_salary_setup', 'read')->access()) { ?>
+                                    <li class="treeview <?php if ($this->uri->segment('1') == ("salary_groups")) {
+                                                            echo "active";
+                                                        } else {
+                                                            echo " ";
+                                                        } ?>"><a href="<?php echo base_url('salary_groups') ?>">Salary Groups</a></li>
                                 <?php } ?>
                             </ul>
                         </li>

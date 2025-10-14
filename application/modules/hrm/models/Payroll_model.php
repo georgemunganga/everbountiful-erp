@@ -415,33 +415,61 @@ public function create_employee_payment($data = array())
 
 	public function gmb_salary_generateView($limit = null, $start = null)
 	{
-
-        return  $this->db->select('ssg.*,u.first_name,u.last_name,uu.first_name as firstname_apv_by,uu.last_name as lastname_apv_by')   
-            ->from('gmb_salary_sheet_generate ssg')
-            ->join('users u', 'ssg.generate_by = u.id', 'left')
-            ->join('users uu', 'ssg.approved_by = uu.id', 'left')
-            ->order_by('ssg_id', 'desc')
-            ->limit($limit, $start)
-            ->get()
-            ->result();
-
-            
+		return  $this->db->select('ssg.*, sg.group_name, u.first_name, u.last_name, uu.first_name as firstname_apv_by, uu.last_name as lastname_apv_by')
+			->from('gmb_salary_sheet_generate ssg')
+			->join('hrm_salary_groups sg', 'sg.id = ssg.salary_group_id', 'left')
+			->join('users u', 'ssg.generate_by = u.id', 'left')
+			->join('users uu', 'ssg.approved_by = uu.id', 'left')
+			->order_by('ssg.ssg_id', 'desc')
+			->limit($limit, $start)
+			->get()
+			->result();
 	}
 
-	public function gmb_salary_generate_delete($id = null,$salname = null)
-	{
-		$this->db->where('ssg_id',$id)
-			->delete('gmb_salary_sheet_generate');
-		$this->db->where('sal_month_year',$salname)
-			->delete('gmb_salary_generate');
-		
+		public function gmb_salary_generate_delete($id = null,$salname = null)
+		{
+			$sheet = $this->db->select('salary_group_id, name')
+				->from('gmb_salary_sheet_generate')
+				->where('ssg_id', $id)
+				->get()
+				->row();
 
-		if ($this->db->affected_rows()) {
-			return true;
-		} else {
-			return false;
+			if (!$sheet) {
+				return false;
+			}
+
+			$this->db->trans_start();
+
+			$salary_rows = $this->db->select('g.id, g.employee_id, g.office_loan_deduct, g.office_loan_transaction_id, g.createDate')
+				->from('gmb_salary_generate g')
+				->where('g.sal_month_year', $sheet->name);
+			if (isset($sheet->salary_group_id) && $sheet->salary_group_id !== null) {
+				$salary_rows = $salary_rows->where('g.salary_group_id', (int) $sheet->salary_group_id);
+			}
+			$salary_rows = $salary_rows->get()->result();
+
+			foreach ($salary_rows as $salary_row) {
+				if (!empty($salary_row->office_loan_transaction_id) && floatval($salary_row->office_loan_deduct) > 0) {
+					$this->revert_office_loan_deduction(
+						$salary_row->office_loan_transaction_id,
+						$salary_row->createDate,
+						floatval($salary_row->office_loan_deduct)
+					);
+				}
+			}
+
+			$this->db->where('ssg_id', $id)->delete('gmb_salary_sheet_generate');
+
+			$this->db->where('sal_month_year', $sheet->name);
+			if (isset($sheet->salary_group_id) && $sheet->salary_group_id !== null) {
+				$this->db->where('salary_group_id', (int) $sheet->salary_group_id);
+			}
+			$this->db->delete('gmb_salary_generate');
+
+			$this->db->trans_complete();
+
+			return $this->db->trans_status();
 		}
-	} 
 
 	public function emp_salary_paymentView($limit = null, $start = null)
 	{
@@ -458,51 +486,37 @@ public function create_employee_payment($data = array())
 	public function salary_sheet_generate_info($ssg_id)
 	{
 
-		$salary_sheet_generate_info = $this->db->select('*')
-                       ->from('gmb_salary_sheet_generate')
-                       ->where('ssg_id',$ssg_id)
-                       ->get()
-                       ->row();
-                       
-        return $salary_sheet_generate_info;
+		return $this->db->select('ssg.*, sg.group_name')
+			->from('gmb_salary_sheet_generate ssg')
+			->join('hrm_salary_groups sg', 'sg.id = ssg.salary_group_id', 'left')
+			->where('ssg.ssg_id', $ssg_id)
+			->get()
+			->row();
 	}
 
 
 	public function employee_salary_charts($ssg_id)
 	{
-			$salary_sheet_generate_info = $this->db->select('*')
-                       ->from('gmb_salary_sheet_generate')
-                       ->where('ssg_id',$ssg_id)
-                       ->get()
-                       ->row();
+		$salary_sheet_generate_info = $this->salary_sheet_generate_info($ssg_id);
+		if (!$salary_sheet_generate_info) {
+			return array();
+		}
 
-			return $this->db->select('count(DISTINCT(pment.id)) as emp_sal_pay_id,pment.*,p.id as employee_id,p.first_name,p.last_name')   
-            ->from('gmb_salary_generate pment')
-            ->join('employee_history p', 'pment.employee_id = p.id', 'left')
-            ->group_by('pment.id')
-            ->order_by('pment.id', 'desc')
-            ->where('pment.sal_month_year',$salary_sheet_generate_info->name)
-            ->get()
-            ->result();
+		$this->db->select('count(DISTINCT(pment.id)) as emp_sal_pay_id, pment.*, p.id as employee_id, p.first_name, p.last_name, sg.group_name');
+		$this->db->from('gmb_salary_generate pment');
+		$this->db->join('employee_history p', 'pment.employee_id = p.id', 'left');
+		$this->db->join('hrm_salary_groups sg', 'sg.id = pment.salary_group_id', 'left');
+		$this->db->group_by('pment.id');
+		$this->db->order_by('pment.id', 'desc');
+		$this->db->where('pment.sal_month_year', $salary_sheet_generate_info->name);
+		if (!empty($salary_sheet_generate_info->salary_group_id)) {
+			$this->db->where('pment.salary_group_id', $salary_sheet_generate_info->salary_group_id);
+		}
+
+		return $this->db->get()->result();
 	}
 
 	/* Payroll related functionality starts from 16th april 2022*/
-
-	public function salary_advance_deduction($emp_id,$salary_month)
-	{
-
-		$query = 'SELECT * FROM `gmb_salary_advance` WHERE `salary_month` = '."'".$salary_month."'".' AND `employee_id` = '.$emp_id.' AND (`amount` - `release_amount`) > 0';
-
-		return $this->db->query($query)->row();
-	}
-
-	public function update_sal_advance($data = array())
-	{
-		
-
-		return $this->db->where('id', $data['id'])
-			->update("gmb_salary_advance", $data);
-	}
 
 	public function loan_installment_deduction($emp_id)
 	{
@@ -533,25 +547,28 @@ public function create_employee_payment($data = array())
 			pl.transaction_id,
 			pi.person_id,
 			pi.employee_id,
-			(old.principal_amount - IFNULL(old.total_paid, 0)) as remaining_balance,
+			(old.principal_amount - IFNULL(old.total_paid, 0)) AS remaining_balance,
+			LEAST(old.monthly_installment, (old.principal_amount - IFNULL(old.total_paid, 0))) AS payable_amount,
 			CASE 
 				WHEN old.next_due_date IS NULL THEN old.repayment_start_date
 				ELSE old.next_due_date
-			END as next_payment_date
+			END AS next_payment_date
 		FROM office_loan_details old
 		JOIN person_ledger pl ON pl.transaction_id = old.transaction_id
 		JOIN person_information pi ON pi.person_id = pl.person_id
 		WHERE pi.employee_id = ? 
 		AND old.monthly_installment > 0
 		AND (old.principal_amount - IFNULL(old.total_paid, 0)) > 0
+		AND (old.repayment_start_date IS NULL OR old.repayment_start_date <= ?)
+		AND (old.repayment_end_date IS NULL OR old.repayment_end_date >= ?)
 		AND (
 			old.next_due_date IS NULL 
 			OR old.next_due_date <= ?
 		)
-		ORDER BY old.disbursement_date ASC
+		ORDER BY old.next_due_date IS NULL ASC, old.next_due_date ASC, old.disbursement_date ASC
 		LIMIT 1";
 
-		return $this->db->query($query, array($emp_id, $current_date))->row();
+		return $this->db->query($query, array($emp_id, $current_date, $current_date, $current_date))->row();
 	}
 
 	// Update office loan payment after deduction
@@ -609,12 +626,13 @@ public function create_employee_payment($data = array())
 	public function employee_salary_generate_info($id)
 	{
 
-		return $this->db->select('pment.*,p.id as employee_id,p.first_name,p.last_name')   
-        ->from('gmb_salary_generate pment')
-        ->join('employee_history p', 'pment.employee_id = p.id', 'left')
-        ->where('pment.id', $id)
-        ->get()
-        ->row();
+		return $this->db->select('pment.*, p.id as employee_id, p.first_name, p.last_name, sg.group_name')
+			->from('gmb_salary_generate pment')
+			->join('employee_history p', 'pment.employee_id = p.id', 'left')
+			->join('hrm_salary_groups sg', 'sg.id = pment.salary_group_id', 'left')
+			->where('pment.id', $id)
+			->get()
+			->row();
 	}
 
 	// employee Information
@@ -699,13 +717,89 @@ public function create_employee_payment($data = array())
 		}
 	}
 
-	public function get_salary_components($only_active = false)
+	public function ensure_salary_group_support()
 	{
-		$this->db->from('hrm_salary_components');
-		if ($only_active) {
-			$this->db->where('status', 1);
+		if (!$this->db->table_exists('hrm_salary_groups')) {
+			$this->db->query("CREATE TABLE IF NOT EXISTS `hrm_salary_groups` (
+				`id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+				`group_name` varchar(100) NOT NULL,
+				`description` text DEFAULT NULL,
+				`status` tinyint(1) NOT NULL DEFAULT 1,
+				`created_by` int(11) DEFAULT NULL,
+				`created_at` datetime NOT NULL DEFAULT current_timestamp(),
+				`updated_by` int(11) DEFAULT NULL,
+				`updated_at` datetime DEFAULT NULL,
+				PRIMARY KEY (`id`),
+				UNIQUE KEY `group_name` (`group_name`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;");
 		}
-		$components = $this->db->order_by('component_name', 'asc')->get()->result();
+
+		if (!$this->db->table_exists('hrm_salary_group_employees')) {
+			$this->db->query("CREATE TABLE IF NOT EXISTS `hrm_salary_group_employees` (
+				`id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+				`group_id` int(10) UNSIGNED NOT NULL,
+				`employee_id` int(11) NOT NULL,
+				`assigned_at` datetime NOT NULL DEFAULT current_timestamp(),
+				PRIMARY KEY (`id`),
+				KEY `group_id` (`group_id`),
+				KEY `employee_id` (`employee_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;");
+		}
+
+		if (!$this->db->table_exists('hrm_salary_group_components')) {
+			$this->db->query("CREATE TABLE IF NOT EXISTS `hrm_salary_group_components` (
+				`id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+				`group_id` int(10) UNSIGNED NOT NULL,
+				`component_id` int(10) UNSIGNED NOT NULL,
+				PRIMARY KEY (`id`),
+				KEY `group_id` (`group_id`),
+				KEY `component_id` (`component_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;");
+		}
+
+		if (!$this->db->table_exists('hrm_salary_group_tax_slabs')) {
+			$this->db->query("CREATE TABLE IF NOT EXISTS `hrm_salary_group_tax_slabs` (
+				`id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+				`group_id` int(10) UNSIGNED NOT NULL,
+				`slab_id` int(10) UNSIGNED NOT NULL,
+				PRIMARY KEY (`id`),
+				KEY `group_id` (`group_id`),
+				KEY `slab_id` (`slab_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;");
+		}
+
+		if ($this->db->table_exists('gmb_salary_sheet_generate')) {
+			if (!$this->column_exists('gmb_salary_sheet_generate', 'salary_group_id')) {
+				$this->db->query("ALTER TABLE `gmb_salary_sheet_generate` ADD `salary_group_id` INT(10) UNSIGNED DEFAULT NULL AFTER `ssg_id`;");
+			}
+			if (!$this->column_exists('gmb_salary_sheet_generate', 'pay_date')) {
+				$this->db->query("ALTER TABLE `gmb_salary_sheet_generate` ADD `pay_date` DATE DEFAULT NULL AFTER `gdate`;");
+			}
+		}
+
+		if ($this->db->table_exists('gmb_salary_generate')) {
+			if (!$this->column_exists('gmb_salary_generate', 'salary_group_id')) {
+				$this->db->query("ALTER TABLE `gmb_salary_generate` ADD `salary_group_id` INT(10) UNSIGNED DEFAULT NULL AFTER `id`;");
+			}
+		}
+	}
+
+	public function get_salary_components($only_active = false, $group_id = null)
+	{
+		if ($group_id !== null) {
+			$this->ensure_salary_group_support();
+		}
+
+		$this->db->select('c.*');
+		$this->db->from('hrm_salary_components c');
+		if ($group_id !== null) {
+			$this->db->join('hrm_salary_group_components gc', 'gc.component_id = c.id', 'inner');
+			$this->db->where('gc.group_id', (int) $group_id);
+		}
+		if ($only_active) {
+			$this->db->where('c.status', 1);
+		}
+		$components = $this->db->order_by('c.component_name', 'asc')->get()->result();
 
 		if (!empty($components) && $this->db->table_exists('hrm_salary_component_tax_slabs')) {
 			$ids = array();
@@ -720,6 +814,21 @@ public function create_employee_payment($data = array())
 				foreach ($components as $component) {
 					$component_id = isset($component->id) ? (int) $component->id : 0;
 					$component->tax_slabs = isset($map[$component_id]) ? $map[$component_id] : array();
+				}
+			}
+		}
+
+		if ($group_id !== null) {
+			$allowed_slab_ids = $this->get_salary_group_tax_slabs($group_id, true);
+			if (!empty($allowed_slab_ids)) {
+				$allowed_lookup = array_flip($allowed_slab_ids);
+				foreach ($components as $component) {
+					if (!empty($component->tax_slabs) && is_array($component->tax_slabs)) {
+						$component->tax_slabs = array_values(array_filter($component->tax_slabs, function ($slab) use ($allowed_lookup) {
+							$slab_id = isset($slab['slab_id']) ? (int) $slab['slab_id'] : 0;
+							return $slab_id > 0 && isset($allowed_lookup[$slab_id]);
+						}));
+					}
 				}
 			}
 		}
@@ -830,8 +939,267 @@ public function create_employee_payment($data = array())
 		return $map;
 	}
 
+	public function get_salary_group_tax_slabs($group_id, $return_ids = false)
+	{
+		$this->ensure_salary_group_support();
 
-	public function calculate_component_breakdown($salary_info = null)
+		$group_id = (int) $group_id;
+		if ($group_id <= 0) {
+			return $return_ids ? array() : array();
+		}
+
+		if ($return_ids) {
+			$result = $this->db->select('slab_id')
+				->from('hrm_salary_group_tax_slabs')
+				->where('group_id', $group_id)
+				->get()
+				->result();
+
+			$ids = array();
+			if (!empty($result)) {
+				foreach ($result as $row) {
+					if (isset($row->slab_id)) {
+						$ids[] = (int) $row->slab_id;
+					}
+				}
+			}
+
+			return $ids;
+		}
+
+		return $this->db->select('gt.*, ts.min_amount, ts.max_amount, ts.rate_percent, ts.additional_amount, ts.status')
+			->from('hrm_salary_group_tax_slabs gt')
+			->join('hrm_tax_slabs ts', 'ts.id = gt.slab_id', 'left')
+			->where('gt.group_id', $group_id)
+			->order_by('ts.min_amount', 'asc')
+			->get()
+			->result();
+	}
+
+	public function get_salary_groups($only_active = false)
+	{
+		$this->ensure_salary_group_support();
+
+		$this->db->select('g.*,
+			(SELECT COUNT(*) FROM hrm_salary_group_employees ge WHERE ge.group_id = g.id) AS employee_count,
+			(SELECT COUNT(*) FROM hrm_salary_group_components gc WHERE gc.group_id = g.id) AS component_count,
+			(SELECT COUNT(*) FROM hrm_salary_group_tax_slabs gt WHERE gt.group_id = g.id) AS tax_slab_count');
+		$this->db->from('hrm_salary_groups g');
+		if ($only_active) {
+			$this->db->where('g.status', 1);
+		}
+		return $this->db->order_by('g.group_name', 'asc')->get()->result();
+	}
+
+	public function get_salary_group($group_id)
+	{
+		$this->ensure_salary_group_support();
+
+		$group_id = (int) $group_id;
+		if ($group_id <= 0) {
+			return null;
+		}
+
+		return $this->db->get_where('hrm_salary_groups', array('id' => $group_id))->row();
+	}
+
+	public function get_salary_group_assignments($group_id)
+	{
+		$this->ensure_salary_group_support();
+
+		$group_id = (int) $group_id;
+		$result = array(
+			'employees' => array(),
+			'components' => array(),
+			'tax_slabs' => array(),
+		);
+
+		if ($group_id <= 0) {
+			return $result;
+		}
+
+		$employees = $this->db->select('employee_id')
+			->from('hrm_salary_group_employees')
+			->where('group_id', $group_id)
+			->get()
+			->result();
+		foreach ($employees as $row) {
+			if (isset($row->employee_id)) {
+				$result['employees'][] = (int) $row->employee_id;
+			}
+		}
+
+		$components = $this->db->select('component_id')
+			->from('hrm_salary_group_components')
+			->where('group_id', $group_id)
+			->get()
+			->result();
+		foreach ($components as $row) {
+			if (isset($row->component_id)) {
+				$result['components'][] = (int) $row->component_id;
+			}
+		}
+
+		$result['tax_slabs'] = $this->get_salary_group_tax_slabs($group_id, true);
+
+		$result['employees'] = array_values(array_unique($result['employees']));
+		$result['components'] = array_values(array_unique($result['components']));
+		$result['tax_slabs'] = array_values(array_unique($result['tax_slabs']));
+
+		return $result;
+	}
+
+	protected function replace_salary_group_assignments($group_id, $employee_ids = array(), $component_ids = array(), $tax_slab_ids = array())
+	{
+		$group_id = (int) $group_id;
+		if ($group_id <= 0) {
+			return false;
+		}
+
+		$employee_ids = $this->normalize_id_array($employee_ids);
+		$component_ids = $this->normalize_id_array($component_ids);
+		$tax_slab_ids = $this->normalize_id_array($tax_slab_ids);
+
+		// Employees
+		$this->db->where('group_id', $group_id)->delete('hrm_salary_group_employees');
+		if (!empty($employee_ids)) {
+			$now = date('Y-m-d H:i:s');
+			$rows = array();
+			foreach ($employee_ids as $employee_id) {
+				$rows[] = array(
+					'group_id'    => $group_id,
+					'employee_id' => $employee_id,
+					'assigned_at' => $now,
+				);
+			}
+			$this->db->insert_batch('hrm_salary_group_employees', $rows);
+		}
+
+		// Components
+		$this->db->where('group_id', $group_id)->delete('hrm_salary_group_components');
+		if (!empty($component_ids)) {
+			$rows = array();
+			foreach ($component_ids as $component_id) {
+				$rows[] = array(
+					'group_id'     => $group_id,
+					'component_id' => $component_id,
+				);
+			}
+			$this->db->insert_batch('hrm_salary_group_components', $rows);
+		}
+
+		// Tax slabs
+		$this->db->where('group_id', $group_id)->delete('hrm_salary_group_tax_slabs');
+		if (!empty($tax_slab_ids)) {
+			$rows = array();
+			foreach ($tax_slab_ids as $slab_id) {
+				$rows[] = array(
+					'group_id' => $group_id,
+					'slab_id'  => $slab_id,
+				);
+			}
+			$this->db->insert_batch('hrm_salary_group_tax_slabs', $rows);
+		}
+
+		return true;
+	}
+
+	public function create_salary_group($data = array(), $employee_ids = array(), $component_ids = array(), $tax_slab_ids = array())
+	{
+		$this->ensure_salary_group_support();
+
+		$this->db->trans_start();
+		$this->db->insert('hrm_salary_groups', $data);
+		$group_id = (int) $this->db->insert_id();
+		if ($group_id > 0) {
+			$this->replace_salary_group_assignments($group_id, $employee_ids, $component_ids, $tax_slab_ids);
+		}
+		$this->db->trans_complete();
+
+		if (!$this->db->trans_status()) {
+			return false;
+		}
+
+		return $group_id;
+	}
+
+	public function update_salary_group($group_id, $data = array(), $employee_ids = array(), $component_ids = array(), $tax_slab_ids = array())
+	{
+		$this->ensure_salary_group_support();
+
+		$group_id = (int) $group_id;
+		if ($group_id <= 0) {
+			return false;
+		}
+
+		$current = $this->get_salary_group($group_id);
+		if (!$current) {
+			return false;
+		}
+
+		$this->db->trans_start();
+		$this->db->where('id', $group_id)->update('hrm_salary_groups', $data);
+		$this->replace_salary_group_assignments($group_id, $employee_ids, $component_ids, $tax_slab_ids);
+		$this->db->trans_complete();
+
+		return $this->db->trans_status();
+	}
+
+	public function delete_salary_group($group_id)
+	{
+		$this->ensure_salary_group_support();
+
+		$group_id = (int) $group_id;
+		if ($group_id <= 0) {
+			return false;
+		}
+
+		$current = $this->get_salary_group($group_id);
+		if (!$current) {
+			return false;
+		}
+
+		$this->db->trans_start();
+		$this->db->where('group_id', $group_id)->delete('hrm_salary_group_employees');
+		$this->db->where('group_id', $group_id)->delete('hrm_salary_group_components');
+		$this->db->where('group_id', $group_id)->delete('hrm_salary_group_tax_slabs');
+		$this->db->where('id', $group_id)->delete('hrm_salary_groups');
+		$this->db->trans_complete();
+
+		return $this->db->trans_status();
+	}
+
+	public function get_all_employees_for_groups()
+	{
+		return $this->db->select('e.id, e.first_name, e.last_name, e.designation, d.designation as designation_name, e.phone')
+			->from('employee_history e')
+			->join('designation d', 'd.id = e.designation', 'left')
+			->order_by('e.first_name', 'asc')
+			->order_by('e.last_name', 'asc')
+			->get()
+			->result();
+	}
+
+	public function get_salary_group_employees($group_id)
+	{
+		$this->ensure_salary_group_support();
+
+		$group_id = (int) $group_id;
+		if ($group_id <= 0) {
+			return array();
+		}
+
+		return $this->db->select('e.*')
+			->from('hrm_salary_group_employees ge')
+			->join('employee_history e', 'e.id = ge.employee_id', 'inner')
+			->where('ge.group_id', $group_id)
+			->order_by('e.first_name', 'asc')
+			->order_by('e.last_name', 'asc')
+			->get()
+			->result();
+	}
+
+	public function calculate_component_breakdown($salary_info = null, $group_id = null)
 	{
 		$breakdown = array(
 			'earnings' => array(),
@@ -844,9 +1212,13 @@ public function create_employee_payment($data = array())
 			return $breakdown;
 		}
 
+		if ($group_id === null && is_object($salary_info) && isset($salary_info->salary_group_id)) {
+			$group_id = (int) $salary_info->salary_group_id;
+		}
+
 		$this->ensure_tax_slab_support();
 
-		$components = $this->get_salary_components(true);
+		$components = $this->get_salary_components(true, $group_id);
 		if (empty($components)) {
 			return $breakdown;
 		}
@@ -963,6 +1335,28 @@ public function create_employee_payment($data = array())
 		return $amount;
 	}
 
+	protected function column_exists($table, $column)
+	{
+		$table = trim((string) $table);
+		$column = trim((string) $column);
+		if ($table === '' || $column === '') {
+			return false;
+		}
+
+		$query = $this->db->query("SHOW COLUMNS FROM `{$table}` LIKE " . $this->db->escape($column));
+		return $query && $query->num_rows() > 0;
+	}
+
+	protected function normalize_id_array($values = array())
+	{
+		$values = array_map('intval', (array) $values);
+		$values = array_filter($values, function ($value) {
+			return $value > 0;
+		});
+
+		return array_values(array_unique($values));
+	}
+
 public function get_tax_slabs($only_active = false)
 	{
 		$this->db->from('hrm_tax_slabs');
@@ -992,45 +1386,160 @@ public function get_tax_slabs($only_active = false)
 		return $this->db->where('id', $id)->delete('hrm_tax_slabs');
 	}
 
-	// Update office loan deduction after payroll processing
-	public function update_office_loan_deduction($data = array())
+	private function generate_person_ledger_transaction_id()
 	{
-		$transaction_id = $data['transaction_id'];
-		$deduction_amount = $data['deduction_amount'];
-		$deduction_date = $data['deduction_date'];
+		do {
+			$candidate = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 10));
+			$exists = $this->db->select('transaction_id')
+				->from('person_ledger')
+				->where('transaction_id', $candidate)
+				->limit(1)
+				->get()
+				->num_rows() > 0;
+		} while ($exists);
 
-		// Update office_loan_details
-		$this->db->query("UPDATE office_loan_details 
-			SET total_paid = IFNULL(total_paid, 0) + ?,
-				last_deduction_date = ?,
-				next_due_date = DATE_ADD(?, INTERVAL 1 MONTH)
+		return $candidate;
+	}
+
+		// Update office loan deduction after payroll processing
+		public function update_office_loan_deduction($data = array())
+		{
+			$transaction_id = $data['transaction_id'];
+			$deduction_amount = $data['deduction_amount'];
+			$deduction_date = $data['deduction_date'];
+
+			$this->db->trans_start();
+
+			// Update office_loan_details
+			$this->db->query("UPDATE office_loan_details 
+				SET total_paid = LEAST(principal_amount, IFNULL(total_paid, 0) + ?),
+					last_deduction_date = ?,
+					next_due_date = CASE 
+					WHEN repayment_end_date IS NOT NULL AND DATE_ADD(?, INTERVAL 1 MONTH) > repayment_end_date 
+						THEN repayment_end_date
+					ELSE DATE_ADD(?, INTERVAL 1 MONTH)
+				END
 			WHERE transaction_id = ?", 
-			array($deduction_amount, $deduction_date, $deduction_date, $transaction_id));
+			array($deduction_amount, $deduction_date, $deduction_date, $deduction_date, $transaction_id));
 
 		// Get person_id for this transaction
 		$person_query = $this->db->select('pl.person_id')
 			->from('person_ledger pl')
-			->where('pl.transaction_id', $transaction_id)
-			->limit(1)
-			->get();
+				->where('pl.transaction_id', $transaction_id)
+				->limit(1)
+				->get();
 
-		if ($person_query->num_rows() > 0) {
-			$person_id = $person_query->row()->person_id;
+			$success = false;
+			if ($person_query->num_rows() > 0) {
+				$person_id = $person_query->row()->person_id;
 
-			// Add credit entry to person_ledger
-			$ledger_data = array(
-				'person_id' => $person_id,
-				'transaction_id' => $transaction_id,
-				'date' => $deduction_date,
-				'debit' => 0,
-				'credit' => $deduction_amount,
-				'details' => 'Payroll deduction - ' . date('M Y', strtotime($deduction_date))
-			);
+				// Add credit entry to person_ledger
+				$ledger_transaction_id = $this->generate_person_ledger_transaction_id();
+				$ledger_data = array(
+					'person_id' => $person_id,
+					'transaction_id' => $ledger_transaction_id,
+					'date' => $deduction_date,
+					'debit' => 0,
+					'credit' => $deduction_amount,
+					'details' => 'Payroll deduction - ' . date('M Y', strtotime($deduction_date)) . ' (Loan ref: ' . $transaction_id . ')'
+				);
 
-			return $this->db->insert('person_ledger', $ledger_data);
+				$success = $this->db->insert('person_ledger', $ledger_data);
+			}
+
+			$this->db->trans_complete();
+
+			return $success && $this->db->trans_status();
 		}
 
-		return false;
-	}
+		private function recalculate_office_loan_progress($loan_transaction_id)
+		{
+			$loan = $this->db->select('*')
+				->from('office_loan_details')
+				->where('transaction_id', $loan_transaction_id)
+				->limit(1)
+				->get()
+				->row();
 
-}
+			if (!$loan) {
+				return;
+			}
+
+			$person_row = $this->db->select('person_id')
+				->from('person_ledger')
+				->where('transaction_id', $loan_transaction_id)
+				->where('debit >', 0)
+				->limit(1)
+				->get()
+				->row();
+
+			$person_id = $person_row ? $person_row->person_id : null;
+			if (!$person_id) {
+				return;
+			}
+
+			$credits = $this->db->select('date, credit')
+				->from('person_ledger')
+				->where('person_id', $person_id)
+				->where('credit >', 0)
+				->like('details', 'Loan ref: ' . $loan_transaction_id)
+				->order_by('date', 'asc')
+				->get()
+				->result();
+
+			$total_paid = 0.0;
+			$last_date = null;
+			foreach ($credits as $row) {
+				$total_paid += floatval($row->credit);
+				$last_date = $row->date;
+			}
+
+			$total_paid = min(floatval($loan->principal_amount), $total_paid);
+
+			$payments_made = count($credits);
+			$next_due_date = null;
+			$repayment_start = !empty($loan->repayment_start_date) ? $loan->repayment_start_date : $loan->disbursement_date;
+			if (!empty($repayment_start) && $total_paid < floatval($loan->principal_amount)) {
+				try {
+					$next_due = new DateTime($repayment_start);
+					if ($payments_made > 0) {
+						$next_due->modify('+' . $payments_made . ' month');
+					}
+					$candidate = $next_due->format('Y-m-d');
+					if (!empty($loan->repayment_end_date) && strtotime($candidate) > strtotime($loan->repayment_end_date)) {
+						$candidate = $loan->repayment_end_date;
+					}
+					$next_due_date = $candidate;
+				} catch (Exception $exception) {
+					$next_due_date = null;
+				}
+			}
+
+			if ($total_paid >= floatval($loan->principal_amount)) {
+				$next_due_date = null;
+			}
+
+			$this->db->where('transaction_id', $loan_transaction_id)->update('office_loan_details', array(
+				'total_paid' => $total_paid,
+				'last_deduction_date' => $last_date ? $last_date : null,
+				'next_due_date' => $next_due_date,
+			));
+		}
+
+		public function revert_office_loan_deduction($loan_transaction_id, $deduction_date, $amount)
+		{
+			if (empty($loan_transaction_id) || empty($deduction_date) || floatval($amount) <= 0) {
+				return true;
+			}
+
+			$this->db->where('date', $deduction_date)
+				->where('credit', floatval($amount))
+				->like('details', 'Loan ref: ' . $loan_transaction_id)
+				->delete('person_ledger');
+
+			$this->recalculate_office_loan_progress($loan_transaction_id);
+
+			return true;
+		}
+
+	}

@@ -29,6 +29,8 @@ class Loan_model extends CI_Model {
         return $this->db
             ->select('pl.*, pi.person_name, pi.person_phone, pi.person_address, pi.employee_id')
             ->select("CONCAT_WS(' ', eh.first_name, eh.last_name) AS employee_full_name", false)
+            ->select('IFNULL(old.principal_amount, pl.debit) AS principal_amount', false)
+            ->select('IFNULL(old.total_paid, 0) AS total_paid_amount', false)
             ->select('(SELECT IFNULL(SUM(debit), 0) FROM person_ledger WHERE person_id = pl.person_id) AS total_debit', false)
             ->select('(SELECT IFNULL(SUM(credit), 0) FROM person_ledger WHERE person_id = pl.person_id) AS total_credit', false)
             ->select('old.disbursement_date, old.repayment_period, old.repayment_start_date, old.repayment_end_date')
@@ -51,6 +53,69 @@ class Loan_model extends CI_Model {
         return $this->db->where('debit >', 0)
             ->from('person_ledger')
             ->count_all_results();
+    }
+
+    public function employees_without_open_office_loan()
+    {
+        return $this->db->select('eh.id, eh.first_name, eh.last_name, eh.phone, eh.address_line_1')
+            ->from('employee_history eh')
+            ->join('person_information pi', 'pi.employee_id = eh.id', 'left')
+            ->join('office_loan_details old', '(old.person_id = pi.person_id AND (old.principal_amount - IFNULL(old.total_paid, 0)) > 0)', 'left', false)
+            ->join('(SELECT person_id, SUM(debit) AS total_debit, SUM(credit) AS total_credit FROM person_ledger GROUP BY person_id) pls', 'pls.person_id = pi.person_id', 'left', false)
+            ->where('old.id IS NULL')
+            ->group_start()
+                ->where('pls.person_id IS NULL')
+                ->or_where('(IFNULL(pls.total_debit, 0) - IFNULL(pls.total_credit, 0)) <=', 0, false)
+            ->group_end()
+            ->order_by('eh.first_name', 'asc')
+            ->order_by('eh.last_name', 'asc')
+            ->group_by('eh.id')
+            ->get()
+            ->result();
+    }
+
+    public function employee_has_open_office_loan($employee_id)
+    {
+        if (empty($employee_id)) {
+            return false;
+        }
+
+        $person = $this->db->select('person_id')
+            ->from('person_information')
+            ->where('employee_id', $employee_id)
+            ->get()
+            ->row();
+
+        if (!$person) {
+            return false;
+        }
+
+        $open_detail = $this->db->select('id')
+            ->from('office_loan_details')
+            ->where('person_id', $person->person_id)
+            ->where('(principal_amount - IFNULL(total_paid, 0)) >', 0, false)
+            ->limit(1)
+            ->get()
+            ->num_rows() > 0;
+
+        if ($open_detail) {
+            return true;
+        }
+
+        $ledger_totals = $this->db->select('IFNULL(SUM(debit), 0) AS total_debit, IFNULL(SUM(credit), 0) AS total_credit', false)
+            ->from('person_ledger')
+            ->where('person_id', $person->person_id)
+            ->get()
+            ->row();
+
+        if ($ledger_totals) {
+            $outstanding = (float) $ledger_totals->total_debit - (float) $ledger_totals->total_credit;
+            if ($outstanding > 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
@@ -173,11 +238,69 @@ class Loan_model extends CI_Model {
     	$this->db->select('*');
         $this->db->from('person_information');
         $this->db->where('status', 1);
-        $query = $this->db->get();
-        if ($query->num_rows() > 0) {
-            return $query->result_array();
+        $this->db->where('employee_id IS NOT NULL', null, false);
+        return $this->db->order_by('person_name', 'asc')->get()->result_array();
+    }
+
+    public function get_person_active_office_loans($person_id)
+    {
+        if (empty($person_id)) {
+            return array();
         }
-        return false;
+
+        return $this->db->select('old.*, (old.principal_amount - IFNULL(old.total_paid, 0)) AS remaining_balance')
+            ->from('office_loan_details old')
+            ->where('old.person_id', $person_id)
+            ->where('(old.principal_amount - IFNULL(old.total_paid, 0)) >', 0)
+            ->order_by('old.next_due_date IS NULL', 'asc', false)
+            ->order_by('old.next_due_date', 'asc')
+            ->order_by('old.disbursement_date', 'asc')
+            ->get()
+            ->result();
+    }
+
+    public function apply_office_loan_payment($transaction_id, $amount, $payment_date)
+    {
+        if (empty($transaction_id) || $amount <= 0) {
+            return false;
+        }
+
+        $loan = $this->get_office_loan_detail($transaction_id);
+        if (!$loan) {
+            return false;
+        }
+
+        $remaining = max(0.0, floatval($loan->principal_amount) - floatval($loan->total_paid));
+        if ($remaining <= 0.0) {
+            return false;
+        }
+
+        $applied_amount = min($remaining, $amount);
+        $new_total_paid = floatval($loan->total_paid) + $applied_amount;
+        if ($new_total_paid > floatval($loan->principal_amount)) {
+            $new_total_paid = floatval($loan->principal_amount);
+        }
+
+        $next_due_date = null;
+        if ($new_total_paid < floatval($loan->principal_amount)) {
+            $base_date = $loan->next_due_date ? $loan->next_due_date : $loan->repayment_start_date;
+            if (empty($base_date) || strtotime($base_date) < strtotime($payment_date)) {
+                $base_date = $payment_date;
+            }
+            $candidate = date('Y-m-d', strtotime('+1 month', strtotime($base_date)));
+            if (!empty($loan->repayment_end_date) && strtotime($candidate) > strtotime($loan->repayment_end_date)) {
+                $candidate = $loan->repayment_end_date;
+            }
+            $next_due_date = $candidate;
+        }
+
+        $update = array(
+            'total_paid'          => number_format($new_total_paid, 2, '.', ''),
+            'last_deduction_date' => $payment_date,
+            'next_due_date'       => $next_due_date,
+        );
+
+        return $this->db->where('transaction_id', $transaction_id)->update('office_loan_details', $update);
     }
 
         public function select_person_by_id($person_id) {

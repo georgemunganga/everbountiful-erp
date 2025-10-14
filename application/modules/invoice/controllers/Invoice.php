@@ -27,11 +27,31 @@ class Invoice extends MX_Controller
         $this->load->model('invoice/Invoice_model', 'invoice_model');
         $this->load->model('customer/Customer_model', 'customer_model');
         $this->load->model('account/Accounts_model', 'accounts_model');
+        $this->load->model('inventory/Inventory_model', 'inventory_model');
 
         // Redirect if not logged in
         if (!$this->session->userdata('isLogIn')) {
             redirect('login');
         }
+    }
+
+    private function resolve_invoice_status($total, $paid, $due)
+    {
+        $total = (float)$total;
+        $paid  = (float)$paid;
+        $due   = (float)$due;
+        $epsilon = 0.01;
+
+        if ($total <= $epsilon && $paid <= $epsilon && $due <= $epsilon) {
+            return ['No Balance', 'label label-default'];
+        }
+        if ($due <= $epsilon) {
+            return ['Paid', 'label label-success'];
+        }
+        if ($paid > $epsilon && $due > $epsilon) {
+            return ['Partially Paid', 'label label-warning'];
+        }
+        return ['Unpaid', 'label label-danger'];
     }
 
     function bdtask_invoice_form()
@@ -40,12 +60,24 @@ class Invoice extends MX_Controller
         $walking_customer = $this->invoice_model->pos_customer_setup();
         $data['all_pmethod'] = $this->invoice_model->pmethod_dropdown();
 
-        $data['customer_name'] = $walking_customer[0]['customer_name'];
-        $data['customer_id'] = $walking_customer[0]['customer_id'];
+        $selectedCustomer = $walking_customer[0];
+        $prefillCustomerId = $this->input->get('customer_id', true);
+        if ($prefillCustomerId) {
+            $customerRecord = $this->customer_model->singledata($prefillCustomerId);
+            if ($customerRecord) {
+                $selectedCustomer = array(
+                    'customer_id'   => $customerRecord->customer_id,
+                    'customer_name' => $customerRecord->customer_name,
+                );
+            }
+        }
+        $data['customer_name'] = $selectedCustomer['customer_name'];
+        $data['customer_id'] = $selectedCustomer['customer_id'];
         $data['invoice_no'] = $this->number_generator();
         $data['title'] = display('add_invoice');
         $data['taxes'] = $this->invoice_model->tax_fileds();
         $data['module'] = "invoice";
+        $data['stock_locations'] = $this->inventory_model->get_active_locations();
         $vatortax = $this->invoice_model->vat_tax_setting();
         if ($vatortax->fixed_tax == 1) {
             $data['page'] = "add_invoice_form";
@@ -179,7 +211,12 @@ class Invoice extends MX_Controller
         }
 
 
-        $totalbal = $invoice_detail[0]['total_amount'] + $invoice_detail[0]['prevous_due'];
+        $raw_total = isset($invoice_detail[0]['total_amount']) ? (float)$invoice_detail[0]['total_amount'] : 0.0;
+        $raw_paid  = isset($invoice_detail[0]['paid_amount']) ? (float)$invoice_detail[0]['paid_amount'] : 0.0;
+        $raw_due   = isset($invoice_detail[0]['due_amount']) ? (float)$invoice_detail[0]['due_amount'] : max(0.0, $raw_total - $raw_paid);
+        [$status_label, $status_class] = $this->resolve_invoice_status($raw_total, $raw_paid, $raw_due);
+
+        $totalbal = $raw_total + (isset($invoice_detail[0]['prevous_due']) ? (float)$invoice_detail[0]['prevous_due'] : 0.0);
         $amount_inword = $totalbal;
         $user_id = $invoice_detail[0]['sales_by'];
         $users = $this->invoice_model->user_invoice_data($user_id);
@@ -204,8 +241,8 @@ class Invoice extends MX_Controller
             'subTotal_ammount' => number_format($subTotal_ammount !== null ? $subTotal_ammount : 0, 2, '.', ','),
 
             'subTotal_amount_cal' => $subTotal_ammount,
-            'paid_amount' => number_format($invoice_detail[0]['paid_amount'] !== null ? $invoice_detail[0]['paid_amount'] : 0, 2, '.', ','),
-            'due_amount' => number_format($invoice_detail[0]['due_amount'] !== null ? $invoice_detail[0]['due_amount'] : 0, 2, '.', ','),
+            'paid_amount' => number_format($raw_paid, 2, '.', ','),
+            'due_amount' => number_format($raw_due, 2, '.', ','),
             'previous' => number_format($invoice_detail[0]['prevous_due'] !== null ? $invoice_detail[0]['prevous_due'] : 0, 2, '.', ','),
             'shipping_cost' => number_format($invoice_detail[0]['shipping_cost'] !== null ? $invoice_detail[0]['shipping_cost'] : 0, 2, '.', ','),
 
@@ -221,6 +258,8 @@ class Invoice extends MX_Controller
             'is_discount' => $is_discount,
             'is_serial' => $isserial,
             'is_unit' => $isunit,
+            'status_label' => $status_label,
+            'status_class' => $status_class,
         );
         $data['module'] = "invoice";
         $data['page'] = "invoice_html";
@@ -287,7 +326,12 @@ class Invoice extends MX_Controller
         }
 
 
-        $totalbal = $invoice_detail[0]['total_amount'] + $invoice_detail[0]['prevous_due'];
+        $raw_total = isset($invoice_detail[0]['total_amount']) ? (float)$invoice_detail[0]['total_amount'] : 0.0;
+        $raw_paid  = isset($invoice_detail[0]['paid_amount']) ? (float)$invoice_detail[0]['paid_amount'] : 0.0;
+        $raw_due   = isset($invoice_detail[0]['due_amount']) ? (float)$invoice_detail[0]['due_amount'] : max(0.0, $raw_total - $raw_paid);
+        [$status_label, $status_class] = $this->resolve_invoice_status($raw_total, $raw_paid, $raw_due);
+
+        $totalbal = $raw_total + (isset($invoice_detail[0]['prevous_due']) ? (float)$invoice_detail[0]['prevous_due'] : 0.0);
         $amount_inword = $totalbal;
         $user_id = $invoice_detail[0]['sales_by'];
         $users = $this->invoice_model->user_invoice_data($user_id);
@@ -1724,7 +1768,11 @@ class Invoice extends MX_Controller
         if (!empty($product_info)) {
             $list[''] = '';
             foreach ($product_info as $value) {
-                $json_product[] = array('label' => $value['product_name'] . '(' . $value['product_model'] . ')', 'value' => $value['product_id']);
+                $label = (string) $value['product_name'];
+                if (!empty($value['product_model'])) {
+                    $label = trim($label . ' ' . $value['product_model']);
+                }
+                $json_product[] = array('label' => $label, 'value' => $value['product_id']);
             }
         } else {
             $json_product[] = 'No Product Found';
@@ -1921,8 +1969,8 @@ class Invoice extends MX_Controller
             'total_discount' => number_format($invoice_detail[0]['total_discount'], 2, '.', ','),
             'total_tax' => number_format($invoice_detail[0]['total_tax'], 2, '.', ','),
             'subTotal_ammount' => number_format($subTotal_ammount, 2, '.', ','),
-            'paid_amount' => number_format($invoice_detail[0]['paid_amount'], 2, '.', ','),
-            'due_amount' => number_format($invoice_detail[0]['due_amount'], 2, '.', ','),
+            'paid_amount' => number_format($raw_paid, 2, '.', ','),
+            'due_amount' => number_format($raw_due, 2, '.', ','),
             'previous' => number_format($invoice_detail[0]['prevous_due'], 2, '.', ','),
             'shipping_cost' => number_format($invoice_detail[0]['shipping_cost'], 2, '.', ','),
             'invoice_all_data' => $invoice_detail,
@@ -1938,6 +1986,8 @@ class Invoice extends MX_Controller
             'logo' => $currency_details[0]['invoice_logo'],
             'position' => $currency_details[0]['currency_position'],
             'currency' => $currency_details[0]['currency'],
+            'status_label' => $status_label,
+            'status_class' => $status_class,
         );
         return $data;
     }

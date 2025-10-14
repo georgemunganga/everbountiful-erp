@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 #------------------------------------    
-# Author: Bdtask Ltd
+# Author:Greenwebb Ltd
 # Author link: https://www.bdtask.com/
 # Dynamic style php file
 # Developed by :Isahaq
@@ -9,6 +9,172 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Customer_model extends CI_Model
 {
+
+  private $customer_tables_checked = array();
+
+  private function ensure_customer_table($table)
+  {
+    if (isset($this->customer_tables_checked[$table])) {
+      return $this->customer_tables_checked[$table];
+    }
+    if ($this->db->table_exists($table)) {
+      $this->customer_tables_checked[$table] = true;
+      return true;
+    }
+    $this->load->dbforge();
+    switch ($table) {
+      case 'customer_credit_notes':
+        $this->dbforge->add_field(array(
+          'id' => array(
+            'type' => 'INT',
+            'constraint' => 11,
+            'unsigned' => true,
+            'auto_increment' => true,
+          ),
+          'customer_id' => array(
+            'type' => 'INT',
+            'constraint' => 11,
+            'unsigned' => true,
+          ),
+          'note_number' => array(
+            'type' => 'VARCHAR',
+            'constraint' => 100,
+            'null' => true,
+          ),
+          'note_date' => array(
+            'type' => 'DATE',
+            'null' => true,
+          ),
+          'amount' => array(
+            'type' => 'DECIMAL',
+            'constraint' => '18,2',
+            'default' => '0.00',
+          ),
+          'status' => array(
+            'type' => 'VARCHAR',
+            'constraint' => 50,
+            'null' => true,
+          ),
+          'remarks' => array(
+            'type' => 'TEXT',
+            'null' => true,
+          ),
+          'created_at' => array(
+            'type' => 'DATETIME',
+            'null' => true,
+          ),
+          'updated_at' => array(
+            'type' => 'DATETIME',
+            'null' => true,
+          ),
+        ));
+        $this->dbforge->add_key('id', true);
+        $this->dbforge->add_key('customer_id');
+        break;
+      case 'customer_estimates':
+        $this->dbforge->add_field(array(
+          'id' => array(
+            'type' => 'INT',
+            'constraint' => 11,
+            'unsigned' => true,
+            'auto_increment' => true,
+          ),
+          'customer_id' => array(
+            'type' => 'INT',
+            'constraint' => 11,
+            'unsigned' => true,
+          ),
+          'estimate_number' => array(
+            'type' => 'VARCHAR',
+            'constraint' => 100,
+            'null' => true,
+          ),
+          'estimate_date' => array(
+            'type' => 'DATE',
+            'null' => true,
+          ),
+          'amount' => array(
+            'type' => 'DECIMAL',
+            'constraint' => '18,2',
+            'default' => '0.00',
+          ),
+          'status' => array(
+            'type' => 'VARCHAR',
+            'constraint' => 50,
+            'null' => true,
+          ),
+          'notes' => array(
+            'type' => 'TEXT',
+            'null' => true,
+          ),
+          'created_at' => array(
+            'type' => 'DATETIME',
+            'null' => true,
+          ),
+          'updated_at' => array(
+            'type' => 'DATETIME',
+            'null' => true,
+          ),
+        ));
+        $this->dbforge->add_key('id', true);
+        $this->dbforge->add_key('customer_id');
+        break;
+      case 'customer_expenses':
+        $this->dbforge->add_field(array(
+          'id' => array(
+            'type' => 'INT',
+            'constraint' => 11,
+            'unsigned' => true,
+            'auto_increment' => true,
+          ),
+          'customer_id' => array(
+            'type' => 'INT',
+            'constraint' => 11,
+            'unsigned' => true,
+          ),
+          'category' => array(
+            'type' => 'VARCHAR',
+            'constraint' => 100,
+            'null' => true,
+          ),
+          'expense_date' => array(
+            'type' => 'DATE',
+            'null' => true,
+          ),
+          'amount' => array(
+            'type' => 'DECIMAL',
+            'constraint' => '18,2',
+            'default' => '0.00',
+          ),
+          'vendor' => array(
+            'type' => 'VARCHAR',
+            'constraint' => 150,
+            'null' => true,
+          ),
+          'notes' => array(
+            'type' => 'TEXT',
+            'null' => true,
+          ),
+          'created_at' => array(
+            'type' => 'DATETIME',
+            'null' => true,
+          ),
+          'updated_at' => array(
+            'type' => 'DATETIME',
+            'null' => true,
+          ),
+        ));
+        $this->dbforge->add_key('id', true);
+        $this->dbforge->add_key('customer_id');
+        break;
+      default:
+        $this->customer_tables_checked[$table] = false;
+        return false;
+    }
+    $result = $this->dbforge->create_table($table, true);
+    $this->customer_tables_checked[$table] = $result;
+    return $result;
+  }
 
 
   public function create($data = array())
@@ -76,6 +242,381 @@ class Customer_model extends CI_Model
     } else {
       return false;
     }
+  }
+
+  // Invoices for a customer within date range
+  public function get_customer_invoices($customer_id, $from_date = null, $to_date = null)
+  {
+    $this->db->select('i.id, i.invoice_id, i.invoice as invoice_no, i.date, i.total_amount, i.paid_amount, i.due_amount, i.status AS invoice_status');
+    $this->db->from('invoice i');
+    $this->db->where('i.customer_id', $customer_id);
+    if (!empty($from_date)) {
+      $this->db->where('DATE(i.date) >=', $from_date);
+    }
+    if (!empty($to_date)) {
+      $this->db->where('DATE(i.date) <=', $to_date);
+    }
+    $this->db->order_by('i.date', 'desc');
+    $this->db->order_by('i.id', 'desc');
+    return $this->db->get()->result_array();
+  }
+
+  public function get_customer_contacts($customer_id)
+  {
+    return $this->db->select('id, customer_id, name, email, phone, position, created_at')
+      ->from('customer_contacts')
+      ->where('customer_id', $customer_id)
+      ->order_by('name', 'asc')
+      ->get()
+      ->result_array();
+  }
+
+  public function add_customer_contact($customer_id, array $data)
+  {
+    $allowed = ['name', 'email', 'phone', 'position', 'created_at'];
+    $data = array_intersect_key($data, array_flip($allowed));
+    $data['customer_id'] = $customer_id;
+    if (empty($data['created_at'])) {
+      $data['created_at'] = date('Y-m-d H:i:s');
+    }
+    $this->db->insert('customer_contacts', $data);
+    return $this->db->insert_id();
+  }
+
+  public function delete_customer_contact($customer_id, $contact_id)
+  {
+    $this->db->where('customer_id', $customer_id)
+      ->where('id', $contact_id)
+      ->delete('customer_contacts');
+    return $this->db->affected_rows() > 0;
+  }
+  // Payments for a customer within date range (from acc_transaction via COA)
+  public function get_customer_payments($customer_id, $from_date = null, $to_date = null)
+  {
+    $head = $this->db->select('HeadCode')->from('acc_coa')->where('customer_id', $customer_id)->get()->row();
+    if (!$head) return [];
+    $this->db->select('VDate as date, VNo as voucher_no, Debit, Credit, Narration');
+    $this->db->from('acc_transaction');
+    $this->db->where('COAID', $head->HeadCode);
+    $this->db->where('IsAppove', 1);
+    if (!empty($from_date)) {
+      $this->db->where('DATE(VDate) >=', $from_date);
+    }
+    if (!empty($to_date)) {
+      $this->db->where('DATE(VDate) <=', $to_date);
+    }
+    $this->db->order_by('VDate', 'asc');
+    return $this->db->get()->result_array();
+  }
+
+  // Statement summary and lines
+  public function get_customer_statement($customer_id, $from_date, $to_date)
+  {
+    $from_date = date('Y-m-d', strtotime($from_date));
+    $to_date   = date('Y-m-d', strtotime($to_date));
+
+    $head = $this->db->select('HeadCode')->from('acc_coa')->where('customer_id', $customer_id)->get()->row();
+    $headCode = $head ? $head->HeadCode : null;
+
+    // Beginning balance: sum(debit-credit) before from_date
+    if ($headCode) {
+      $begin_q = $this->db->select('IFNULL(SUM(Debit),0) AS deb, IFNULL(SUM(Credit),0) AS cred')
+        ->from('acc_transaction')
+        ->where('COAID', $headCode)
+        ->where('IsAppove', 1)
+        ->where('DATE(VDate) <', $from_date)
+        ->get()
+        ->row();
+      $beginning = (float)$begin_q->deb - (float)$begin_q->cred;
+    } else {
+      $beginning = 0.0;
+    }
+
+    // Invoiced amount within range (sum invoice totals)
+    $inv_q = $this->db->select('IFNULL(SUM(total_amount),0) AS total')
+      ->from('invoice')
+      ->where('customer_id', $customer_id)
+      ->where('DATE(date) >=', $from_date)
+      ->where('DATE(date) <=', $to_date)
+      ->get()
+      ->row();
+    $invoiced = (float)$inv_q->total;
+
+    // Amount paid entries (ledger transactions if available)
+    $entries = [];
+    $invoices = $this->get_customer_invoices($customer_id, $from_date, $to_date);
+    foreach ($invoices as $inv) {
+      $entries[] = [
+        'date'       => $inv['date'],
+        'description'=> sprintf('Invoice %s', $inv['invoice_no']),
+        'debit'      => (float)$inv['total_amount'],
+        'credit'     => 0.0,
+        'type_sort'  => 1,
+        'sort_ts'    => strtotime($inv['date']),
+      ];
+      $paid_on_invoice = isset($inv['paid_amount']) ? (float)$inv['paid_amount'] : 0.0;
+      if ($paid_on_invoice > 0.0001) {
+        $entries[] = [
+          'date'       => $inv['date'],
+          'description'=> sprintf('Payment (Invoice %s)', $inv['invoice_no']),
+          'debit'      => 0.0,
+          'credit'     => min($paid_on_invoice, (float)$inv['total_amount']),
+          'type_sort'  => 2,
+          'sort_ts'    => strtotime($inv['date']) + 0.5,
+        ];
+      }
+    }
+
+    $payments = array();
+    if ($headCode) {
+      $payments = $this->get_customer_payments($customer_id, $from_date, $to_date);
+    }
+    foreach ($payments as $p) {
+      $entries[] = [
+        'date'       => $p['date'],
+        'description'=> trim('Payment ' . $p['voucher_no'] . ' ' . ($p['Narration'] ?? '')),
+        'debit'      => 0.0,
+        'credit'     => (float)$p['Credit'],
+        'type_sort'  => 2,
+        'sort_ts'    => strtotime($p['date']),
+      ];
+    }
+
+
+    usort($entries, function ($a, $b) {
+      if ($a['sort_ts'] === $b['sort_ts']) {
+        return $a['type_sort'] <=> $b['type_sort'];
+      }
+      return $a['sort_ts'] <=> $b['sort_ts'];
+    });
+
+    $lines = [];
+    $running = $beginning;
+    $lines[] = [
+      'date'        => $from_date,
+      'description' => 'Beginning Balance',
+      'debit'       => 0.0,
+      'credit'      => 0.0,
+      'balance'     => $running,
+    ];
+
+    foreach ($entries as $entry) {
+      $running += $entry['debit'];
+      $running -= $entry['credit'];
+      $lines[] = [
+        'date'        => $entry['date'],
+        'description' => $entry['description'],
+        'debit'       => $entry['debit'],
+        'credit'      => $entry['credit'],
+        'balance'     => $running,
+      ];
+    }
+
+    $paid_total = 0.0;
+    foreach ($entries as $entry) {
+      $paid_total += $entry['credit'];
+    }
+
+    $balance_due = $running;
+
+    return [
+      'summary' => [
+        'beginning'   => $beginning,
+        'invoiced'    => $invoiced,
+        'paid'        => $paid_total,
+        'balance_due' => $balance_due,
+      ],
+      'lines' => $lines,
+    ];
+  }
+
+  // Notes CRUD
+  public function get_notes($customer_id)
+  {
+    if (!$this->db->table_exists('customer_notes')) {
+      return [];
+    }
+    return $this->db->select('*')->from('customer_notes')->where('customer_id', $customer_id)->order_by('created_at', 'desc')->get()->result_array();
+  }
+  public function add_note($customer_id, $text)
+  {
+    if (!$this->db->table_exists('customer_notes')) {
+      return false;
+    }
+    return $this->db->insert('customer_notes', ['customer_id' => $customer_id, 'note_text' => $text]);
+  }
+  public function delete_note($id, $customer_id)
+  {
+    if (!$this->db->table_exists('customer_notes')) {
+      return false;
+    }
+    return $this->db->where('id', $id)->where('customer_id', $customer_id)->delete('customer_notes');
+  }
+
+  public function get_credit_notes($customer_id)
+  {
+    if (!$this->ensure_customer_table('customer_credit_notes')) {
+      return [];
+    }
+    return $this->db->select('id, note_number AS number, note_date AS date, amount, status, remarks')
+      ->from('customer_credit_notes')
+      ->where('customer_id', $customer_id)
+      ->order_by('note_date', 'desc')
+      ->order_by('id', 'desc')
+      ->get()
+      ->result_array();
+  }
+
+  public function add_credit_note($customer_id, array $data)
+  {
+    if (!$this->ensure_customer_table('customer_credit_notes')) {
+      return false;
+    }
+    $insert = array(
+      'customer_id' => $customer_id,
+      'note_number' => isset($data['number']) ? trim($data['number']) : null,
+      'note_date'   => !empty($data['date']) ? $data['date'] : null,
+      'amount'      => isset($data['amount']) ? (float) $data['amount'] : 0,
+      'status'      => isset($data['status']) ? trim($data['status']) : null,
+      'remarks'     => isset($data['remarks']) ? trim($data['remarks']) : null,
+      'created_at'  => date('Y-m-d H:i:s'),
+      'updated_at'  => date('Y-m-d H:i:s'),
+    );
+    return $this->db->insert('customer_credit_notes', $insert);
+  }
+
+  public function delete_credit_note($customer_id, $note_id)
+  {
+    if (!$this->ensure_customer_table('customer_credit_notes')) {
+      return false;
+    }
+    return $this->db->where('id', $note_id)->where('customer_id', $customer_id)->delete('customer_credit_notes');
+  }
+
+  public function get_estimates($customer_id)
+  {
+    if (!$this->ensure_customer_table('customer_estimates')) {
+      return [];
+    }
+    return $this->db->select('id, estimate_number AS number, estimate_date AS date, amount, status, notes')
+      ->from('customer_estimates')
+      ->where('customer_id', $customer_id)
+      ->order_by('estimate_date', 'desc')
+      ->order_by('id', 'desc')
+      ->get()
+      ->result_array();
+  }
+
+  public function add_estimate($customer_id, array $data)
+  {
+    if (!$this->ensure_customer_table('customer_estimates')) {
+      return false;
+    }
+    $insert = array(
+      'customer_id'     => $customer_id,
+      'estimate_number' => isset($data['number']) ? trim($data['number']) : null,
+      'estimate_date'   => !empty($data['date']) ? $data['date'] : null,
+      'amount'          => isset($data['amount']) ? (float) $data['amount'] : 0,
+      'status'          => isset($data['status']) ? trim($data['status']) : null,
+      'notes'           => isset($data['notes']) ? trim($data['notes']) : null,
+      'created_at'      => date('Y-m-d H:i:s'),
+      'updated_at'      => date('Y-m-d H:i:s'),
+    );
+    return $this->db->insert('customer_estimates', $insert);
+  }
+
+  public function delete_estimate($customer_id, $estimate_id)
+  {
+    if (!$this->ensure_customer_table('customer_estimates')) {
+      return false;
+    }
+    return $this->db->where('id', $estimate_id)->where('customer_id', $customer_id)->delete('customer_estimates');
+  }
+
+  public function get_expenses($customer_id)
+  {
+    if (!$this->ensure_customer_table('customer_expenses')) {
+      return [];
+    }
+    return $this->db->select('id, category, expense_date AS date, amount, vendor, notes')
+      ->from('customer_expenses')
+      ->where('customer_id', $customer_id)
+      ->order_by('expense_date', 'desc')
+      ->order_by('id', 'desc')
+      ->get()
+      ->result_array();
+  }
+
+  public function add_expense($customer_id, array $data)
+  {
+    if (!$this->ensure_customer_table('customer_expenses')) {
+      return false;
+    }
+    $insert = array(
+      'customer_id'  => $customer_id,
+      'category'     => isset($data['category']) ? trim($data['category']) : null,
+      'expense_date' => !empty($data['date']) ? $data['date'] : null,
+      'amount'       => isset($data['amount']) ? (float) $data['amount'] : 0,
+      'vendor'       => isset($data['vendor']) ? trim($data['vendor']) : null,
+      'notes'        => isset($data['notes']) ? trim($data['notes']) : null,
+      'created_at'   => date('Y-m-d H:i:s'),
+      'updated_at'   => date('Y-m-d H:i:s'),
+    );
+    return $this->db->insert('customer_expenses', $insert);
+  }
+
+  public function delete_expense($customer_id, $expense_id)
+  {
+    if (!$this->ensure_customer_table('customer_expenses')) {
+      return false;
+    }
+    return $this->db->where('id', $expense_id)->where('customer_id', $customer_id)->delete('customer_expenses');
+  }
+
+  // Reminders CRUD
+  public function get_reminders($customer_id)
+  {
+    if (!$this->db->table_exists('customer_reminders')) {
+      return [];
+    }
+    return $this->db->select('*')->from('customer_reminders')->where('customer_id', $customer_id)->order_by('remind_on', 'asc')->get()->result_array();
+  }
+  public function add_reminder($customer_id, $title, $remind_on)
+  {
+    if (!$this->db->table_exists('customer_reminders')) {
+      return false;
+    }
+    return $this->db->insert('customer_reminders', ['customer_id' => $customer_id, 'title' => $title, 'remind_on' => $remind_on, 'status' => 'pending']);
+  }
+  public function delete_reminder($id, $customer_id)
+  {
+    if (!$this->db->table_exists('customer_reminders')) {
+      return false;
+    }
+    return $this->db->where('id', $id)->where('customer_id', $customer_id)->delete('customer_reminders');
+  }
+
+  // Files list
+  public function get_files($customer_id)
+  {
+    if (!$this->db->table_exists('customer_files')) {
+      return [];
+    }
+    return $this->db->select('*')->from('customer_files')->where('customer_id', $customer_id)->order_by('uploaded_at', 'desc')->get()->result_array();
+  }
+  public function add_file_record($customer_id, $file_name, $file_path)
+  {
+    if (!$this->db->table_exists('customer_files')) {
+      return false;
+    }
+    return $this->db->insert('customer_files', ['customer_id' => $customer_id, 'file_name' => $file_name, 'file_path' => $file_path]);
+  }
+  public function delete_file($id, $customer_id)
+  {
+    if (!$this->db->table_exists('customer_files')) {
+      return false;
+    }
+    return $this->db->where('id', $id)->where('customer_id', $customer_id)->delete('customer_files');
   }
 
   //credit customer dropdown
@@ -224,6 +765,8 @@ class Customer_model extends CI_Model
       $button = '';
       $base_url = base_url();
 
+      // Details view link
+      $button .= ' <a href="' . $base_url . 'customer/customer_detail/' . $record->customer_id . '" class="btn btn-info btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Details"><i class="fa fa-user" aria-hidden="true"></i></a>';
       if ($this->permission1->method('manage_customer', 'update')->access()) {
         $button .= ' <a href="' . $base_url . 'edit_customer/' . $record->customer_id . '" class="btn btn-success btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Update"><i class="pe-7s-note" aria-hidden="true"></i></a>';
       }
@@ -236,7 +779,7 @@ class Customer_model extends CI_Model
 
       $data[] = array(
         'sl'               => $sl,
-        'customer_name'    => $record->customer_name,
+        'customer_name'    => '<a href="' . $base_url . 'customer/customer_detail//' . $record->customer_id . '" title="View Details">' . html_escape($record->customer_name) . '</a>',
         'address'          => $record->customer_address,
         'address2'         => $record->address2,
         'mobile'           => $record->customer_mobile,
@@ -354,6 +897,8 @@ class Customer_model extends CI_Model
       $button = '';
       $base_url = base_url();
 
+      // Details view link
+      $button .= ' <a href="' . $base_url . 'customer/customer_detail/' . $record->customer_id . '" class="btn btn-info btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Details"><i class="fa fa-user" aria-hidden="true"></i></a>';
       if ($this->permission1->method('credit_customer', 'update')->access()) {
         $button .= ' <a href="' . $base_url . 'edit_customer/' . $record->customer_id . '" class="btn btn-success btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Update"><i class="pe-7s-note" aria-hidden="true"></i></a>';
       }
@@ -484,6 +1029,8 @@ class Customer_model extends CI_Model
       $button = '';
       $base_url = base_url();
 
+      // Details view link
+      $button .= ' <a href="' . $base_url . 'customer/customer_detail/' . $record->customer_id . '" class="btn btn-info btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Details"><i class="fa fa-user" aria-hidden="true"></i></a>';
       if ($this->permission1->method('paid_customer', 'update')->access()) {
         $button .= ' <a href="' . $base_url . 'edit_customer/' . $record->customer_id . '" class="btn btn-success btn-xs m-b-5 custom_btn" data-toggle="tooltip" data-placement="left" title="Update"><i class="pe-7s-note" aria-hidden="true"></i></a>';
       }
@@ -810,3 +1357,4 @@ class Customer_model extends CI_Model
       ->result_array();
   }
 }
+

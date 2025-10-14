@@ -108,6 +108,7 @@ $(document).ready(function() {
     "use strict";
 
     var frm = $("#customer_receive_form");
+    var returnTo = frm.find('input[name="return_to"]').val();
     frm.on('submit', function(e) {
 
         var finyear = $("#finyear").val();
@@ -158,7 +159,11 @@ $(document).ready(function() {
 
                         } else {
 
-                            location.reload();
+                            if (returnTo) {
+                                window.location.href = returnTo;
+                            } else {
+                                location.reload();
+                            }
                         }
 
                     });
@@ -187,6 +192,11 @@ function printRawHtmlInvoice(view) {
 }
 
 function printJobCompleteInvoice() {
-    location.reload();
+    var returnTo = $('#customer_receive_form').find('input[name="return_to"]').val();
+    if (returnTo) {
+        window.location.href = returnTo;
+    } else {
+        location.reload();
+    }
 
 }

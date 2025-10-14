@@ -42,6 +42,12 @@
                                     <th style="text-align: left;"><?php echo display('invoice_no'); ?></th>
                                     <th style="text-align: right;"><?php echo $invoice_no; ?></th>
                                 </tr>
+                                <?php if (!empty($status_label)) { ?>
+                                <tr>
+                                    <th style="text-align: left;"><?php echo display('status'); ?></th>
+                                    <th style="text-align: right;"><?php echo html_escape($status_label); ?></th>
+                                </tr>
+                                <?php } ?>
                                 <tr>
                                     <th style="text-align: left;"><?php echo display('customer'); ?></th>
                                     <th style="text-align: right;"><?php echo $customer_name; ?></th>

@@ -82,7 +82,7 @@
                                         ?></h4>
                                             
                                             <div class="caption_btn activated">
-                                                <p class="price">$<?php echo number_format($theme->price,2); ?>
+                                                <p class="price">K<?php echo number_format($theme->price,2); ?>
 
                                             </div>
                                         </div>

@@ -26,8 +26,8 @@
                                         <th><?php echo display('employee_name'); ?></th>
                                         <th><?php echo display('phone'); ?></th>
                                         <th class="text-right"><?php echo display('loan_amount'); ?></th>
-                                        <th class="text-right"><?php echo display('paid'); ?></th>
-                                        <th class="text-right"><?php echo display('outstanding'); ?></th>
+                                        <th class="text-right">Paid</th>
+                                        <th class="text-right">Outstanding</th>
                                         <th><?php echo display('details') ?></th>
                                         <th><?php echo display('action') ?></th>
                                     </tr>
@@ -81,7 +81,7 @@
                                                 </td>
                                                 <td>
                                                     <?php echo html_escape($loan['details']); ?>
-                                                    <?php if (!empty($loan['disbursement_date']) || !empty($loan['repayment_start_date']) || !empty($loan['repayment_end_date']) || !empty($loan['repayment_period'])) { ?>
+                                                    <?php if (!empty($loan['disbursement_date']) || !empty($loan['repayment_start_date']) || !empty($loan['repayment_end_date']) || !empty($loan['repayment_period']) || !empty($loan['payment_channel_label'])) { ?>
                                                         <div class="small text-muted m-t-5">
                                                             <?php if (!empty($loan['disbursement_date'])) { ?>
                                                                 <div><?php echo display('disbursement_date'); ?>: <?php echo html_escape($loan['disbursement_date']); ?></div>
@@ -94,6 +94,9 @@
                                                             <?php } ?>
                                                             <?php if (!empty($loan['repayment_period'])) { ?>
                                                                 <div><?php echo display('repayment_period'); ?>: <?php echo html_escape($loan['repayment_period']); ?> <?php echo display('months'); ?></div>
+                                                            <?php } ?>
+                                                            <?php if (!empty($loan['payment_channel_label'])) { ?>
+                                                                <div><?php echo display('payment_type') ?: 'Payment Channel'; ?>: <?php echo html_escape($loan['payment_channel_label']); ?></div>
                                                             <?php } ?>
                                                         </div>
                                                     <?php } ?>

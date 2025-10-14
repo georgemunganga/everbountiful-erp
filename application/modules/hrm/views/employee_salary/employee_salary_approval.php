@@ -56,11 +56,6 @@
                                 <td><?php echo $currency.' '.$loans;?></td>
                             </tr>
                             <tr style="text-align: center;">
-                                <th style="text-align: center;">Salary Advance</th>
-                                <td></td>
-                                <td><?php echo $currency.' '.$salary_advance;?></td>
-                            </tr>
-                            <tr style="text-align: center;">
                                 <th style="text-align: center;">State Income Tax</th>
                                 <td></td>
                                 <td><?php echo $currency.' '.$state_income_tax;?></td>
