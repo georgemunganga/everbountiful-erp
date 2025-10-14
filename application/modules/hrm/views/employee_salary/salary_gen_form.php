@@ -1,4 +1,4 @@
-<link href="<?php echo base_url('application/modules/addon/assets/css/style.css'); ?>" rel="stylesheet" type="text/css"/>
+﻿<link href="<?php echo base_url('application/modules/addon/assets/css/style.css'); ?>" rel="stylesheet" type="text/css"/>
 
 <?php $salary_groups = isset($salary_groups) ? $salary_groups : array(); ?>
 
@@ -16,6 +16,38 @@
             </div>
 
             <div class="panel-body">
+                <?php $loanWarnings = $this->session->flashdata('loan_warnings'); ?>
+                <?php if (!empty($loanWarnings) && is_array($loanWarnings)) { ?>
+                    <div class="alert alert-warning">
+                        <strong><?php echo display('notice') ?: 'Notice'; ?>:</strong>
+                        <ul style="margin-bottom:0;">
+                            <?php
+                            $not_available_label = display('not_available');
+                            if ($not_available_label === 'not_available') {
+                                $not_available_label = 'Not available';
+                            }
+                            foreach ($loanWarnings as $warning) { 
+                                $name = isset($warning['employee']) ? $warning['employee'] : '';
+                                $nextDueTimestamp = isset($warning['next_due_date']) && !empty($warning['next_due_date']) ? strtotime($warning['next_due_date']) : false;
+                                $nextDue = ($nextDueTimestamp && $nextDueTimestamp > 0) ? date('M j, Y', $nextDueTimestamp) : $not_available_label;
+                                $remaining = isset($warning['remaining']) ? number_format((float) $warning['remaining'], 2) : '0.00';
+                                $payDate = isset($warning['pay_date']) ? date('M j, Y', strtotime($warning['pay_date'])) : '';
+                                $periodEnd = isset($warning['period_end']) ? date('M j, Y', strtotime($warning['period_end'])) : '';
+                            ?>
+                                <li>
+                                    <?php echo sprintf(
+                                        '%s has an outstanding office loan balance of %s with the next installment due on %s. The current payroll period (%s – %s) did not deduct it automatically.',
+                                        html_escape($name),
+                                        html_escape($remaining),
+                                        html_escape($nextDue),
+                                        html_escape($payDate),
+                                        html_escape($periodEnd)
+                                    ); ?>
+                                </li>
+                            <?php } ?>
+                        </ul>
+                    </div>
+                <?php } ?>
                 <div class="col-sm-4 col-md-4">
 
 

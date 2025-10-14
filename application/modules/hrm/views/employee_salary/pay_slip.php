@@ -182,6 +182,13 @@
                     ?>
 
                     <div class="row">
+                        <?php if (!empty($loan_warning)) { ?>
+                            <div class="col-sm-12">
+                                <div class="alert alert-warning">
+                                    <?php echo html_escape($loan_warning); ?>
+                                </div>
+                            </div>
+                        <?php } ?>
                         <table width="99%"
                             class="payrollDatatableReport table table-striped table-bordered table-hover">
                             <thead>
@@ -278,6 +285,26 @@
                                     <td></td>
                                     <td></td>
                                     <td style="text-align: left !important;"><?php echo $curncy_symbol.' '.number_format($office_loan_display,2);?></td>
+                                </tr>
+                                <?php } ?>
+                                <?php if (!empty($loan_outstanding_total) && $loan_outstanding_total > 0) { ?>
+                                <tr style="text-align: left !important;">
+                                    <td>Outstanding Office Loan Balance</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td style="text-align: left !important;">
+                                        <?php 
+                                        $nextLoanLabel = '';
+                                        if (!empty($next_loan_due_date)) {
+                                            $nextLoanTimestamp = strtotime($next_loan_due_date);
+                                            if ($nextLoanTimestamp && $nextLoanTimestamp > 0) {
+                                                $nextLoanLabel = ' (Next due ' . html_escape(date('M j, Y', $nextLoanTimestamp)) . ')';
+                                            }
+                                        }
+                                        echo $curncy_symbol.' '.number_format($loan_outstanding_total,2) . $nextLoanLabel;
+                                        ?>
+                                    </td>
                                 </tr>
                                 <?php } ?>
 <tr style="text-align: left;">

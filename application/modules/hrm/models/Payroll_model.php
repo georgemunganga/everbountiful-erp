@@ -536,10 +536,16 @@ public function create_employee_payment($data = array())
 	}
 
 	// Office loan installment deduction for payroll
-	public function office_loan_installment_deduction($emp_id, $current_date = null)
+	public function office_loan_installment_deduction($emp_id, $current_date = null, $period_end = null)
 	{
 		if (!$current_date) {
 			$current_date = date('Y-m-d');
+		}
+
+		$anchor_date = $current_date;
+		$window_end = $period_end ?: $anchor_date;
+		if (strtotime($window_end) === false || strtotime($window_end) < strtotime($anchor_date)) {
+			$window_end = $anchor_date;
 		}
 
 		$query = "SELECT 
@@ -568,7 +574,7 @@ public function create_employee_payment($data = array())
 		ORDER BY old.next_due_date IS NULL ASC, old.next_due_date ASC, old.disbursement_date ASC
 		LIMIT 1";
 
-		return $this->db->query($query, array($emp_id, $current_date, $current_date, $current_date))->row();
+		return $this->db->query($query, array($emp_id, $window_end, $anchor_date, $window_end))->row();
 	}
 
 	// Update office loan payment after deduction

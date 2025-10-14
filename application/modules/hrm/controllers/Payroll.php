@@ -816,6 +816,7 @@ class Payroll extends MX_Controller {
 			addActivityLog("salary generate", "create", $generate_id, "gmb_salary_sheet_generate", 2, $postData);
 
 			$salary_generate_success = false;
+			$loanWarnings = array();
 
 			foreach ($employees as $employee) {
 				$employee_id = isset($employee->id) ? $employee->id : (isset($employee->employee_id) ? $employee->employee_id : null);
@@ -879,7 +880,7 @@ class Payroll extends MX_Controller {
 
 				$office_loan_deduct = 0.0;
 				$office_loan_transaction_id = null;
-				$office_loan_respo = $this->Payroll_model->office_loan_installment_deduction($employee_id, $pay_date);
+				$office_loan_respo = $this->Payroll_model->office_loan_installment_deduction($employee_id, $pay_date, $edate);
 				if ($office_loan_respo) {
 					$remaining_office_balance = max(0.0, floatval($office_loan_respo->remaining_balance));
 					$office_installment = isset($office_loan_respo->payable_amount)
@@ -887,6 +888,47 @@ class Payroll extends MX_Controller {
 						: floatval($office_loan_respo->monthly_installment);
 					$office_loan_deduct = max(0.0, min($office_installment, $remaining_office_balance));
 					$office_loan_transaction_id = $office_loan_respo->transaction_id;
+				} else {
+					$loan_summary_rows = $this->Payroll_model->get_employee_office_loan_summary($employee_id);
+					if (!empty($loan_summary_rows)) {
+						$remaining_total = 0.0;
+						$next_due_date = null;
+						foreach ($loan_summary_rows as $loan_row) {
+							$balance = max(0.0, floatval(isset($loan_row->remaining_balance) ? $loan_row->remaining_balance : (($loan_row->principal_amount ?? 0) - ($loan_row->total_paid ?? 0))));
+							if ($balance <= 0) {
+								continue;
+							}
+							$remaining_total += $balance;
+							$candidate_due = null;
+							if (!empty($loan_row->next_due_date) && strtotime($loan_row->next_due_date)) {
+								$candidate_due = date('Y-m-d', strtotime($loan_row->next_due_date));
+							} elseif (!empty($loan_row->repayment_start_date) && strtotime($loan_row->repayment_start_date)) {
+								$candidate_due = date('Y-m-d', strtotime($loan_row->repayment_start_date));
+							}
+							if ($candidate_due !== null) {
+								if ($next_due_date === null || strtotime($candidate_due) < strtotime($next_due_date)) {
+									$next_due_date = $candidate_due;
+								}
+							}
+						}
+						if ($remaining_total > 0) {
+							$employee_name = trim(
+								((isset($employee->first_name) ? $employee->first_name : '') ?: '') . ' ' .
+								((isset($employee->last_name) ? $employee->last_name : '') ?: '')
+							);
+							if ($employee_name === '') {
+								$employee_name = 'Employee ID ' . $employee_id;
+							}
+							$loanWarnings[] = array(
+								'employee'      => $employee_name,
+								'employee_id'   => $employee_id,
+								'next_due_date' => $next_due_date,
+								'remaining'     => $remaining_total,
+								'pay_date'      => $pay_date,
+								'period_end'    => $edate,
+							);
+						}
+					}
 				}
 
 				$available_for_deductions = max(0.0, $netAmount);
@@ -953,6 +995,10 @@ class Payroll extends MX_Controller {
 						));
 					}
 				}
+			}
+
+			if (!empty($loanWarnings)) {
+				$this->session->set_flashdata('loan_warnings', $loanWarnings);
 			}
 
 			if ($salary_generate_success) {
@@ -1121,7 +1167,8 @@ class Payroll extends MX_Controller {
 						// Convert salary month to proper date format for loan deduction check
 						$salary_month = $this->input->post('name',true);
 						$current_date = date('Y-m-d', strtotime($salary_month . '-01'));
-						$office_loan_respo = $this->Payroll_model->office_loan_installment_deduction($emp_id, $current_date);
+						$period_end_date = date('Y-m-t', strtotime($current_date));
+						$office_loan_respo = $this->Payroll_model->office_loan_installment_deduction($emp_id, $current_date, $period_end_date);
 						if($office_loan_respo){
 							$remaining_office_balance = max(0.0, floatval($office_loan_respo->remaining_balance));
 							$office_loan_deduct = floatval(isset($office_loan_respo->payable_amount) ? $office_loan_respo->payable_amount : $office_loan_respo->monthly_installment);
@@ -1739,6 +1786,52 @@ class Payroll extends MX_Controller {
 		$leaveDays = $this->leave_model->get_leave_days_for_period((int) $salary_info->employee_id, $salary_info->sal_month_year ?? '', $salary_info->createDate ?? '');
 		$data['leave_days'] = round($leaveDays, 2);
 		$data['worked_days'] = !empty($salary_info->total_attendance) ? $salary_info->total_attendance : ($salary_info->total_count ?? '');
+
+		$loanSummary = $this->Payroll_model->get_employee_office_loan_summary($salary_info->employee_id);
+		$data['loan_summary'] = $loanSummary;
+		$loanOutstandingTotal = 0.0;
+		$nextLoanDue = null;
+		if (!empty($loanSummary)) {
+			foreach ($loanSummary as $loanRow) {
+				$balance = 0.0;
+				if (isset($loanRow->remaining_balance)) {
+					$balance = (float) $loanRow->remaining_balance;
+				} else {
+					$principal = isset($loanRow->principal_amount) ? (float) $loanRow->principal_amount : 0.0;
+					$totalPaid = isset($loanRow->total_paid) ? (float) $loanRow->total_paid : 0.0;
+					$balance = $principal - $totalPaid;
+				}
+				if ($balance <= 0) {
+					continue;
+				}
+				$loanOutstandingTotal += $balance;
+				$candidateDue = null;
+				if (!empty($loanRow->next_due_date)) {
+					$candidateDue = $loanRow->next_due_date;
+				} elseif (!empty($loanRow->repayment_start_date)) {
+					$candidateDue = $loanRow->repayment_start_date;
+				}
+				if ($candidateDue !== null) {
+					if ($nextLoanDue === null || strtotime($candidateDue) < strtotime($nextLoanDue)) {
+						$nextLoanDue = $candidateDue;
+					}
+				}
+			}
+		}
+		$data['loan_outstanding_total'] = round($loanOutstandingTotal, 2);
+		$data['next_loan_due_date'] = $nextLoanDue;
+		if ($loanOutstandingTotal > 0 && $data['office_loan_total'] <= 0.0001) {
+			$nextLoanDueFormatted = ($nextLoanDue && strtotime($nextLoanDue)) ? date('M j, Y', strtotime($nextLoanDue)) : 'a future date';
+			$data['loan_warning'] = sprintf(
+				'%s has an outstanding office loan balance of %s%s. The next installment is scheduled for %s and was not deducted on this pay period.',
+				isset($employee_info->first_name) || isset($employee_info->last_name)
+					? trim(($employee_info->first_name ?? '') . ' ' . ($employee_info->last_name ?? ''))
+					: ('Employee ID ' . $salary_info->employee_id),
+				isset($data['setting']->currency_symbol) ? $data['setting']->currency_symbol . ' ' : '',
+				number_format($loanOutstandingTotal, 2),
+				$nextLoanDueFormatted
+			);
+		}
 
 		return $data;
 	}
