@@ -9,5 +9,5 @@ defined('BASEPATH') or exit('No direct script access allowed');
 // Ensure the canonical class is available
 require_once __DIR__ . '/CustomerGroups_model.php';
 
-class Customergroups_model extends CustomerGroups_model {}
+class CustomerGroups_model extends CustomerGroups_model {}
 
