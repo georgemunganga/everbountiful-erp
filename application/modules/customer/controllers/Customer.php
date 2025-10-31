@@ -13,12 +13,11 @@ class Customer extends MX_Controller {
     {
         parent::__construct();
   
-        $this->load->model(array(
-            'customer_model',
-            'customergroups_model' => 'CustomerGroups_model',
-            'template/template_model' => 'template_model',
-            'account/Accounts_model' => 'accounts_model'
-        )); 
+        // Load models with correct case-sensitive paths for Linux hosts
+        $this->load->model('customer/Customer_model', 'customer_model');
+        $this->load->model('customer/CustomerGroups_model', 'CustomerGroups_model');
+        $this->load->model('template/Template_model', 'template_model');
+        $this->load->model('account/Accounts_model', 'accounts_model'); 
         if (! $this->session->userdata('isLogIn'))
             redirect('login');
           
