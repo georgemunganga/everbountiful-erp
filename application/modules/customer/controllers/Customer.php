@@ -15,7 +15,7 @@ class Customer extends MX_Controller {
   
         // Load models with correct case-sensitive paths for Linux hosts
         $this->load->model('customer/Customer_model', 'customer_model');
-        $this->load->model('customer/CustomerGroups_model', 'CustomerGroups_model');
+        $this->load->model('customer/Customergroups_model', 'Customergroups_model');
         $this->load->model('template/Template_model', 'template_model');
         $this->load->model('account/Accounts_model', 'accounts_model'); 
         if (! $this->session->userdata('isLogIn'))
@@ -166,7 +166,7 @@ class Customer extends MX_Controller {
             $data['title']    = display('edit_customer');
             $data['customer'] = $this->customer_model->singledata($id);  
             }
-            $data['groups']   = $this->CustomerGroups_model->get_dropdown();
+            $data['groups']   = $this->Customergroups_model->get_dropdown();
             $data['module']   = "customer";  
             $data['page']     = "form";  
             echo Modules::run('template/layout', $data); 
@@ -261,7 +261,7 @@ class Customer extends MX_Controller {
     public function customer_groups()
     {
         $data['title']  = 'Customer Groups';
-        $data['groups'] = $this->CustomerGroups_model->list_all();
+        $data['groups'] = $this->Customergroups_model->list_all();
         $data['module'] = 'customer';
         $data['page']   = 'customer_group_list';
         echo Modules::run('template/layout', $data);
@@ -271,7 +271,7 @@ class Customer extends MX_Controller {
     public function customer_group_form($id = null)
     {
         $data['title']  = empty($id) ? 'Add Group' : 'Edit Group';
-        $data['group']  = !empty($id) ? $this->CustomerGroups_model->get($id) : null;
+        $data['group']  = !empty($id) ? $this->Customergroups_model->get($id) : null;
         $data['module'] = 'customer';
         $data['page']   = 'customer_group_form';
         echo Modules::run('template/layout', $data);
@@ -302,9 +302,9 @@ class Customer extends MX_Controller {
 
         $ok = false;
         if ($id > 0) {
-            $ok = $this->CustomerGroups_model->update($id, $data);
+            $ok = $this->Customergroups_model->update($id, $data);
         } else {
-            $ok = $this->CustomerGroups_model->create($data);
+            $ok = $this->Customergroups_model->create($data);
         }
 
         if ($ok) {
@@ -320,7 +320,7 @@ class Customer extends MX_Controller {
     // Customer Groups: delete
     public function customer_group_delete($id)
     {
-        $this->CustomerGroups_model->delete($id);
+        $this->Customergroups_model->delete($id);
         redirect('customer/customer_groups');
     }
 
