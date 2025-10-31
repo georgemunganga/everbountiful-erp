@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-define('DEMO_MODE', value: false);
+define('DEMO_MODE', false);
 /*
 |--------------------------------------------------------------------------
 | Base Site URL
@@ -155,7 +155,7 @@ $config['subclass_prefix'] = 'MY_';
 | Note: This will NOT disable or override the CodeIgniter-specific
 |	autoloading (application/config/autoload.php)
 */
-$config['composer_autoload'] = './vendor/autoload.php';
+$config['composer_autoload'] = (is_file(FCPATH.'vendor/autoload.php') ? FCPATH.'vendor/autoload.php' : FALSE);
 
 /*
 |--------------------------------------------------------------------------
@@ -399,7 +399,7 @@ $config['encryption_key'] = 'MySuperEncryptionKEY2017';
 $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'ci_session';
 $config['sess_expiration'] = 7200;
-$config['sess_save_path'] = APPPATH.'cache/temp/';
+$config['sess_save_path'] = APPPATH.'cache/';
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 300;
 $config['sess_regenerate_destroy'] = FALSE;
