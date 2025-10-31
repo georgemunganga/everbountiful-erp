@@ -506,6 +506,7 @@
                                           <th style="width:140px;">Applied Date</th>
                                           <th>Applied To</th>
                                           <th class="text-right">Amount</th>
+                                          <th class="text-right">Due (after apply)</th>
                                         </tr>
                                       </thead>
                                       <tbody>
@@ -514,6 +515,7 @@
                                             <td><?php echo !empty($it['date']) ? date('d-m-Y', strtotime($it['date'])) : ''; ?></td>
                                             <td class="text-muted">Invoice <?php echo html_escape($it['invoice_id']); ?> (Voucher <?php echo html_escape($it['voucher']); ?>)</td>
                                             <td class="text-right text-muted"><?php echo $formatCurrency($it['amount']); ?></td>
+                                            <td class="text-right"><?php echo isset($it['due']) && $it['due'] !== null ? $formatCurrency($it['due']) : '<span class="text-muted">—</span>'; ?></td>
                                           </tr>
                                         <?php } ?>
                                       </tbody>

@@ -478,6 +478,29 @@ class Customer extends MX_Controller {
                 }
             }
         }
+        // Enrich breakdowns with current due per invoice
+        if (!empty($payment_groups)) {
+            $all_ids = array();
+            foreach ($payment_groups as $lbl => $pg) {
+                if (!empty($pg['items'])) {
+                    foreach ($pg['items'] as $it) {
+                        if (!empty($it['invoice_id'])) { $all_ids[(int)$it['invoice_id']] = true; }
+                    }
+                }
+            }
+            if (!empty($all_ids)) {
+                $rows = $this->db->select('invoice_id, due_amount')->from('invoice')->where_in('invoice_id', array_keys($all_ids))->get()->result_array();
+                $due_map = array(); foreach ($rows as $r) { $due_map[(int)$r['invoice_id']] = (float)$r['due_amount']; }
+                foreach ($payment_groups as $lbl => $pg) {
+                    if (!empty($pg['items'])) {
+                        foreach ($payment_groups[$lbl]['items'] as $k => $it) {
+                            $iid = isset($it['invoice_id']) ? (int)$it['invoice_id'] : 0;
+                            $payment_groups[$lbl]['items'][$k]['due'] = isset($due_map[$iid]) ? $due_map[$iid] : null;
+                        }
+                    }
+                }
+            }
+        }
         $data['payment_groups'] = $payment_groups;
         $invoice_rows_all = $this->customer_model->get_customer_invoices($customer_id);
         $prepared_invoices = array();
