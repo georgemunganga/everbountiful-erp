@@ -161,3 +161,23 @@
     });
 </script>
 <?php endif; ?>
+
+<?php if (!empty($prefill_invoice_id)) : ?>
+<script>
+    $(function () {
+        var desiredInvoice = '<?php echo html_escape($prefill_invoice_id); ?>';
+        // Try to select the desired invoice after the customer vouchers load
+        var trySelectVoucher = function(){
+            var $sel = $('#voucher_no_1');
+            if ($sel.find('option').length > 0) {
+                $sel.val(desiredInvoice).trigger('change');
+                // Populate due amount for the selected invoice
+                if (desiredInvoice) { customervoucher_due(desiredInvoice); }
+            } else {
+                setTimeout(trySelectVoucher, 250);
+            }
+        };
+        trySelectVoucher();
+    });
+    </script>
+<?php endif; ?>

@@ -5,7 +5,47 @@ if(isset($_POST['btnSearch']))
 }
 $searchdate =(!empty($postdate)?$postdate:date('F Y'));
 
+// Range helpers from controller
+$selected_range       = isset($selected_range) ? $selected_range : 'this_month';
+$selected_range_label = isset($selected_range_label) ? $selected_range_label : 'This Month';
+$range_start          = isset($range_start) ? $range_start : date('Y-m-01');
+$range_end            = isset($range_end) ? $range_end : date('Y-m-t');
 ?>
+
+<div class="row dash-toolbar">
+    <div class="col-xs-12">
+        <div class="btn-group" role="group" aria-label="Date filters">
+            <?php 
+            $filters = [
+                'today'       => 'Today',
+                'last_week'   => 'Last Week',
+                'this_month'  => 'This Month',
+                'last_month'  => 'Last Month',
+                'this_year'   => 'This Year',
+                'last_year'   => 'Last Year',
+            ];
+            foreach ($filters as $key => $label): 
+                $active = ($selected_range === $key) ? 'btn-primary' : 'btn-default';
+            ?>
+            <a class="btn <?php echo $active; ?>" href="<?php echo base_url('home?range=' . $key); ?>"><?php echo html_escape($label); ?></a>
+            <?php endforeach; ?>
+        </div>
+        <form class="form-inline" method="get" action="<?php echo base_url('home'); ?>" style="display:inline-block; margin-left:15px;">
+            <label style="margin-right:6px; font-weight:normal; color:#6b7280;">From</label>
+            <input type="date" class="form-control" name="from" value="<?php echo html_escape($range_start); ?>" style="height:30px; padding:2px 6px;">
+            <label style="margin:0 6px; font-weight:normal; color:#6b7280;">To</label>
+            <input type="date" class="form-control" name="to" value="<?php echo html_escape($range_end); ?>" style="height:30px; padding:2px 6px;">
+            <button type="submit" class="btn btn-primary btn-sm" style="margin-left:6px; height:30px; line-height:1.4; padding:4px 10px;">
+                <?php echo html_escape(display('filter') ?: 'Filter'); ?>
+            </button>
+            <a href="<?php echo base_url('home'); ?>" class="btn btn-default btn-sm" style="margin-left:6px; height:30px; line-height:1.4; padding:4px 10px;">Reset</a>
+        </form>
+        <div class="text-muted" style="display:inline-block; margin-left:10px; vertical-align:middle;">
+            Showing: <?php echo html_escape($selected_range_label); ?> (<?php echo html_escape($range_start); ?> to <?php echo html_escape($range_end); ?>)
+        </div>
+    </div>
+</div>
+<hr>
 
 <div class="row">
     <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
@@ -26,7 +66,7 @@ $searchdate =(!empty($postdate)?$postdate:date('F Y'));
         </div>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
-        <div class="small-box bg-pase whitecolor">
+        <div class="small-box bg-green whitecolor">
             <div class="inner">
                 <h4><span class="count-number"><?php echo html_escape($total_product) ?></span></h4>
 
@@ -44,7 +84,7 @@ $searchdate =(!empty($postdate)?$postdate:date('F Y'));
         </div>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
-        <div class="small-box bg-bringal whitecolor">
+        <div class="small-box bg-green whitecolor">
             <div class="inner">
                 <h4><span class="count-number"><?php echo html_escape($total_suppliers)?></span></h4>
 
@@ -62,7 +102,7 @@ $searchdate =(!empty($postdate)?$postdate:date('F Y'));
         </div>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
-        <div class="small-box bg-darkgreen whitecolor">
+        <div class="small-box bg-green whitecolor">
             <div class="inner">
                 <h4><span class="count-number"><?php echo html_escape($total_sales) ?></span> </h4>
 
@@ -83,6 +123,102 @@ $searchdate =(!empty($postdate)?$postdate:date('F Y'));
 <hr>
 
 <?php if ($this->session->userdata('isAdmin')){?>
+
+<style>
+/* Mini stat cards (compact, 5 per row on large screens) */
+.mini-stat-grid { display:flex; flex-wrap:wrap; margin:-8px; }
+.mini-stat-card {
+    background:#fff; border:1px solid #e5e7eb; border-radius:0px; padding:12px 14px 40px 14px; margin:8px;
+    box-shadow:0 1px 2px rgba(0,0,0,0.05); flex:1 1 calc(20% - 16px); min-width:210px; position:relative;
+}
+.mini-stat-card .msc-title { font-size:12px; color:#6b7280; margin-bottom:4px; text-transform:uppercase; letter-spacing:.04em; font-weight: bold; }
+.mini-stat-card .msc-value { font-size:22px; font-weight:700; color:#111827; }
+.mini-stat-card .msc-sub { font-size:12px; color:#374151; margin-top:2px; }
+.mini-stat-card .msc-icon { position:absolute; right:12px; bottom:10px; top:auto; color:#9ca3af; font-size:18px; }
+.mini-stat-card .msc-link { display:inline-block; margin-top:6px; font-size:12px; color:#319000; text-decoration:none; }
+.mini-stat-card .msc-link:hover { text-decoration:underline; }
+.mini-stat-card.accent-blue { border-top:3px solid #319000; }
+.mini-stat-card.accent-green { border-top:3px solid #fec802; }
+.mini-stat-card.accent-rose { border-top:3px solid #319000; }
+.mini-stat-card.accent-amber { border-top:3px solid #f59e0b; }
+.mini-stat-card.accent-purple { border-top:3px solid #8b5cf6; }
+/* Vertical spacing helpers */
+.dash-toolbar { margin-bottom: 12px; }
+.dash-toolbar .btn-group { margin-bottom: 8px; }
+.mini-stat-grid { margin-top: 8px; margin-bottom: 16px; }
+.panel.panel-bd { margin-top: 12px; }
+@media (max-width: 1199px) { .mini-stat-card { flex:1 1 calc(25% - 16px); } }
+@media (max-width: 991px) { .mini-stat-card { flex:1 1 calc(33.333% - 16px); } }
+@media (max-width: 767px) { .mini-stat-card { flex:1 1 calc(50% - 16px); } }
+@media (max-width: 479px) { .mini-stat-card { flex:1 1 100%; } }
+</style>
+
+<div class="mini-stat-grid">
+    <!-- Total Sales (range) -->
+    <div class="mini-stat-card accent-blue">
+        <i class="msc-icon fa fa-line-chart"></i>
+        <div class="msc-title"><?php echo display('total_sales') ?: 'Total Sales'; ?> — <?php echo html_escape($selected_range_label); ?></div>
+        <div class="msc-value"><?php echo html_escape($total_sales_count_range ?? 0); ?></div>
+        <div class="msc-sub">
+            <?php 
+                $amt = isset($total_sales_amount_range) ? $total_sales_amount_range : '0.00';
+                $label = display('amount') ?: 'Amount';
+                echo html_escape($label . ': ' . (($position == 0) ? "$currency $amt" : "$amt $currency"));
+            ?>
+        </div>
+        <a class="msc-link" href="<?php echo base_url('sales_report'); ?>"><?php echo display('see_all') ?: 'See all'; ?></a>
+    </div>
+
+    <!-- Total Production (range) -->
+    <div class="mini-stat-card accent-green">
+        <i class="msc-icon fa fa-industry"></i>
+        <div class="msc-title"><?php echo html_escape(display('productions') ?: 'Total Production'); ?> — <?php echo html_escape($selected_range_label); ?></div>
+        <div class="msc-value"><?php echo html_escape($total_production_range ?? 0); ?></div>
+        <?php if (!empty($latest_consumption)) { ?>
+        <div class="msc-sub">
+            <?php 
+                $lc_name = $latest_consumption['product_name'] ?? '';
+                $lc_qty  = isset($latest_consumption['quantity_out']) ? (float)$latest_consumption['quantity_out'] : '';
+                $lc_unit = $latest_consumption['unit_name'] ?? '';
+                if ($lc_name !== '') {
+                    echo 'Latest consumed: ' . html_escape($lc_name) . ' ' . html_escape($lc_qty) . ' ' . html_escape($lc_unit);
+                }
+            ?>
+        </div>
+        <?php } ?>
+        <a class="msc-link" href="<?php echo base_url('productions'); ?>"><?php echo display('see_all') ?: 'See all'; ?></a>
+    </div>
+
+    <!-- Total Mortality (range) -->
+    <div class="mini-stat-card accent-rose">
+        <i class="msc-icon fa fa-heartbeat"></i>
+        <div class="msc-title"><?php echo html_escape(display('mortality') ?: 'Total Mortality'); ?> — <?php echo html_escape($selected_range_label); ?></div>
+        <div class="msc-value"><?php echo html_escape($total_mortality_range ?? 0); ?></div>
+        <a class="msc-link" href="<?php echo base_url('productions'); ?>"><?php echo display('see_all') ?: 'See all'; ?></a>
+    </div>
+
+    <!-- Total Feed Stock (snapshot) -->
+    <div class="mini-stat-card accent-green">
+        <i class="msc-icon fa fa-cubes"></i>
+        <div class="msc-title"><?php echo html_escape(display('total_instock') ?: 'Total Feed Stock'); ?></div>
+        <div class="msc-value"><?php echo html_escape($total_feed_instock ?? 0); ?></div>
+        <a class="msc-link" href="<?php echo base_url('feed-usages'); ?>"><?php echo display('see_all') ?: 'See all'; ?></a>
+    </div>
+
+    <!-- Available Products (current availability + last two bought) -->
+    <div class="mini-stat-card accent-rose">
+        <i class="msc-icon fa fa-archive"></i>
+        <div class="msc-title"><?php echo html_escape(display('total_product') ?: 'Available Products'); ?></div>
+        <div class="msc-value"><?php echo html_escape($available_products_count ?? 0); ?></div>
+        <?php if (!empty($last_two_purchased)) { 
+            $names = array();
+            foreach ($last_two_purchased as $p) { if (!empty($p['product_name'])) { $names[] = $p['product_name']; } }
+            if (!empty($names)) { ?>
+                <div class="msc-sub"><?php echo 'Last bought: ' . html_escape(implode(', ', array_slice($names, 0, 2))); ?></div>
+        <?php } } ?>
+        <a class="msc-link" href="<?php echo base_url('stock/consumption'); ?>"><?php echo display('see_all') ?: 'See all'; ?></a>
+    </div>
+</div>
 <div class="row d-flex flex-wrap">
     <!-- This month progress -->
     <div class="col-sm-12 col-md-7 d-flex">

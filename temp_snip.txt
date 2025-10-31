@@ -1,0 +1,40 @@
+    </div>
+</div>
+<hr>
+
+<?php if ($this->session->userdata('isAdmin')){?>
+
+<style>
+/* Mini stat cards (compact, 5 per row on large screens) */
+.mini-stat-grid { display:flex; flex-wrap:wrap; margin:-8px; }
+.mini-stat-card {
+    background:#fff; border:1px solid #e5e7eb; border-radius:0px; padding:12px 14px; margin:8px;
+    box-shadow:0 1px 2px rgba(0,0,0,0.05); flex:1 1 calc(20% - 16px); min-width:210px; position:relative;
+}
+.mini-stat-card .msc-title { font-size:12px; color:#6b7280; margin-bottom:4px; text-transform:uppercase; letter-spacing:.04em; font-weight: bold; }
+.mini-stat-card .msc-value { font-size:22px; font-weight:700; color:#111827; }
+.mini-stat-card .msc-sub { font-size:12px; color:#374151; margin-top:2px; }
+.mini-stat-card .msc-icon { position:absolute; right:12px; top:10px; color:#9ca3af; font-size:18px; }
+.mini-stat-card .msc-link { display:inline-block; margin-top:6px; font-size:12px; color:#319000; text-decoration:none; }
+.mini-stat-card .msc-link:hover { text-decoration:underline; }
+.mini-stat-card.accent-blue { border-top:3px solid #319000; }
+.mini-stat-card.accent-green { border-top:3px solid #fec802; }
+.mini-stat-card.accent-rose { border-top:3px solid #319000; }
+.mini-stat-card.accent-amber { border-top:3px solid #f59e0b; }
+.mini-stat-card.accent-purple { border-top:3px solid #8b5cf6; }
+/* Vertical spacing helpers */
+.dash-toolbar { margin-bottom: 12px; }
+.dash-toolbar .btn-group { margin-bottom: 8px; }
+.mini-stat-grid { margin-top: 8px; margin-bottom: 16px; }
+.panel.panel-bd { margin-top: 12px; }
+@media (max-width: 1199px) { .mini-stat-card { flex:1 1 calc(25% - 16px); } }
+@media (max-width: 991px) { .mini-stat-card { flex:1 1 calc(33.333% - 16px); } }
+@media (max-width: 767px) { .mini-stat-card { flex:1 1 calc(50% - 16px); } }
+@media (max-width: 479px) { .mini-stat-card { flex:1 1 100%; } }
+</style>
+
+<div class="mini-stat-grid">
+    <!-- Total Sales (range) -->
+    <div class="mini-stat-card accent-blue">
+        <i class="msc-icon fa fa-line-chart"></i>
+        <div class="msc-title"><?php echo display('total_sales') ?: 'Total Sales'; ?> — <?php echo html_escape($selected_range_label); ?></div>

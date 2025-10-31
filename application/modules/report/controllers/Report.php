@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
  #------------------------------------    
     # Author: Bdtask Ltd
-    # Author link: https://www.bdtask.com/
+    # Author link: https://www.greenwebb.tech/
     # Dynamic style php file
     # Developed by :Isahaq
     #------------------------------------    
@@ -32,7 +32,7 @@ class Report extends MX_Controller {
     public function bdtask_checkStocklist(){
         // GET data
         $postData = $this->input->post();
-        $data = $this->report_model->bdtask_getStock($postData);
+        $data = $this->report_model->bd_task_getStock($postData);
         echo json_encode($data);
     } 
 

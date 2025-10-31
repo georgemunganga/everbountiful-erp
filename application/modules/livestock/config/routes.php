@@ -12,6 +12,7 @@ $route['productions/(:num)']           = "livestock/livestock/productions";
 $route['productions/create']           = "livestock/livestock/production_form";
 $route['productions/edit/(:num)']      = "livestock/livestock/production_form/$1";
 $route['productions/delete/(:num)']    = "livestock/livestock/production_delete/$1";
+$route['productions/import']           = "livestock/livestock/import_productions";
 
 $route['livestock-groups']               = "livestock/livestock/livestock_groups";
 $route['livestock-groups/(:num)']        = "livestock/livestock/livestock_groups";

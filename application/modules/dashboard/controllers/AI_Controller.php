@@ -2,7 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 #------------------------------------    
 # Author: Bdtask Ltd
-# Author link: https://www.bdtask.com/
+# Author link: https://www.greenwebb.tech/
 # Dynamic style php file
 # Developed by :Isahaq
 #------------------------------------    
@@ -129,7 +129,7 @@ class AI_Controller extends MX_Controller
 //         }
 
 //         if ($report_type === 'stock') {
-//             $stock_data = $this->report_model->bdtask_getStock([
+//             $stock_data = $this->report_model->bd_task_getStock([
 //                 'draw' => 1,
 //                 'start' => 0,
 //                 'length' => 1000,
@@ -276,7 +276,7 @@ class AI_Controller extends MX_Controller
             }
 
             if ($report_type === 'stock') {
-                $stock_data = $this->report_model->bdtask_getStock([
+                $stock_data = $this->report_model->bd_task_getStock([
                     'draw' => 1,
                     'start' => 0,
                     'length' => 1000,

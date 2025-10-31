@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  #------------------------------------    
     # Author: Bdtask Ltd
-    # Author link: https://www.bdtask.com/
+    # Author link: https://www.greenwebb.tech/
     # Dynamic style php file
     # Developed by :Isahaq
     #------------------------------------    

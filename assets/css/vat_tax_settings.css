@@ -37,7 +37,7 @@
 
 /* When the radio button is checked, add a blue background */
 .invoice-view-option input:checked~.checkmark {
-    background-color: #37a000;
+    background-color: #126e21;
 }
 
 /* Create the indicator (the dot/circle - hidden when not checked) */

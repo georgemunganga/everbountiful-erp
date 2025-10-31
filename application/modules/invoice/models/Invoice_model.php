@@ -2,7 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 #------------------------------------    
 # Author: Bdtask Ltd
-# Author link: https://www.bdtask.com/
+# Author link: https://www.greenwebb.tech/
 # Dynamic style php file
 # Developed by :Isahaq
 #------------------------------------    
@@ -92,7 +92,22 @@ class Invoice_model extends CI_Model
 
     public function pmethod_dropdown()
     {
-        return ['Cash', 'Credit Card', 'PayPal'];
+        // Include Credit Sale (0) plus available Cash/Bank COA heads
+        $data = $this->db->select('*')
+            ->from('acc_coa')
+            ->where('PHeadName', 'Cash')
+            ->or_where('PHeadName', 'Cash at Bank')
+            ->get()
+            ->result();
+
+        $list = [];
+        $list[0] = 'Credit Sale';
+        if (!empty($data)) {
+            foreach ($data as $value) {
+                $list[$value->HeadCode] = $value->HeadName;
+            }
+        }
+        return $list;
     }
 
     public function tax_fileds()
@@ -268,7 +283,7 @@ class Invoice_model extends CI_Model
         $totalRecordwithFilter = $records->allcount;
 
         ## Fetch records
-        $this->db->select("a.invoice_id, a.invoice, a.date, a.total_amount, 
+        $this->db->select("a.invoice_id, a.invoice, a.date, a.total_amount, a.ret_adjust_amnt,
                         b.customer_name, u.first_name, u.last_name");
         $this->db->from('invoice a');
         $this->db->join('customer_information b', 'b.customer_id = a.customer_id', 'left');
@@ -297,6 +312,13 @@ class Invoice_model extends CI_Model
             $base_url = base_url();
             $jsaction = "return confirm('Are You Sure ?')";
 
+            $approve = $this->db->select('status, referenceNo')
+                ->from('acc_vaucher')
+                ->where('referenceNo', $record->invoice_id)
+                ->where('status', 1)
+                ->get()
+                ->num_rows();
+
             $button .= '&nbsp;<a href="' . $base_url . 'invoice_details/' . $record->invoice_id . '" class="btn btn-success btn-sm" 
                         data-toggle="tooltip" data-placement="left" title="' . display('invoice') . '">
                         <i class="fa fa-window-restore" aria-hidden="true"></i></a>';
@@ -310,18 +332,30 @@ class Invoice_model extends CI_Model
                         <i class="fa fa-fax" aria-hidden="true"></i></a>';
 
             if ($this->permission1->method('manage_invoice', 'update')->access()) {
-                $approve = $this->db->select('status, referenceNo')
-                    ->from('acc_vaucher')
-                    ->where('referenceNo', $record->invoice_id)
-                    ->where('status', 1)
-                    ->get()
-                    ->num_rows();
-
-                if ($approve == 0 && empty($record->ret_adjust_amnt)) {
+                $isAdmin = $this->session->userdata('isAdmin');
+                if ($isAdmin || ($approve == 0 && empty($record->ret_adjust_amnt))) {
                     $button .= '&nbsp;<a href="' . $base_url . 'invoice_edit/' . $record->invoice_id . '" class="btn btn-success btn-sm" 
                             data-toggle="tooltip" data-placement="left" title="' . display('update') . '">
                             <i class="fa fa-pencil" aria-hidden="true"></i></a>';
                 }
+            }
+
+            if ($this->permission1->method('manage_invoice', 'delete')->access()) {
+                $hasApprovedVoucher = ($approve > 0);
+                $hasReturnAdjustment = !empty($record->ret_adjust_amnt);
+
+                $delete_title = display('delete');
+                if ($hasApprovedVoucher && $hasReturnAdjustment) {
+                    $delete_title = 'Deleting will remove approved vouchers and return adjustments.';
+                } elseif ($hasApprovedVoucher) {
+                    $delete_title = 'Deleting will remove approved vouchers.';
+                } elseif ($hasReturnAdjustment) {
+                    $delete_title = 'Deleting will remove return adjustments linked to this invoice.';
+                }
+
+                $button .= '&nbsp;<button type="button" class="btn btn-danger btn-sm js-delete-invoice" 
+                        data-toggle="tooltip" data-placement="right" title="' . $delete_title . '" data-invoice="' . $record->invoice_id . '" data-approved="' . ($hasApprovedVoucher ? 1 : 0) . '" data-retadjust="' . ($hasReturnAdjustment ? 1 : 0) . '">
+                        <i class="fa fa-trash-o" aria-hidden="true"></i></button>';
             }
 
             $details = '<a href="' . $base_url . 'invoice_details/' . $record->invoice_id . '" class="" >' . $record->invoice . '</a>';
@@ -568,7 +602,7 @@ class Invoice_model extends CI_Model
             'total_amount' => $this->input->post('grand_total_price', TRUE),
             'total_tax' => $this->input->post('total_tax', TRUE),
             'invoice' => $incremented_id,
-            'invoice_details' => (!empty($this->input->post('inva_details', TRUE)) ? $this->input->post('inva_details', TRUE) : 'Thank you for shopping with us'),
+            'invoice_details' => (!empty($this->input->post('inva_details', TRUE)) ? $this->input->post('inva_details', TRUE) : 'Thank you for your support'),
             'invoice_discount' => $this->input->post('invoice_discount', TRUE),
             'total_discount' => $this->input->post('total_discount', TRUE),
             'total_vat_amnt' => $this->input->post('total_vat_amnt', TRUE),
@@ -953,6 +987,7 @@ class Invoice_model extends CI_Model
         $product_id = $this->input->post('product_id', TRUE);
         $multipayamount = $this->input->post('pamount_by_method', TRUE);
         $multipaytype = $this->input->post('multipaytype', TRUE);
+        $hasPayment = (is_array($multipaytype) && count($multipaytype) > 0 && $multipaytype[0] !== '');
         $changeamount = $this->input->post('change', TRUE);
         if ($changeamount > 0) {
             $paidamount = $this->input->post('n_total', TRUE);
@@ -973,8 +1008,10 @@ class Invoice_model extends CI_Model
         $transection_id = $this->generator(8);
 
 
-        $this->db->where('referenceNo', $invoice_id);
-        $this->db->delete('acc_vaucher');
+        // Only remove/rebuild vouchers when user actually posted payment info
+        if ($hasPayment) {
+            $this->db->where('referenceNo', $invoice_id)->delete('acc_vaucher');
+        }
 
         $this->db->where('relation_id', $invoice_id);
         $this->db->delete('tax_collection');
@@ -996,6 +1033,11 @@ class Invoice_model extends CI_Model
 
 
 
+        // Preserve existing paid/due when no payment was posted on edit
+        $existing = $this->db->select('paid_amount,due_amount')->from('invoice')->where('invoice_id', $invoice_id)->get()->row();
+        $posted_total = (float)$this->input->post('grand_total_price', TRUE);
+        $keep_paid = $existing ? (float)$existing->paid_amount : 0.0;
+        $keep_due  = max(0.0, $posted_total - $keep_paid);
         $data = array(
             'invoice_id' => $invoice_id,
             'customer_id' => $this->input->post('customer_id', TRUE),
@@ -1003,8 +1045,8 @@ class Invoice_model extends CI_Model
             'total_amount' => $this->input->post('grand_total_price', TRUE),
             'total_tax' => $this->input->post('total_tax', TRUE),
             'invoice_details' => $this->input->post('inva_details', TRUE),
-            'due_amount' => $this->input->post('due_amount', TRUE),
-            'paid_amount' => $this->input->post('paid_amount', TRUE),
+            'due_amount' => $hasPayment ? $this->input->post('due_amount', TRUE) : $keep_due,
+            'paid_amount' => $hasPayment ? $this->input->post('paid_amount', TRUE) : $keep_paid,
             'invoice_discount' => $this->input->post('invoice_discount', TRUE),
             'total_discount' => $this->input->post('total_discount', TRUE),
             'total_vat_amnt' => $this->input->post('total_vat_amnt', TRUE),
@@ -1036,7 +1078,7 @@ class Invoice_model extends CI_Model
         $Comment = "Sales Voucher for customer";
         $reVID = $predefine_account->salesCode;
 
-        if ($multipaytype && $multipayamount) {
+        if ($hasPayment && $multipayamount) {
 
             if ($multipaytype[0] == 0) {
 
@@ -1689,14 +1731,78 @@ class Invoice_model extends CI_Model
         }
     }
 
-    public function invoice_method_wise_balance($invoice_id)
+    public function is_invoice_approved($invoice_id)
     {
-
-        return $this->db->select('acc_vaucher.Debit,acc_vaucher.COAID,acc_coa.HeadName')
+        return $this->db->select('status')
             ->from('acc_vaucher')
-            ->join('acc_coa', 'acc_coa.HeadCode=acc_vaucher.COAID', 'left')
-            ->where('acc_vaucher.referenceNo', $invoice_id)
-            ->where('acc_vaucher.Vtype', 'CV')
+            ->where('referenceNo', $invoice_id)
+            ->where('status', 1)
+            ->limit(1)
+            ->get()
+            ->num_rows() > 0;
+    }
+
+    public function delete_invoice($invoice_id)
+    {
+        $invoice = $this->db->select('id')->from('invoice')->where('invoice_id', $invoice_id)->get()->row();
+
+        if (!$invoice) {
+            return [
+                'status' => false,
+                'message' => 'Invoice not found.',
+            ];
+        }
+
+        $db_invoice_id = $invoice->id;
+
+        $this->db->trans_start();
+
+        $this->db->where('invoice_id', $db_invoice_id)->delete('invoice_details');
+        $this->db->where('invoice_id', $invoice_id)->delete('invoice');
+        $this->db->where('relation_id', $invoice_id)->delete('tax_collection');
+        $this->db->where('referenceNo', $invoice_id)->delete('acc_vaucher');
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === false) {
+            return [
+                'status' => false,
+                'message' => display('please_try_again'),
+            ];
+        }
+
+        return ['status' => true];
+    }
+
+    public function invoice_method_wise_balance($invoice_id, $invoice_no = null, $customer_id = null)
+    {
+        // Only read from acc_vaucher and restrict to this customer (subType=3, subCode matches customer)
+        $subId = null;
+        if (!empty($customer_id)) {
+            $sub = $this->db->select('id')->from('acc_subcode')
+                ->where('referenceNo', $customer_id)
+                ->where('subTypeId', 3)
+                ->get()->row();
+            if ($sub) { $subId = $sub->id; }
+        }
+
+        $this->db->select('v.VNo, v.VDate, v.Credit, v.COAID, pm.HeadName AS MethodName')
+            ->from('acc_vaucher v')
+            ->join('acc_coa pm', 'pm.HeadCode = v.RevCodde', 'left')
+            ->where('v.Vtype', 'CV');
+        if ($invoice_no !== null && $invoice_no !== '') {
+            $this->db->group_start()
+                ->where('v.referenceNo', $invoice_id)
+                ->or_where('v.referenceNo', $invoice_no)
+            ->group_end();
+        } else {
+            $this->db->where('v.referenceNo', $invoice_id);
+        }
+        $this->db->where('v.subType', 3);
+        if (!empty($subId)) { $this->db->where('v.subCode', $subId); }
+
+        return $this->db->order_by('v.VDate', 'asc')
+            ->order_by('v.VNo', 'asc')
             ->get()->result();
     }
 }

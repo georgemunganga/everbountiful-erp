@@ -36,6 +36,21 @@ function setInvoiceSaleType(type) {
             });
             $controls.find('.number.pay').val('').prop('disabled', true);
         });
+
+        // Ensure required fields exist for credit sale on submit (edit/update forms)
+        var $form = $('#update_invoice').length ? $('#update_invoice') : ($('#insert_sale').length ? $('#insert_sale') : null);
+        if ($form && $form.length) {
+            var ensureHidden = function(id, name, value) {
+                var $el = $form.find('#' + id);
+                if (!$el.length) {
+                    $el = $('<input>', { type: 'hidden', id: id, name: name });
+                    $form.append($el);
+                }
+                $el.val(value);
+            };
+            ensureHidden('credit_hidden_multipaytype', 'multipaytype[]', '0');
+            ensureHidden('credit_hidden_amount', 'pamount_by_method[]', '0');
+        }
     } else {
         paidField.prop('readonly', false).removeClass('bg-light');
         multiPayInputs.prop('disabled', false);
@@ -56,8 +71,17 @@ function setInvoiceSaleType(type) {
             });
             $controls.find('.number.pay').prop('disabled', false);
         });
+        // Remove credit hidden helpers if present
+        var $form2 = $('#update_invoice').length ? $('#update_invoice') : ($('#insert_sale').length ? $('#insert_sale') : null);
+        if ($form2 && $form2.length) {
+            $form2.find('#credit_hidden_multipaytype,#credit_hidden_amount').remove();
+        }
     }
     $('.invoice-payment-row, .invoice-payment-controls').toggle(!isCredit);
+    var controlsVisible = $('.invoice-payment-controls:visible').length > 0;
+    if (bankSelect && bankSelect.length && !controlsVisible) {
+        bankSelect.prop('required', false);
+    }
     $('.sale-type-option[value="' + normalizedType + '"]').prop('checked', true);
     $('.sale-type-select').val(normalizedType);
     if (typeof check_creditsale === 'function') {
@@ -469,7 +493,8 @@ $(document).on('click','#add_invoice',function(){
 
     var saleType = $('#sale_type').val() || 'cash';
     var gtotal=parseFloat($("#paidAmount").val()) || 0;
-    if (saleType !== 'credit_sale') {
+    var controlsVisible = $('.invoice-payment-controls:visible').length > 0;
+    if (saleType !== 'credit_sale' && controlsVisible) {
         if (Math.abs(total - gtotal) > 0.009) {
           toastr.error('Paid amount should match the total collected value.');
           return false;
@@ -908,10 +933,30 @@ $(document).ready(function(){
     $(document).ready(function() {
         $("#default_payment_id").empty();
     "use strict";
-   var frm = $("#update_invoice");
+    var frm = $("#update_invoice");
     var output = $("#output");
     frm.on('submit', function(e) {
          e.preventDefault(); 
+         var $f = $(this);
+         if (!$f.data('editConfirmShown')) {
+            var proceed = function(ok){
+               if (ok) { $f.data('editConfirmShown', true); $f.trigger('submit'); }
+            };
+            if (typeof swal === 'function') {
+              swal({
+                 title: 'Confirm Edit',
+                 text: 'Editing will reverse and re-post accounting entries for this invoice. Continue?',
+                 type: 'warning',
+                 showCancelButton: true,
+                 confirmButtonText: 'Yes, Continue',
+                 cancelButtonText: 'Cancel'
+              }, function(isConfirm){ proceed(isConfirm === true); });
+            } else {
+              proceed(window.confirm('Editing will reverse and re-post accounting entries for this invoice. Continue?'));
+            }
+            return;
+         }
+         $f.removeData('editConfirmShown');
                $.ajax({
             url : $(this).attr('action'),
             method : $(this).attr('method'),

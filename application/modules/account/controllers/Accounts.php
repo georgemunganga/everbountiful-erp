@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Accounts extends MX_Controller {
@@ -3890,8 +3890,10 @@ public function customer_receive(){
   $data['voucher_no']    = $this->accounts_model->Creceive();
   $data['all_pmethod']   = $this->accounts_model->pmethod_dropdown();
   $prefillCustomerId     = $this->input->get('customer_id', true);
+  $prefillInvoiceId      = $this->input->get('invoice_id', true);
   $returnTo              = $this->input->get('return_to', true);
   $data['prefill_customer_id'] = $prefillCustomerId ? trim($prefillCustomerId) : '';
+  $data['prefill_invoice_id']  = $prefillInvoiceId ? trim($prefillInvoiceId) : '';
   $data['return_to'] = $returnTo ? trim($returnTo) : '';
   $data['title']         = display('customer_receive');
   $data['module']        = "account";
@@ -3916,37 +3918,302 @@ public function customer_headcode(){
 
 
   public function create_customer_receive(){
-   $this->form_validation->set_rules('voucher_no', display('voucher_no')  ,'required');
-   $this->form_validation->set_rules('txtCode', display('txtCode')  ,'|max_length[100]');
-   $this->form_validation->set_rules('txtAmount', display('amount')  ,'max_length[100]');
-       if ($this->form_validation->run()) {
-        $receive_data = $this->accounts_model->customer_receive_insert();
-        if ($receive_data) { 
-          $info['setting']       = $this->accounts_model->setting();
-          $info['company_info']       = $this->accounts_model->retrieve_company();
-          $info['customer_info']      = $this->accounts_model->custoinfo($this->input->post('customer_id',TRUE));
-          $info['payment_info']       = $this->accounts_model->customerreceiptinfo($this->input->post('voucher_no',TRUE), $receive_data);
-          $info['message']            = display('save_successfully');
-          $info['details']            = $this->load->view('account/customer_payment_receipt', $info, true);
-          $info['status']             = true;
-               echo json_encode($info);
-           exit;
-      }else{
-        
-          $info['exception']            = display('please_try_again');
-          $info['status']             = false;
-               echo json_encode($info);
-           exit;
-      }
-   
-  }else{
-     $info['exception']            = validation_errors();
-          $info['status']             = false;
-               echo json_encode($info);
-           exit;
-   }
+    $voucher_no = trim($this->input->post('voucher_no', true));
 
- }
+    if (!empty($voucher_no)) {
+      // Single-invoice payment with clamp + advance credit
+      $this->form_validation->set_rules('voucher_no', display('voucher_no'), 'required');
+      $this->form_validation->set_rules('txtAmount', display('amount'), 'required|numeric');
+      $this->form_validation->set_rules('multipaytype[]', 'Payment Method', 'required');
+
+      if ($this->form_validation->run() === false) {
+        echo json_encode(['status'=>false,'exception'=>validation_errors()]);
+        return;
+      }
+
+      $invoice_id  = (int)$voucher_no;
+      $amount_req  = (float)$this->input->post('txtAmount', true);
+      $methodArr   = $this->input->post('multipaytype', true);
+      $method      = is_array($methodArr) && count($methodArr) ? $methodArr[0] : null;
+      $customer_id = (int)$this->input->post('customer_id', true);
+      $inv = $this->db->select('total_amount, paid_amount, due_amount')->from('invoice')->where('invoice_id', $invoice_id)->get()->row();
+      if (!$inv) { echo json_encode(['status'=>false,'exception'=>'Invoice not found']); return; }
+
+      $due_now = max(0.0, (float)$inv->due_amount);
+      $apply   = min($amount_req, $due_now);
+      $leftover = max(0.0, $amount_req - $apply);
+
+      // Accounting heads
+      $predef = $this->db->select('*')->from('acc_predefine_account')->get()->row();
+      $COAID  = $predef ? $predef->customerCode : null;
+      $subrow = $this->db->select('id')->from('acc_subcode')->where('referenceNo', $customer_id)->where('subTypeId', 3)->get()->row();
+      $subcode= $subrow ? $subrow->id : null;
+      if (empty($COAID) || empty($method)) { echo json_encode(['status'=>false,'exception'=>'Configuration or method missing']); return; }
+
+      $this->db->trans_start();
+      $allocations = [];
+      if ($apply > 0) {
+        $this->accounts_model->insert_sales_due($invoice_id, $COAID, 'Credit', $apply, 'Sales Due Voucher', 'Single Payment', $method, $subcode);
+        $new_paid = ((float)$inv->paid_amount) + $apply;
+        $new_due  = max(0, $due_now - $apply);
+        $this->db->where('invoice_id', $invoice_id)->update('invoice', ['paid_amount'=>$new_paid, 'due_amount'=>$new_due]);
+        @$this->db->where('invoice_id', $invoice_id)->update('invoice_details', ['paid_amount'=>$new_paid, 'due_amount'=>$new_due]);
+        $allocations[] = ['invoice_id'=>$invoice_id, 'applied'=>$apply, 'new_due'=>$new_due];
+        // Auto-approve if enabled
+        $setting_row = $this->db->select('is_autoapprove_v')->from('web_setting')->where('setting_id', 1)->get()->row();
+        if ($setting_row && (int)$setting_row->is_autoapprove_v === 1) {
+          $last = $this->db->select('VNo')->from('acc_vaucher')->where('Vtype','CV')->where('referenceNo', $invoice_id)->order_by('id','DESC')->limit(1)->get()->row();
+          if ($last && !empty($last->VNo)) {
+            $this->accounts_model->approved_vaucher($last->VNo, 'active');
+          }
+        }
+      }
+      if ($leftover > 0.0001) {
+        // Create advance/unapplied credit voucher (referenceNo=0)
+        $this->accounts_model->insert_sales_due(0, $COAID, 'Credit', $leftover, 'Advance Credit', 'Advance Credit (unapplied)', $method, $subcode);
+      }
+      $this->db->trans_complete();
+      if ($this->db->trans_status() === false) {
+        $err = $this->db->error();
+        echo json_encode(['status'=>false,'exception'=> isset($err['message']) ? $err['message'] : 'DB error']);
+        return;
+      }
+      echo json_encode(['status'=>true,'message'=>'Payment recorded','applied_total'=>$apply,'remaining'=>$leftover,'allocations'=>$allocations]);
+      return;
+    }
+
+    // Group/FIFO payment across unpaid invoices (no voucher_no posted)
+    $this->form_validation->set_rules('customer_id', 'Customer', 'required');
+    $this->form_validation->set_rules('txtAmount', display('amount'), 'required|numeric');
+    // Require at least one payment method
+    $this->form_validation->set_rules('multipaytype[]', 'Payment Method', 'required');
+
+    if ($this->form_validation->run() === false) {
+      echo json_encode(['status'=>false,'exception'=>validation_errors()]);
+      return;
+    }
+
+    $customer_id = $this->input->post('customer_id', true);
+    $amount_total = (float)$this->input->post('txtAmount', true);
+    $date = $this->input->post('dtpDate', true) ?: date('Y-m-d');
+    $remarks = addslashes(trim($this->input->post('txtRemarks', true)));
+    $methodArr = $this->input->post('multipaytype', true);
+    $method = is_array($methodArr) && count($methodArr) ? $methodArr[0] : null;
+
+    if (empty($method)) {
+      echo json_encode(['status'=>false,'exception'=>'Payment method is required']);
+      return;
+    }
+
+    // Prepare accounting heads
+    $predef = $this->db->select('*')->from('acc_predefine_account')->get()->row();
+    $COAID = $predef ? $predef->customerCode : null; // Customer control account
+    $subcodeRow = $this->db->select('id')->from('acc_subcode')->where('referenceNo', $customer_id)->where('subTypeId', 3)->get()->row();
+    $subcode = $subcodeRow ? $subcodeRow->id : null;
+
+    if (empty($COAID)) {
+      echo json_encode(['status'=>false, 'exception'=>'Customer control account not configured']);
+      return;
+    }
+
+    // Fetch unpaid invoices FIFO (oldest first)
+    $invoices = $this->db->select('invoice_id, invoice, date, paid_amount, due_amount')
+                         ->from('invoice')
+                         ->where('customer_id', $customer_id)
+                         ->where('due_amount >', 0)
+                         ->order_by('date', 'asc')
+                         ->order_by('invoice_id', 'asc')
+                         ->get()->result();
+
+    if (empty($invoices)) {
+      echo json_encode(['status'=>false,'exception'=>'No unpaid invoices found for this customer']);
+      return;
+    }
+
+    $remaining = $amount_total;
+    $applied_total = 0.0;
+    $allocations = [];
+    $Narration = 'Sales Due Voucher';
+    // Tag all vouchers in this group with the same reference for batch undo
+    $group_ref = 'GP-'.date('YmdHis').'-'.$customer_id.'-'.substr(md5(uniqid('', true)), 0, 6);
+    $Comment   = 'Group Payment '.$group_ref;
+
+    $this->db->trans_start();
+
+    foreach ($invoices as $inv) {
+      if ($remaining <= 0) break;
+      $due = (float)$inv->due_amount;
+      if ($due <= 0) continue;
+      $apply = $remaining < $due ? $remaining : $due;
+      if ($apply <= 0) continue;
+
+      // Create CV voucher for this invoice
+      $this->accounts_model->insert_sales_due($inv->invoice_id, $COAID, 'Credit', $apply, $Narration, $Comment, $method, $subcode);
+
+      // Update invoice paid/due
+      $new_paid = ((float)$inv->paid_amount) + $apply;
+      $new_due  = max(0, $due - $apply);
+      $this->db->where('invoice_id', $inv->invoice_id)->update('invoice', ['paid_amount'=>$new_paid, 'due_amount'=>$new_due]);
+      // Best-effort mirror into invoice_details
+      @$this->db->where('invoice_id', $inv->invoice_id)->update('invoice_details', ['paid_amount'=>$new_paid, 'due_amount'=>$new_due]);
+
+      // Auto-approve if enabled
+      $setting_data = $this->db->select('is_autoapprove_v')->from('web_setting')->where('setting_id', 1)->get()->row();
+      if ($setting_data && (int)$setting_data->is_autoapprove_v === 1) {
+        $last = $this->db->select('VNo')->from('acc_vaucher')
+                         ->where('Vtype','CV')
+                         ->where('referenceNo', $inv->invoice_id)
+                         ->order_by('id','DESC')->limit(1)->get()->row();
+        if ($last && !empty($last->VNo)) {
+          $this->accounts_model->approved_vaucher($last->VNo, 'active');
+        }
+      }
+
+      $allocations[] = [
+        'invoice_id' => $inv->invoice_id,
+        'invoice_no' => isset($inv->invoice) ? $inv->invoice : '',
+        'applied'    => $apply,
+        'new_due'    => $new_due,
+      ];
+      $applied_total += $apply;
+      $remaining -= $apply;
+    }
+
+    $this->db->trans_complete();
+    if ($this->db->trans_status() === false) {
+      $err = $this->db->error();
+      echo json_encode(['status'=>false,'exception'=> isset($err['message']) ? $err['message'] : 'DB error']);
+      return;
+    }
+
+    // If remaining amount after FIFO, record Advance Credit
+    if ($remaining > 0.0001) {
+      $this->accounts_model->insert_sales_due(0, $COAID, 'Credit', $remaining, 'Advance Credit', 'Advance Credit (unapplied)', $method, $subcode);
+    }
+
+    echo json_encode([
+      'status'        => true,
+      'message'       => 'Payment recorded and allocated (FIFO) to unpaid invoices',
+      'applied_total' => $applied_total,
+      'remaining'     => max(0, $remaining),
+      'allocations'   => $allocations,
+    ]);
+  }
+
+  // Update a single customer payment voucher (CV row)
+  public function update_customer_payment()
+  {
+    $this->form_validation->set_rules('edit_vno', 'Voucher No', 'required');
+    $this->form_validation->set_rules('txtAmount', display('amount'), 'required|numeric');
+    if ($this->form_validation->run() === false) {
+      echo json_encode(['status'=>false, 'exception'=>validation_errors()]);
+      return;
+    }
+    $vno = $this->input->post('edit_vno', true);
+    $date = $this->input->post('dtpDate', true);
+    $amount = (float)$this->input->post('txtAmount', true);
+    $methodArr = $this->input->post('multipaytype', true);
+    $method = is_array($methodArr) && count($methodArr) ? $methodArr[0] : null;
+    $row = $this->db->select('*')->from('acc_vaucher')->where('VNo', $vno)->where('Vtype','CV')->get()->row();
+    if (!$row) {
+      echo json_encode(['status'=>false, 'exception'=>'Payment voucher not found']);
+      return;
+    }
+    $old = (float)$row->Credit;
+    $invoice_id = $row->referenceNo;
+    $this->db->trans_start();
+    $this->db->where('VNo', $vno)->update('acc_vaucher', [
+      'VDate' => $date ?: date('Y-m-d'),
+      'Credit'=> $amount,
+      'RevCodde' => $method,
+    ]);
+    // Reflect changes into approved transactions if they exist
+    // Update customer-side credit row
+    $this->db->where('VNo', $vno)->where('Vtype','CV')->where('COAID', $row->COAID)
+             ->update('acc_transaction', ['VDate' => ($date?:date('Y-m-d')), 'Credit' => $amount, 'RevCodde' => $method]);
+    // Update reverse bank/cash debit row
+    if (!empty($row->RevCodde)) {
+      $this->db->where('VNo', $vno)->where('Vtype','CV')->where('COAID', $row->RevCodde)
+               ->update('acc_transaction', ['VDate' => ($date?:date('Y-m-d')), 'Debit' => $amount, 'COAID' => $method]);
+    }
+    // Adjust invoice paid/due
+    $inv = $this->db->select('paid_amount,due_amount')->from('invoice')->where('invoice_id', $invoice_id)->get()->row();
+    if ($inv) {
+      $new_paid = max(0, ((float)$inv->paid_amount) - $old + $amount);
+      $new_due  = max(0, ((float)$inv->due_amount) + $old - $amount);
+      $this->db->where('invoice_id', $invoice_id)->update('invoice', ['paid_amount'=>$new_paid, 'due_amount'=>$new_due]);
+      // Invoice details update is best-effort; ignore if schema differs
+      @$this->db->where('invoice_id', $invoice_id)->update('invoice_details', ['paid_amount'=>$new_paid, 'due_amount'=>$new_due]);
+    }
+    $this->db->trans_complete();
+    if ($this->db->trans_status() === false) {
+      $err = $this->db->error();
+      echo json_encode(['status'=>false, 'exception'=> isset($err['message']) ? $err['message'] : 'DB error']);
+      return;
+    }
+    echo json_encode(['status'=>true, 'message'=>'Updated successfully']);
+  }
+
+  // Delete a single customer payment voucher (CV row)
+  public function delete_customer_payment()
+  {
+    $vno = $this->input->post('vno', true);
+    if (empty($vno)) { echo json_encode(['status'=>false, 'exception'=>'Invalid voucher']); return; }
+    $row = $this->db->select('*')->from('acc_vaucher')->where('VNo', $vno)->where('Vtype','CV')->get()->row();
+    if (!$row) { echo json_encode(['status'=>false, 'exception'=>'Voucher not found']); return; }
+
+    $is_group = (!empty($row->ledgerComment) && strpos($row->ledgerComment, 'Group Payment') === 0);
+    $deleted_count = 0;
+
+    $this->db->trans_start();
+    if ($is_group) {
+      // Delete all vouchers that belong to the same group (batch)
+      $batch_rows = $this->db->select('*')->from('acc_vaucher')
+                        ->where('Vtype','CV')
+                        ->where('subType', 3)
+                        ->where('subCode', $row->subCode)
+                        ->where('ledgerComment', $row->ledgerComment)
+                        ->get()->result();
+      foreach ($batch_rows as $br) {
+        $invoice_id = $br->referenceNo;
+        $amt = (float)$br->Credit;
+        // Delete voucher and its transactions
+        $this->db->where('VNo', $br->VNo)->delete('acc_vaucher');
+        $this->db->where('VNo', $br->VNo)->where('Vtype','CV')->delete('acc_transaction');
+        // Adjust invoice totals back
+        $inv = $this->db->select('paid_amount,due_amount')->from('invoice')->where('invoice_id', $invoice_id)->get()->row();
+        if ($inv) {
+          $new_paid = max(0, ((float)$inv->paid_amount) - $amt);
+          $new_due  = max(0, ((float)$inv->due_amount) + $amt);
+          $this->db->where('invoice_id', $invoice_id)->update('invoice', ['paid_amount'=>$new_paid, 'due_amount'=>$new_due]);
+          @$this->db->where('invoice_id', $invoice_id)->update('invoice_details', ['paid_amount'=>$new_paid, 'due_amount'=>$new_due]);
+        }
+        $deleted_count++;
+      }
+    } else {
+      // Single voucher delete (legacy or non-group)
+      $invoice_id = $row->referenceNo;
+      $amt = (float)$row->Credit;
+      $this->db->where('VNo', $vno)->delete('acc_vaucher');
+      $this->db->where('VNo', $vno)->where('Vtype','CV')->delete('acc_transaction');
+      $inv = $this->db->select('paid_amount,due_amount')->from('invoice')->where('invoice_id', $invoice_id)->get()->row();
+      if ($inv) {
+        $new_paid = max(0, ((float)$inv->paid_amount) - $amt);
+        $new_due  = max(0, ((float)$inv->due_amount) + $amt);
+        $this->db->where('invoice_id', $invoice_id)->update('invoice', ['paid_amount'=>$new_paid, 'due_amount'=>$new_due]);
+        @$this->db->where('invoice_id', $invoice_id)->update('invoice_details', ['paid_amount'=>$new_paid, 'due_amount'=>$new_due]);
+      }
+      $deleted_count = 1;
+    }
+    $this->db->trans_complete();
+    if ($this->db->trans_status() === false) {
+      $err = $this->db->error();
+      echo json_encode(['status'=>false, 'exception'=> isset($err['message']) ? $err['message'] : 'DB error']);
+      return;
+    }
+    $msg = $is_group ? ('Deleted group payment ('.$deleted_count.' entries)') : 'Deleted successfully';
+    echo json_encode(['status'=>true, 'message'=>$msg, 'deleted_count'=>$deleted_count, 'is_group'=>$is_group]);
+  }
     public function create_service_payment(){
    $this->form_validation->set_rules('voucher_no', display('voucher_no')  ,'required');
    $this->form_validation->set_rules('txtAmount', display('amount')  ,'max_length[100]');
@@ -4044,3 +4311,4 @@ public function bdtask_showpaymentmodal(){
 
 
 }
+

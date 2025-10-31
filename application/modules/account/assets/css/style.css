@@ -27,8 +27,8 @@ table.coaTable tr td:nth-child(2) input[type="checkbox"]{
 table.coaTable tr td:nth-child(2) input[type="button"], table.coaTable tr td:nth-child(2) input[type="submit"]{
      min-width: 100px; max-width: 150px;
      margin-bottom: 16px; padding:10px 40px;
-     border: 1px solid #37a000;
-     background-color: #37a000;
+     border: 1px solid #126e21;
+     background-color: #126e21;
      color: white;
      text-align: center;
      display: inline-block;

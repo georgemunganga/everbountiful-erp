@@ -2,17 +2,22 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 #------------------------------------    
 # Author: Bdtask Ltd
-# Author link: https://www.bdtask.com/
+# Author link: https://www.greenwebb.tech/
 # Dynamic style php file
 # Developed by :Isahaq
 #------------------------------------    
 
 class Home extends MX_Controller
 {
+    private $allowed_ranges = array('today','last_week','this_month','last_month','this_year','last_year');
+
     public function __construct()
     {
         parent::__construct();
         $this->load->model('dashboard/Home_model', 'home_model');
+        $this->load->model('livestock/Livestock_model', 'livestock_model');
+        $this->load->model('inventory/Inventory_model', 'inventory_model');
+        $this->load->model('customer/customer_model', 'customer_model');
         $this->db->query('SET SESSION sql_mode = ""');
 
         if (!$this->session->userdata('isLogIn')) {
@@ -22,6 +27,28 @@ class Home extends MX_Controller
 
     public function index()
     {
+        $range = trim($this->input->get('range', true));
+        if (!in_array($range, $this->allowed_ranges, true)) {
+            $range = 'this_month';
+        }
+
+        list($range_start, $range_end, $range_label) = $this->resolve_date_range($range);
+
+        // Optional custom date range override via GET ?from=YYYY-MM-DD&to=YYYY-MM-DD
+        $from = trim($this->input->get('from', true));
+        $to   = trim($this->input->get('to', true));
+        if (!empty($from) && !empty($to)) {
+            $from_dt = DateTime::createFromFormat('Y-m-d', $from);
+            $to_dt   = DateTime::createFromFormat('Y-m-d', $to);
+            if ($from_dt && $from_dt->format('Y-m-d') === $from && $to_dt && $to_dt->format('Y-m-d') === $to) {
+                if ($from_dt <= $to_dt) {
+                    $range_start = $from_dt->format('Y-m-d');
+                    $range_end   = $to_dt->format('Y-m-d');
+                    $range_label = 'Custom';
+                }
+            }
+        }
+
         // Access the model through the models array
         $best_sales_product = $this->home_model->best_sales_products();
 
@@ -61,6 +88,40 @@ class Home extends MX_Controller
                 $chart_data .= (!empty($best_sales_product[$i]) ? $best_sales_product[$i]->quantity . ', ' : null);
             }
 
+        // Ranged metrics for dashboard cards
+        $total_sales_amount_range = $this->sum_sales_amount_between($range_start, $range_end);
+        $total_sales_count_range  = $this->count_sales_between($range_start, $range_end);
+        $production_summary       = $this->livestock_model->get_production_percentage_summary(null, $range_start, $range_end);
+        $total_production_range   = (float) ($production_summary['total_output'] ?? 0);
+        $total_mortality_range    = (float) ($production_summary['total_mortality'] ?? 0);
+        $available_lots           = $this->inventory_model->get_available_lots();
+        $available_products_count = 0;
+        $total_available_qty      = 0.0;
+        if (!empty($available_lots)) {
+            $by_product = array();
+            foreach ($available_lots as $lot) {
+                $pid = (string) ($lot['product_id'] ?? '');
+                $by_product[$pid] = true;
+                $total_available_qty += (float) ($lot['available_qty'] ?? 0);
+            }
+            $available_products_count = count($by_product);
+        }
+
+        // Total feed stock from feed_usages (instock qty). Considered as current snapshot
+        $total_feed_instock = $this->sum_feed_instock_between(null, null); // current overall
+
+        // Last two purchased products within range (fallback to global if none)
+        $last_two_purchased = $this->get_last_two_purchased_products($range_start, $range_end);
+        if (empty($last_two_purchased)) {
+            $last_two_purchased = $this->get_last_two_purchased_products(null, null);
+        }
+
+        // Latest consumption entry (stock consumption)
+        $latest_consumption = $this->get_latest_consumption_within($range_start, $range_end);
+
+        $customers_owing_count   = (int) $this->customer_model->count_credit_customer();
+        $customers_you_owe_count = (int) $this->count_customers_you_owe();
+
         $data['title']         = display('home');
         $data = array(
             'title'                => display('dashboard'),
@@ -89,6 +150,24 @@ class Home extends MX_Controller
                 '.',
                 ','
             ),
+            // Filters
+            'selected_range'        => $range,
+            'selected_range_label'  => $range_label,
+            'range_start'           => $range_start,
+            'range_end'             => $range_end,
+            // Extra cards
+            'total_sales_count_range'  => (int) $total_sales_count_range,
+            'total_sales_amount_range' => number_format((float) $total_sales_amount_range, 2, '.', ','),
+            'total_production_range'   => (float) $total_production_range,
+            'total_mortality_range'    => (float) $total_mortality_range,
+            'total_feed_instock'       => (float) $total_feed_instock,
+            'available_products_count' => (int) $available_products_count,
+            'total_available_qty'      => (float) $total_available_qty,
+            'last_two_purchased'       => $last_two_purchased,
+            'latest_consumption'       => $latest_consumption,
+            // Customer mini-cards
+            'customers_owing_count'    => $customers_owing_count,
+            'customers_you_owe_count'  => $customers_you_owe_count,
         );
         $data['module']      = "dashboard";
         $data['page']        = "home/home";
@@ -106,6 +185,132 @@ class Home extends MX_Controller
         $data['page']                    = "home/best_saler_product_list";
 
         echo Modules::run('template/layout', $data);
+    }
+
+    private function resolve_date_range($range)
+    {
+        $today = new DateTime('today');
+        $start = null; $end = null; $label = '';
+        switch ($range) {
+            case 'today':
+                $start = clone $today; $end = clone $today; $label = 'Today';
+                break;
+            case 'last_week':
+                $end = clone $today;
+                $start = (clone $today)->modify('monday last week');
+                $end->modify('sunday last week');
+                $label = 'Last Week';
+                break;
+            case 'this_month':
+                $start = new DateTime(date('Y-m-01'));
+                $end   = new DateTime(date('Y-m-t'));
+                $label = 'This Month';
+                break;
+            case 'last_month':
+                $start = (new DateTime('first day of last month'))->setTime(0,0,0);
+                $end   = (new DateTime('last day of last month'))->setTime(0,0,0);
+                $label = 'Last Month';
+                break;
+            case 'this_year':
+                $start = new DateTime(date('Y-01-01'));
+                $end   = new DateTime(date('Y-12-31'));
+                $label = 'This Year';
+                break;
+            case 'last_year':
+                $y = (int) date('Y') - 1;
+                $start = new DateTime($y . '-01-01');
+                $end   = new DateTime($y . '-12-31');
+                $label = 'Last Year';
+                break;
+            default:
+                $start = new DateTime(date('Y-m-01'));
+                $end   = new DateTime(date('Y-m-t'));
+                $label = 'This Month';
+        }
+        return array($start->format('Y-m-d'), $end->format('Y-m-d'), $label);
+    }
+
+    private function sum_sales_amount_between($start, $end)
+    {
+        if (empty($start) || empty($end)) return 0.0;
+        $row = $this->db->select('COALESCE(SUM(total_amount),0) AS total')
+            ->from('invoice')
+            ->where('date >=', $start)
+            ->where('date <=', $end)
+            ->get()->row_array();
+        return (float) ($row['total'] ?? 0.0);
+    }
+
+    private function count_sales_between($start, $end)
+    {
+        if (empty($start) || empty($end)) return 0;
+        return (int) $this->db->from('invoice')
+            ->where('date >=', $start)
+            ->where('date <=', $end)
+            ->count_all_results();
+    }
+
+    private function sum_feed_instock_between($start = null, $end = null)
+    {
+        $this->db->select('COALESCE(SUM(total_instock_qty),0) AS total')
+            ->from('feed_usages');
+        if (!empty($start)) {
+            $this->db->where('DATE(created_at) >=', $start);
+        }
+        if (!empty($end)) {
+            $this->db->where('DATE(created_at) <=', $end);
+        }
+        $row = $this->db->get()->row_array();
+        return (float) ($row['total'] ?? 0.0);
+    }
+
+    private function get_last_two_purchased_products($start = null, $end = null)
+    {
+        $this->db->select('pi.product_name, pp.purchase_date')
+            ->from('product_purchase_details ppd')
+            ->join('product_purchase pp', 'pp.purchase_id = ppd.purchase_id', 'left')
+            ->join('product_information pi', 'pi.product_id = ppd.product_id', 'left');
+        if (!empty($start)) {
+            $this->db->where('pp.purchase_date >=', $start);
+        }
+        if (!empty($end)) {
+            $this->db->where('pp.purchase_date <=', $end);
+        }
+        $rows = $this->db->order_by('pp.purchase_date', 'desc')
+            ->limit(2)
+            ->get()->result_array();
+        return $rows ?: array();
+    }
+
+    private function get_latest_consumption_within($start = null, $end = null)
+    {
+        $this->db->select('sm.movement_date, sm.product_id, sm.quantity_out, pi.product_name, u.unit_name')
+            ->from('stock_movements sm')
+            ->join('product_information pi', 'pi.product_id = sm.product_id', 'left')
+            ->join('units u', 'u.unit_id = sm.unit_id', 'left')
+            ->where('sm.reference_type', 'consumption')
+            ->where('sm.quantity_out >', 0);
+        if (!empty($start)) {
+            $this->db->where('DATE(sm.movement_date) >=', $start);
+        }
+        if (!empty($end)) {
+            $this->db->where('DATE(sm.movement_date) <=', $end);
+        }
+        return $this->db->order_by('sm.movement_date', 'desc')
+            ->limit(1)
+            ->get()->row_array();
+    }
+
+    private function count_customers_you_owe()
+    {
+        // Customers with negative balance (we owe them)
+        $q = $this->db->select("a.customer_id, ((SELECT IFNULL(SUM(Debit),0) FROM acc_transaction WHERE COAID = b.HeadCode AND IsAppove = 1) - (SELECT IFNULL(SUM(Credit),0) FROM acc_transaction WHERE COAID = b.HeadCode AND IsAppove = 1)) AS balance", false)
+            ->from('customer_information a')
+            ->join('acc_coa b', 'a.customer_id = b.customer_id', 'left')
+            ->group_by('a.customer_id')
+            ->having('balance <', 0)
+            ->get();
+        return $q ? $q->num_rows() : 0;
     }
 
 

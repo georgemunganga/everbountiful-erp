@@ -156,7 +156,7 @@ class Livestock_model extends CI_Model
 
     /* ------------------------------ Productions ------------------------- */
 
-    public function get_productions($limit = null, $offset = 0)
+    public function get_productions(array $filters = array(), $limit = null, $offset = 0)
     {
         $builder = $this->db->select('p.*, s.name AS shed_name, u.unit_name, pi.product_name AS output_product_name')
             ->from('productions p')
@@ -165,6 +165,27 @@ class Livestock_model extends CI_Model
             ->join('product_information pi', 'pi.product_id = p.output_product_id', 'left')
             ->order_by('p.created_at', 'desc');
 
+        // Apply search filter
+        if (!empty($filters['q'])) {
+            $q = trim((string) $filters['q']);
+            if ($q !== '') {
+                $builder->group_start()
+                    ->like('p.name', $q)
+                    ->or_like('s.name', $q)
+                    ->or_like('pi.product_name', $q)
+                ->group_end();
+            }
+        }
+
+        // Apply date range filter using production_date if available, else created_at
+        $dateField = $this->db->field_exists('production_date', 'productions') ? 'p.production_date' : 'p.created_at';
+        if (!empty($filters['from'])) {
+            $builder->where("DATE($dateField) >=", $filters['from']);
+        }
+        if (!empty($filters['to'])) {
+            $builder->where("DATE($dateField) <=", $filters['to']);
+        }
+
         if ($limit !== null) {
             $builder->limit((int) $limit, (int) $offset);
         }
@@ -172,9 +193,32 @@ class Livestock_model extends CI_Model
         return $builder->get()->result_array();
     }
 
-    public function count_productions()
+    public function count_productions(array $filters = array())
     {
-        return (int) $this->db->from('productions')->count_all_results();
+        $builder = $this->db->from('productions p')
+            ->join('sheds s', 's.id = p.shed_id', 'left')
+            ->join('product_information pi', 'pi.product_id = p.output_product_id', 'left');
+
+        if (!empty($filters['q'])) {
+            $q = trim((string) $filters['q']);
+            if ($q !== '') {
+                $builder->group_start()
+                    ->like('p.name', $q)
+                    ->or_like('s.name', $q)
+                    ->or_like('pi.product_name', $q)
+                ->group_end();
+            }
+        }
+
+        $dateField = $this->db->field_exists('production_date', 'productions') ? 'p.production_date' : 'p.created_at';
+        if (!empty($filters['from'])) {
+            $builder->where("DATE($dateField) >=", $filters['from']);
+        }
+        if (!empty($filters['to'])) {
+            $builder->where("DATE($dateField) <=", $filters['to']);
+        }
+
+        return (int) $builder->count_all_results();
     }
 
     public function get_production($id)
@@ -322,6 +366,53 @@ class Livestock_model extends CI_Model
     public function delete_production($id)
     {
         return $this->delete_record('productions', 'id', $id);
+    }
+
+    /**
+     * Ensure a unique daily record by adding a UNIQUE index on productions.production_date.
+     * - Adds the column if missing (DATE NULL).
+     * - If duplicates exist, does NOT create the index and returns a warning with sample duplicates.
+     *
+     * @return array{status:string,message:string}
+     */
+    public function ensure_production_date_unique()
+    {
+        // Ensure column exists
+        if (!$this->db->field_exists('production_date', 'productions')) {
+            $this->db->query("ALTER TABLE `productions` ADD COLUMN `production_date` DATE NULL");
+        }
+
+        // Check if unique index already exists
+        $exists = $this->db->query(
+            "SELECT COUNT(1) AS cnt
+             FROM INFORMATION_SCHEMA.STATISTICS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'productions' AND INDEX_NAME = 'uniq_productions_date'"
+        )->row();
+        if (!empty($exists) && (int) $exists->cnt > 0) {
+            return ['status' => 'ok', 'message' => 'Unique index already present'];
+        }
+
+        // Check for duplicates on non-null dates
+        $dupes = $this->db->query(
+            "SELECT production_date, COUNT(*) AS c
+             FROM productions
+             WHERE production_date IS NOT NULL
+             GROUP BY production_date
+             HAVING c > 1
+             LIMIT 5"
+        )->result_array();
+
+        if (!empty($dupes)) {
+            $samples = array_map(function($r){ return $r['production_date'] . ' (x' . $r['c'] . ')'; }, $dupes);
+            return [
+                'status'  => 'warning',
+                'message' => 'Duplicate production dates exist: ' . implode(', ', $samples) . '. Resolve duplicates, then the unique index can be created.'
+            ];
+        }
+
+        // Create unique index
+        $this->db->query("CREATE UNIQUE INDEX `uniq_productions_date` ON `productions` (`production_date`)");
+        return ['status' => 'ok', 'message' => 'Unique index created'];
     }
 
     /* ------------------------------ Livestocks -------------------------- */

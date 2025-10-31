@@ -28,7 +28,7 @@ body {
     height: 100px;
 }
 .label-success {
-    background-color: #37a000;
+    background-color: #126e21;
     font-weight: 600;
     border-radius: 20px;
 }
@@ -37,7 +37,7 @@ body {
     border: none;
     display: inline-flex;
     align-items: center;
-    background: #37a000;
+    background: #126e21;
     position: relative;
     padding: 10px 30px;
     color: #fff;
@@ -159,7 +159,7 @@ table th {
 .nav-pills > li.active > a:focus,
 .nav-pills > li.active > a:hover {
     color: #fff;
-    background-color: #37a000;
+    background-color: #126e21;
 }
 .nav-pills > li > a > h1 {
     margin-top: 0;
@@ -228,5 +228,5 @@ table th {
     font-size: 18px;
 }
 .fText a{
-    color: #37a000;
+    color: #126e21;
 }

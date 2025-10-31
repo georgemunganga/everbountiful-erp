@@ -603,7 +603,7 @@ $(document).ready(function () {
                 title: {
                     number: {
                         css: {
-                            'background-color': '#37a000',
+                            'background-color': '#126e21',
                             '-webkit-border-radius': '300px',
                             '-moz-border-radius': '300px',
                             'border-radius': '300px',

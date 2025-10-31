@@ -2,7 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 #------------------------------------    
 # Author: Bdtask Ltd
-# Author link: https://www.bdtask.com/
+# Author link: https://www.greenwebb.tech/
 # Dynamic style php file
 # Developed by :Isahaq
 #------------------------------------    
@@ -25,14 +25,14 @@ class Template extends MX_Controller
     {
         $id = $this->session->userdata('id');
         $settingdata           = $this->template_model->setting();
-        $company_data          = $this->template_model->bdtask_company_info();
+        $company_data          = $this->template_model->bd_task_company_info();
         $data['setting']       = $settingdata;
         $data['company_info']  = $company_data;
         $data['company_name']  = $company_data[0]['company_name'];
         $data['discount_type'] = $settingdata->discount_type;
         $data['max_version']   = @file_get_contents(UPDATE_INFO_URL);
         $data['current_version'] = $this->current_version();
-        $data['bank_list']     = $this->template_model->bdtask_bank_list();
+        $data['bank_list']     = $this->template_model->bd_task_bank_list();
         $data['currency']      = $settingdata->currency;
         $data['position']      = $settingdata->currency_position;
         $data['out_of_stocks'] = $this->template_model->out_of_stock_count();
@@ -43,14 +43,14 @@ class Template extends MX_Controller
     {
         $id = $this->session->userdata('id');
         $settingdata           = $this->template_model->setting();
-        $company_data          = $this->template_model->bdtask_company_info();
+        $company_data          = $this->template_model->bd_task_company_info();
         $data['setting']       = $settingdata;
         $data['company_info']  = $company_data;
         $data['company_name']  = $company_data[0]['company_name'];
         $data['discount_type'] = $settingdata->discount_type;
         $data['max_version']   = @file_get_contents(UPDATE_INFO_URL);
         $data['current_version'] = $this->current_version();
-        $data['bank_list']     = $this->template_model->bdtask_bank_list();
+        $data['bank_list']     = $this->template_model->bd_task_bank_list();
         $data['currency']      = $settingdata->currency;
         $data['position']      = $settingdata->currency_position;
         $data['out_of_stocks'] = $this->template_model->out_of_stock_count();

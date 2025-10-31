@@ -1,0 +1,120 @@
+            $row['total_output']     = (float) ($row['total_output'] ?? 0);
+            $row['total_mortality']  = (float) ($row['total_mortality'] ?? 0);
+            $row['total_damaged']    = (float) ($row['total_damaged'] ?? 0);
+            $row['total_extras']     = (float) ($row['total_extras'] ?? 0);
+            $row['interval']         = $interval;
+        }
+        unset($row);
+
+        return $rows;
+    }
+
+    public function create_production(array $data)
+    {
+        return $this->insert_record('productions', $data);
+    }
+
+    public function update_production($id, array $data)
+    {
+        return $this->update_record('productions', 'id', $id, $data);
+    }
+
+    public function delete_production($id)
+    {
+        return $this->delete_record('productions', 'id', $id);
+    }
+
+    /* ------------------------------ Livestocks -------------------------- */
+
+    public function get_livestocks(array $filters = array(), $limit = null, $offset = 0)
+    {
+        $builder = $this->db->select('l.*, s.name AS shed_name, g.name AS group_name, u.unit_name')
+            ->from('livestocks l')
+            ->join('sheds s', 's.id = l.shed_id', 'left')
+            ->join('livestock_groups g', 'g.id = l.livestock_group_id', 'left')
+            ->join('units u', 'u.unit_id = l.unit_type_id', 'left');
+
+        if (!empty($filters['name'])) {
+            $builder->like('l.name', $filters['name']);
+        }
+
+        if ($limit !== null) {
+            $builder->limit((int) $limit, (int) $offset);
+        }
+
+        return $builder->order_by('l.created_at', 'desc')
+            ->get()
+            ->result_array();
+    }
+
+    public function count_livestocks(array $filters = array())
+    {
+        $builder = $this->db->from('livestocks l');
+
+        if (!empty($filters['name'])) {
+            $builder->like('l.name', $filters['name']);
+        }
+
+        return (int) $builder->count_all_results();
+    }
+
+    public function get_livestock_assets()
+    {
+        return $this->db->select("id, NULLIF(name, '') AS name, livestock_total_qty", false)
+            ->from('livestocks')
+            ->order_by('name', 'asc')
+            ->get()
+            ->result_array();
+    }
+
+    public function get_livestock($id)
+    {
+        return $this->db->select('*')
+            ->from('livestocks')
+            ->where('id', (int) $id)
+            ->get()
+            ->row_array();
+    }
+
+    public function create_livestock(array $data)
+    {
+        return $this->insert_record('livestocks', $data);
+    }
+
+    public function update_livestock($id, array $data)
+    {
+        return $this->update_record('livestocks', 'id', $id, $data);
+    }
+
+    public function delete_livestock($id)
+    {
+        return $this->delete_record('livestocks', 'id', $id);
+    }
+
+    /* -------------------------------- Feeds ----------------------------- */
+
+    public function get_feeds($limit = null, $offset = 0)
+    {
+        $builder = $this->db->select('f.*, u.unit_name')
+            ->from('feeds f')
+            ->join('units u', 'u.unit_id = f.purchase_unit_id', 'left')
+            ->order_by('f.created_at', 'desc');
+
+        if ($limit !== null) {
+            $builder->limit((int) $limit, (int) $offset);
+        }
+
+        return $builder->get()->result_array();
+    }
+
+    public function count_feeds()
+    {
+        return (int) $this->db->from('feeds')->count_all_results();
+    }
+
+    public function get_feeds_dropdown()
+    {
+        return $this->db->select('id, name')
+            ->from('feeds')
+            ->order_by('name', 'asc')
+            ->get()

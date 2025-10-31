@@ -18,37 +18,38 @@ thisCalendar.datepicker('setDate', new Date(year, month, 1));
 });
 
   window.onload = function() {
+    // Only render CanvasJS chart on pages that provide the container and data
+    if (typeof CanvasJS !== 'undefined' && document.getElementById('chartContainer')) {
+      var currency = $("#currency").val() || '';
+      var totalsale = Number($("#totalsalep").val() || 0);
+      var totalpurchase = Number($("#totalplurchasep").val() || 0);
+      var totalexpense = Number($("#totalexpensep").val() || 0);
+      var totalemployeesalary = Number($("#totalemployeesalaryp").val() || 0);
+      var totalservice = Number($("#totalservicep").val() || 0);
 
-    var currency = $("#currency").val();
-    var totalsale = $("#totalsalep").val();
-    var totalpurchase = $("#totalplurchasep").val();
-    var totalexpense = $("#totalexpensep").val();
-    var totalemployeesalary = $("#totalemployeesalaryp").val();
-    var totalservice = $("#totalservicep").val();
-var chart = new CanvasJS.Chart("chartContainer", {
-    animationEnabled: true,
-    title: {
-        text: "Expense statement",
-         fontColor: "green"
-    },
-   
-    data: [{
-        type: "pie",
-        startAngle: 240,
-        yValueFormatString: "##0.00 "+currency,
-        indexLabel: "{label} {y}",
-        dataPoints: [
-            {y: totalsale, label: "Total Sale"},
-             {y: totalpurchase, label: "Total Purchase"},
-            {y: totalexpense, label: "Total Expense"},
-            {y: totalemployeesalary, label: "Employee Salary"},
-            {y: totalservice, label: "Service "}
-        ]
-    }]
-});
-chart.render();
-
-}
+      var chart = new CanvasJS.Chart("chartContainer", {
+        animationEnabled: true,
+        title: {
+          text: "Expense statement",
+          fontColor: "green"
+        },
+        data: [{
+          type: "pie",
+          startAngle: 240,
+          yValueFormatString: "##0.00 " + currency,
+          indexLabel: "{label} {y}",
+          dataPoints: [
+            { y: totalsale, label: "Total Sale" },
+            { y: totalpurchase, label: "Total Purchase" },
+            { y: totalexpense, label: "Total Expense" },
+            { y: totalemployeesalary, label: "Employee Salary" },
+            { y: totalservice, label: "Service " }
+          ]
+        }]
+      });
+      chart.render();
+    }
+  }
 
 $(function (){
    "use strict"; 
@@ -76,6 +77,7 @@ $(function (){
 
                var bestsalmax    = $("#bestsalemax").val();
 
+               if (document.getElementById("yearlyreport")) {
                new Chart(document.getElementById("yearlyreport"), {
   type: 'line',
   data: {
@@ -100,6 +102,7 @@ $(function (){
     }
   }
 });
+}
 
 
 
@@ -113,6 +116,7 @@ $(function (){
 
                var bestsalmax    = $("#bestsalemax").val();
    var ctx = document.getElementById("lineChart");
+   if (ctx) {
     var myChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -190,6 +194,7 @@ $(function (){
 
 
     });
+   }
 
 
 

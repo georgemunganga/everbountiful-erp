@@ -6,7 +6,7 @@ use Dompdf\Options;
 
 #------------------------------------    
 # Author: Bdtask Ltd
-# Author link: https://www.bdtask.com/
+# Author link: https://www.greenwebb.tech/
 # Dynamic style php file
 # Developed by :Isahaq
 #------------------------------------    
@@ -389,7 +389,7 @@ class Invoice extends MX_Controller
             'customer_mobile' => $invoice_detail[0]['customer_mobile'],
             'customer_email' => $invoice_detail[0]['customer_email'],
             'final_date' => $invoice_detail[0]['final_date'],
-            'print_setting' => $this->invoice_model->bdtask_print_settingdata(),
+            'print_setting' => $this->invoice_model->bd_task_print_settingdata(),
             'invoice_details' => $invoice_detail[0]['invoice_details'],
             'total_amount' => number_format($totalbal !== null ? $totalbal : 0, 2, '.', ','),
             'subTotal_cartoon' => $subTotal_cartoon,
@@ -768,10 +768,10 @@ class Invoice extends MX_Controller
                         }
                     }
                     if ($normal == 1) {
-                        $printdata = $this->invoice_model->bdtask_invoice_pos_print_direct($invoice_id);
+                        $printdata = $this->invoice_model->bd_task_invoice_pos_print_direct($invoice_id);
                         $data['details'] = $this->load->view('invoice/invoice_html_manual', $printdata, true);
                     } else {
-                        $printdata = $this->invoice_model->bdtask_invoice_pos_print_direct($invoice_id);
+                        $printdata = $this->invoice_model->bd_task_invoice_pos_print_direct($invoice_id);
 
                         $data['details'] = $this->load->view('invoice/pos_print', $printdata, true);
                     }

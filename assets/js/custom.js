@@ -4,7 +4,7 @@ $(function ($) {
   $('[data-toggle="tooltip"]').tooltip();
   //datatable
   $(".datatable").DataTable({
-    responsive: true,
+    responsive: true,autoWidth: false,
     dom: "<'row'<'col-sm-4'l><'col-sm-4 text-center'B><'col-sm-4'f>>tp",
     lengthMenu: [
       [10, 25, 50, -1],
@@ -26,7 +26,7 @@ $(function ($) {
 
   //datatable
   $(".datatable2").DataTable({
-    responsive: true,
+    responsive: true,autoWidth: false,
     paging: false,
     dom: "<'row'<'col-sm-4'B><'col-sm-4'l><'col-sm-4'f>>tp",
     buttons: [
@@ -176,7 +176,7 @@ $(document).ready(function () {
   var total_invoice = $("#total_invoice").val();
   var currency = $("#currency").val();
   var invoicedatatable = $("#InvList").DataTable({
-    responsive: true,
+    responsive: true,autoWidth: false,
 
     aaSorting: [[1, "desc"]],
     columnDefs: [{ bSortable: false, aTargets: [0, 2, 3, 4, 5, 6] }],
@@ -337,7 +337,7 @@ $(document).ready(function () {
   var currency = $("#currency").val();
   var total_stock = $("#total_stock").val();
   $("#checkListStockList").DataTable({
-    responsive: true,
+    responsive: true,autoWidth: false,
 
     aaSorting: [[1, "asc"]],
     columnDefs: [{ bSortable: false, aTargets: [0, 2, 3, 4, 5, 6, 7, 8, 9] }],
@@ -1012,8 +1012,10 @@ $(document).ready(function () {
   var CSRF_TOKEN = $("#CSRF_TOKEN").val();
   var customer_id = $("#customer_id").val();
   var base_url = $("#base_url").val();
+  if ($("#CustomerList").length) {
   var mydatatable = $("#CustomerList").DataTable({
     responsive: true,
+    autoWidth: false,
 
     aaSorting: [[1, "asc"]],
     columnDefs: [{ bSortable: false, aTargets: [0, 2, 3, 4, 5, 6, 7, 8, 9] }],
@@ -1023,6 +1025,18 @@ $(document).ready(function () {
     lengthMenu: [
       [10, 25, 50, 100, 250, 500, 1000],
       [10, 25, 50, 100, 250, 500, 1000],
+    ],
+    dom: "'<'col-sm-4'l><'col-sm-4 text-center'B><'col-sm-4'f>tp",
+    buttons: [
+      { extend: "copy", className: "btn-sm prints" },
+      { extend: "csv", title: "CustomerList", className: "btn-sm prints",
+        exportOptions: { columns: [0,1,2,3,4,5,6,7,8] } },
+      { extend: "excel", title: "CustomerList", className: "btn-sm prints",
+        exportOptions: { columns: [0,1,2,3,4,5,6,7,8] } },
+      { extend: "pdf", title: "Customer List", className: "btn-sm prints",
+        exportOptions: { columns: [0,1,2,3,4,5,6,7,8] } },
+      { extend: "print", className: "btn-sm prints", title: "<center> Customer List</center>",
+        exportOptions: { columns: [0,1,2,3,4,5,6,7,8] } },
     ],
 
     serverMethod: "post",
@@ -1040,8 +1054,8 @@ $(document).ready(function () {
       { data: "address" },
       { data: "mobile" },
       { data: "email" },
-      { data: "city" },
-      { data: "state" },
+      { data: "customer_group" },
+      
       { data: "zip" },
       { data: "country" },
       { data: "balance", class: "balance" },
@@ -1061,7 +1075,10 @@ $(document).ready(function () {
             var y = parseFloat(b) || 0;
             return x + y;
           }, 0);
-          $(this.footer()).html(sum.toFixed(2, 2));
+          var fCell = (typeof this.footer === 'function') ? this.footer() : null;
+          if (fCell) {
+            $(fCell).html(sum.toFixed(2, 2));
+          }
         });
     },
   });
@@ -1072,6 +1089,7 @@ $(document).ready(function () {
   $("#customsearch").on("change", function () {
     mydatatable.ajax.reload();
   });
+  }
 });
 
 ("use strict");
@@ -1097,7 +1115,7 @@ $(document).ready(function () {
   var customer_id = $("#customer_id").val();
   var base_url = $("#base_url").val();
   var mydatatable = $("#Credit_customerList").DataTable({
-    responsive: true,
+    responsive: true,autoWidth: false,
 
     aaSorting: [[1, "asc"]],
     columnDefs: [{ bSortable: false, aTargets: [0, 2, 3, 4, 5, 6, 7, 8, 9] }],
@@ -1163,8 +1181,8 @@ $(document).ready(function () {
       { data: "address" },
       { data: "mobile" },
       { data: "email" },
-      { data: "city" },
-      { data: "state" },
+      { data: "customer_group" },
+      
       { data: "zip" },
       { data: "country" },
       { data: "balance", class: "balance" },
@@ -1203,7 +1221,7 @@ $(document).ready(function () {
   var customer_id = $("#customer_id").val();
   var base_url = $("#base_url").val();
   var mydatatable = $("#paid_CustomerList").DataTable({
-    responsive: true,
+    responsive: true,autoWidth: false,
 
     aaSorting: [[1, "asc"]],
     columnDefs: [{ bSortable: false, aTargets: [0, 2, 3, 4, 5, 6, 7, 8, 9] }],
@@ -1230,8 +1248,8 @@ $(document).ready(function () {
       { data: "address" },
       { data: "mobile" },
       { data: "email" },
-      { data: "city" },
-      { data: "state" },
+      { data: "customer_group" },
+      
       { data: "zip" },
       { data: "country" },
       { data: "balance", class: "balance" },
@@ -1312,10 +1330,10 @@ $(document).ready(function () {
   var supplier_id = $("#supplier_id").val();
   var base_url = $("#base_url").val();
   var mydatatable = $("#supplierList").DataTable({
-    responsive: true,
+    responsive: true,autoWidth: false,
 
     aaSorting: [[1, "asc"]],
-    columnDefs: [{ bSortable: false, aTargets: [0, 2, 3, 4, 5, 6, 7, 8, 9] }],
+    columnDefs: [{ bSortable: false, aTargets: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10] }],
     processing: true,
     serverSide: true,
 
@@ -1466,3 +1484,7 @@ function delivery_note(sl) {
     },
   });
 }
+
+
+
+

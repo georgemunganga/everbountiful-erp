@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
  #------------------------------------    
     # Author:Greenwebb Ltd
-    # Author link: https://www.Greenwebb.com/
+    # Author link: https://www.Greenwebb.tech/
     # Dynamic style php file
     # Developed by :Isahaq
     #------------------------------------    
@@ -16,7 +16,8 @@ class Customer extends MX_Controller {
         $this->load->model(array(
             'customer_model',
             'customergroups_model' => 'CustomerGroups_model',
-            'template/template_model' => 'template_model'
+            'template/template_model' => 'template_model',
+            'account/Accounts_model' => 'accounts_model'
         )); 
         if (! $this->session->userdata('isLogIn'))
             redirect('login');
@@ -29,6 +30,10 @@ class Customer extends MX_Controller {
         $data['page']              = "customer_list"; 
         $data["customer_dropdown"] = $this->customer_model->customer_dropdown();
         $data['all_customer']      = $this->customer_model->allcustomer(); 
+        // Dashboard mini-card metrics now shown on customer list page
+        $data['total_customer']          = (int) $this->db->count_all('customer_information');
+        $data['customers_owing_count']   = (int) $this->customer_model->count_credit_customer();
+        $data['customers_you_owe_count'] = (int) $this->count_customers_you_owe();
         echo modules::run('template/layout', $data);
     }
 
@@ -42,11 +47,11 @@ class Customer extends MX_Controller {
     }
 
      public function bdtask_credit_customer() {
-        $data['title']             = display('credit_customer');
+        $data['title']             = 'Owing Customers';
         $data['module']            = "customer";
         $data['page']              = "credit_customer"; 
-        $data["customer_dropdown"] = $this->customer_model->bdtask_credit_customer_dropdown();
-        $data['all_customer']      = $this->customer_model->bdtask_all_credit_customer(); 
+        $data["customer_dropdown"] = $this->customer_model->bd_task_credit_customer_dropdown();
+        $data['all_customer']      = $this->customer_model->bd_task_all_credit_customer(); 
         echo modules::run('template/layout', $data);
     }
 
@@ -62,18 +67,29 @@ class Customer extends MX_Controller {
         $data['title']             = display('paid_customer');
         $data['module']            = "customer";
         $data['page']              = "paid_customer"; 
-        $data["customer_dropdown"] = $this->customer_model->bdtask_paid_customer_dropdown();
-        $data['all_customer']      = $this->customer_model->bdtask_all_paid_customer(); 
+        $data["customer_dropdown"] = $this->customer_model->bd_task_paid_customer_dropdown();
+        $data['all_customer']      = $this->customer_model->bd_task_all_paid_customer(); 
         echo modules::run('template/layout', $data);
         
     }
     
-     public function bdtask_CheckPaidCustomerList(){
+    public function bdtask_CheckPaidCustomerList(){
         // GET data
         $postData = $this->input->post();
-        $data = $this->customer_model->bdtask_getPaidCustomerList($postData);
+        $data = $this->customer_model->bd_task_getPaidCustomerList($postData);
         echo json_encode($data);
     } 
+
+    private function count_customers_you_owe()
+    {
+        $q = $this->db->select("a.customer_id, ((SELECT IFNULL(SUM(Debit),0) FROM acc_transaction WHERE COAID = b.HeadCode AND IsAppove = 1) - (SELECT IFNULL(SUM(Credit),0) FROM acc_transaction WHERE COAID = b.HeadCode AND IsAppove = 1)) AS balance", false)
+            ->from('customer_information a')
+            ->join('acc_coa b', 'a.customer_id = b.customer_id', 'left')
+            ->group_by('a.customer_id')
+            ->having('balance <', 0)
+            ->get();
+        return $q ? $q->num_rows() : 0;
+    }
 
 
   public function bdtask_form($id = null)
@@ -265,16 +281,39 @@ class Customer extends MX_Controller {
     // Customer Groups: save
     public function customer_group_save()
     {
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('group_name', 'Group Name', 'required|trim|max_length[150]');
+
         $id   = (int) $this->input->post('id', true);
         $data = [
             'group_name' => $this->input->post('group_name', true),
             'description'=> $this->input->post('description', true),
             'is_active'  => $this->input->post('is_active', true) ? 1 : 0,
         ];
+
+        if ($this->form_validation->run() === false) {
+            $this->session->set_flashdata('exception', validation_errors());
+            if ($id > 0) {
+                redirect('customer/customer_group_form/' . $id);
+            } else {
+                redirect('customer/customer_group_form');
+            }
+            return;
+        }
+
+        $ok = false;
         if ($id > 0) {
-            $this->CustomerGroups_model->update($id, $data);
+            $ok = $this->CustomerGroups_model->update($id, $data);
         } else {
-            $this->CustomerGroups_model->create($data);
+            $ok = $this->CustomerGroups_model->create($data);
+        }
+
+        if ($ok) {
+            $this->session->set_flashdata('message', 'Group saved successfully');
+        } else {
+            $db_err = $this->db->error();
+            $msg = !empty($db_err['message']) ? $db_err['message'] : 'Unable to save group';
+            $this->session->set_flashdata('exception', $msg);
         }
         redirect('customer/customer_groups');
     }
@@ -289,17 +328,75 @@ class Customer extends MX_Controller {
     // Customer detail view with tabs
     public function customer_detail($customer_id)
     {
+        // Gracefully handle accidental extra slash paths like /customer_detail//10
+        if (empty($customer_id) || !is_numeric($customer_id)) {
+            $seg4 = $this->uri->segment(4);
+            if (!empty($seg4) && is_numeric($seg4)) {
+                $customer_id = (int)$seg4;
+            }
+        }
+        if (empty($customer_id)) {
+            $this->session->set_flashdata("exception", "Invalid or missing customer id.");
+            redirect("customer_list");
+            return;
+        }
         $customer = $this->customer_model->singledata($customer_id);
         if (!$customer) {
             show_404();
             return;
         }
-        // Date range for statement (defaults to current month)
+        // Date range for statement
         $from = $this->input->get('from_date', true);
         $to   = $this->input->get('to_date', true);
+        $range = strtolower(trim($this->input->get('range', true)));
+        $active_group = strtolower(trim($this->input->get('group', true)));
         if (empty($from) || empty($to)) {
-            $from = date('Y-m-01');
-            $to   = date('Y-m-t');
+            // derive from 'range' if provided
+            if (!empty($range)) {
+                $today = new DateTime('today');
+                switch ($range) {
+                    case 'today':
+                        $start = clone $today; $end = clone $today; break;
+                    case 'this_week':
+                        $start = (clone $today)->modify('monday this week');
+                        $end   = (clone $start)->modify('sunday this week');
+                        break;
+                    case 'last_week':
+                        $start = (clone $today)->modify('monday last week');
+                        $end   = (clone $start)->modify('sunday next week')->modify('-1 week');
+                        break;
+                    case 'this_month':
+                        $start = new DateTime(date('Y-m-01'));
+                        $end   = new DateTime(date('Y-m-t'));
+                        break;
+                    case 'last_month':
+                        $start = new DateTime('first day of last month');
+                        $end   = new DateTime('last day of last month');
+                        break;
+                    case 'this_year':
+                        $start = new DateTime(date('Y-01-01'));
+                        $end   = new DateTime(date('Y-12-31'));
+                        break;
+                    case 'last_year':
+                        $y = (int) date('Y') - 1;
+                        $start = new DateTime($y.'-01-01');
+                        $end   = new DateTime($y.'-12-31');
+                        break;
+                    case 'all_time':
+                        $start = new DateTime('1970-01-01');
+                        $end   = clone $today;
+                        break;
+                    default:
+                        $start = new DateTime(date('Y-m-01'));
+                        $end   = new DateTime(date('Y-m-t'));
+                }
+                $from = $start->format('Y-m-d');
+                $to   = $end->format('Y-m-d');
+            } else {
+                // default current month
+                $from = date('Y-m-01');
+                $to   = date('Y-m-t');
+            }
         }
 
         $data['title']     = 'Customer Details';
@@ -312,6 +409,76 @@ class Customer extends MX_Controller {
         $data['credit_note_form_data'] = $this->session->flashdata('credit_note_form_data') ?: array();
         $data['estimate_form_data'] = $this->session->flashdata('estimate_form_data') ?: array();
         $data['expense_form_data'] = $this->session->flashdata('expense_form_data') ?: array();
+        // Payments list for Payments tab
+        $receipts_from = ($active_group === 'payments') ? null : $from;
+        $receipts_to   = ($active_group === 'payments') ? null : $to;
+        $data['customer_receipts'] = $this->customer_model->get_customer_receipts($customer_id, $receipts_from, $receipts_to);
+        // Build group summaries for Payments tab (lumpsum group payments)
+        $payment_groups = array();
+        if (!empty($data['customer_receipts']) && is_array($data['customer_receipts'])) {
+            foreach ($data['customer_receipts'] as $rc) {
+                $label = isset($rc['group_note']) ? trim((string)$rc['group_note']) : '';
+                if ($label !== '' && stripos($label, 'Group Payment') === 0) {
+                    if (!isset($payment_groups[$label])) {
+                        $payment_groups[$label] = array(
+                            'label' => $label,
+                            'date' => isset($rc['date']) ? $rc['date'] : '',
+                            'total' => 0.0,
+                            'items' => array(),
+                        );
+                    }
+                    // keep earliest date for the group
+                    if (!empty($rc['date']) && strtotime($rc['date']) < strtotime($payment_groups[$label]['date'])) {
+                        $payment_groups[$label]['date'] = $rc['date'];
+                    }
+                    $amt = isset($rc['amount']) ? (float)$rc['amount'] : 0.0;
+                    $payment_groups[$label]['total'] += $amt;
+                    $payment_groups[$label]['items'][] = array(
+                        'invoice_id' => isset($rc['invoice_id']) ? $rc['invoice_id'] : null,
+                        'amount' => $amt,
+                        'date' => isset($rc['date']) ? $rc['date'] : '',
+                        'voucher' => isset($rc['VNo']) ? $rc['VNo'] : '',
+                    );
+                }
+            }
+            // Fallback batch grouping for older vouchers without the group label
+            $buckets = array();
+            foreach ($data['customer_receipts'] as $rc) {
+                $label = isset($rc['group_note']) ? trim((string)$rc['group_note']) : '';
+                if ($label !== '' && stripos($label, 'Group Payment') === 0) { continue; }
+                $cd = isset($rc['create_dt']) ? trim((string)$rc['create_dt']) : '';
+                if ($cd === '') { continue; }
+                $key = $cd;
+                if (!isset($buckets[$key])) {
+                    $buckets[$key] = array(
+                        'date' => isset($rc['date']) ? $rc['date'] : '',
+                        'total' => 0.0,
+                        'items' => array(),
+                    );
+                }
+                $amt = isset($rc['amount']) ? (float)$rc['amount'] : 0.0;
+                $buckets[$key]['total'] += $amt;
+                $buckets[$key]['items'][] = array(
+                    'invoice_id' => isset($rc['invoice_id']) ? $rc['invoice_id'] : null,
+                    'amount' => $amt,
+                    'date' => isset($rc['date']) ? $rc['date'] : '',
+                    'voucher' => isset($rc['VNo']) ? $rc['VNo'] : '',
+                );
+            }
+            foreach ($buckets as $key => $bk) {
+                if (count($bk['items']) < 2 || $bk['total'] <= 0.0001) { continue; }
+                $label2 = 'Batch @ '.date('Y-m-d H:i', strtotime($key));
+                if (!isset($payment_groups[$label2])) {
+                    $payment_groups[$label2] = array(
+                        'label' => $label2,
+                        'date'  => $bk['date'],
+                        'total' => $bk['total'],
+                        'items' => $bk['items'],
+                    );
+                }
+            }
+        }
+        $data['payment_groups'] = $payment_groups;
         $invoice_rows_all = $this->customer_model->get_customer_invoices($customer_id);
         $prepared_invoices = array();
         if (!empty($invoice_rows_all)) {
@@ -344,12 +511,19 @@ class Customer extends MX_Controller {
             }
         }
         $data['invoices']  = $prepared_invoices;
-        $data['payments']  = $this->customer_model->get_customer_payments($customer_id, $from, $to);
+        // For payments tab, default to all-time (no date restriction) so older payments are visible
+        $payments_from = $from;
+        $payments_to   = $to;
+        if ($active_group === 'payments') {
+            $payments_from = null; $payments_to = null;
+        }
+        $data['payments']  = $this->customer_model->get_customer_payments($customer_id, $payments_from, $payments_to);
         $data['notes']     = $this->customer_model->get_notes($customer_id);
         $data['reminders'] = $this->customer_model->get_reminders($customer_id);
         $data['files']     = $this->customer_model->get_files($customer_id);
         $data['from_date'] = $from;
         $data['to_date']   = $to;
+        $data['range']     = $range;
         $data['statement'] = $this->customer_model->get_customer_statement($customer_id, $from, $to);
         $setting           = $this->template_model->setting();
         if ($setting) {
@@ -362,7 +536,10 @@ class Customer extends MX_Controller {
 
         $data['module']   = 'customer';
         $data['page']     = 'customer_detail_tabs';
-        echo Modules::run('template/layout', $data);
+        // Payment methods for inline payment modal
+        $data['pay_methods'] = $this->accounts_model->pmethod_dropdown();
+
+        echo Modules::run('template/layout', $data); 
     }
 
     public function add_contact($customer_id)

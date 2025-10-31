@@ -123,6 +123,85 @@
      </div>
  </div>
 
+ <script type="text/javascript">
+ (function ($) {
+     'use strict';
+
+     var deleteConfirmMessage = <?php echo json_encode(display('are_you_sure_to_delete')); ?> || 'Are you sure you want to delete?';
+     var deleteEndpoint = <?php echo json_encode(base_url('invoice/invoice/bdtask_delete_invoice')); ?>;
+
+     function notify(type, message) {
+         if (window.toastr && typeof toastr[type] === 'function') {
+             toastr[type](message);
+         } else if (type === 'error') {
+             alert(message);
+         } else {
+             console.log(message);
+         }
+     }
+
+     $(document).on('click', '.js-delete-invoice', function (event) {
+         event.preventDefault();
+         var $button = $(this);
+         var invoiceId = $button.data('invoice');
+
+         if (!invoiceId) {
+             return;
+         }
+
+         var hasApprovedVoucher = parseInt($button.data('approved'), 10) === 1;
+         var hasReturnAdjustment = parseInt($button.data('retadjust'), 10) === 1;
+
+         var confirmationText = deleteConfirmMessage || 'Are you sure you want to delete?';
+         if (hasApprovedVoucher && hasReturnAdjustment) {
+             confirmationText = 'This invoice has approved vouchers and return adjustments. Deleting it will remove those records as well. Continue?';
+         } else if (hasApprovedVoucher) {
+             confirmationText = 'This invoice has approved vouchers. Deleting it will remove the approved vouchers. Continue?';
+         } else if (hasReturnAdjustment) {
+             confirmationText = 'This invoice has return adjustments linked to it. Deleting it will remove those adjustments. Continue?';
+         }
+
+         if (!confirm(confirmationText)) {
+             return;
+         }
+
+         var csrfToken = $('[name="csrf_test_name"]').val();
+         var forceDelete = (hasApprovedVoucher || hasReturnAdjustment) ? 1 : 0;
+         $button.prop('disabled', true);
+
+         $.ajax({
+             url: deleteEndpoint,
+             type: 'POST',
+             dataType: 'json',
+             data: {
+                 invoice_id: invoiceId,
+                 csrf_test_name: csrfToken,
+                 force_delete: forceDelete
+             },
+             complete: function () {
+                 $button.prop('disabled', false);
+             },
+             success: function (response) {
+                 if (response && response.csrf_test_name) {
+                     $('[name="csrf_test_name"]').val(response.csrf_test_name);
+                 }
+
+                 if (response && response.status) {
+                     notify('success', response.message || <?php echo json_encode(display('delete_successfully')); ?>);
+                     var table = $('#InvList').DataTable();
+                     table.ajax.reload(null, false);
+                 } else {
+                     notify('error', (response && response.message) || <?php echo json_encode(display('please_try_again')); ?>);
+                 }
+             },
+             error: function () {
+                 notify('error', <?php echo json_encode(display('please_try_again')); ?>);
+             }
+         });
+     });
+ })(jQuery);
+ </script>
+
  <style>
 .tooltip-inner {
     font-size: 14px;

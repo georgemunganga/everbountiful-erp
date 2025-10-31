@@ -1,5 +1,5 @@
 :root {
-  --brand-primary: #37a000;
+  --brand-primary: #126e21;
   --brand-secondary: #2c3136;
   --white: #ffffff;
 }
@@ -792,7 +792,7 @@ fieldset[disabled] .form-control {
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
 .product-panel.active {
-  box-shadow: 0 0 0 0.1rem #37a000 !important;
+  box-shadow: 0 0 0 0.1rem #126e21 !important;
 }
 .product-panel .panel-body {
   padding: 0;

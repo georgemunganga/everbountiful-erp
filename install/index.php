@@ -177,7 +177,7 @@ if ($dbvalid===true) {
                 <div class="row"> 
                     <div class="col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1"> 
                         <header class="header">
-                            <h1 class="header-title">Bdtask software installer</h1>
+                            <h1 class="header-title">Greenwebb software installer</h1>
                         </header>
                         <div class="page-content">
                             <div class="outer-container">
@@ -195,7 +195,7 @@ if ($dbvalid===true) {
                                                 <!-- if purchases key used then will appear update button -->
                                                 <?php if($_SESSION['purchase_key_used']){ ?>
 
-                                                <a target="_blank" class="btn btn-warning pull-right" href="https://www.bdtask.com/license-update.php?<?php echo 'product_key='.$Verification->get_product_key().'&'.'purchase_key='.base64_encode(filterInput($_GET['purchase_key']));?>" role="button">Update Purchase Key</a>
+                                                <a target="_blank" class="btn btn-warning pull-right" href="https://www.greenwebb.tech/license-update.php?<?php echo 'product_key='.$Verification->get_product_key().'&'.'purchase_key='.base64_encode(filterInput($_GET['purchase_key']));?>" role="button">Update Purchase Key</a>
 
                                                 <?php }?>
                                             </div>

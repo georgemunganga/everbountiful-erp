@@ -39,7 +39,7 @@
         border-width: 2px;
         border-style: solid;
         border-right: 0;
-        border-color: #37a000;
+        border-color: #126e21;
         height: 57px;
     }
 
@@ -61,7 +61,7 @@
         border-style: solid;
         border-left: 0;
         color: #fff;
-        background-color: #37a000;
+        background-color: #126e21;
         padding: 12px 30px;
         font-size: 18px;
         height: 57px;
@@ -100,13 +100,13 @@
         border-width: 2px;
         border-style: solid;
         border-right: 0;
-        border-color: #37a000;
+        border-color: #126e21;
         height: 57px;
     }
 
     .navbar-search .input-group .input-group-addon {
 
-        border: solid #37a000;
+        border: solid #126e21;
         border-width: 2px 0;
         background-color: #fff;
     }
@@ -127,7 +127,7 @@
         border-style: solid;
         border-left: 0;
         color: #fff;
-        background-color: #37a000;
+        background-color: #126e21;
         padding: 12px 30px;
         font-size: 18px;
         height: 57px;
@@ -165,12 +165,12 @@
     }
 
     .actives .panel-footer {
-        background-color: #37a000;
+        background-color: #126e21;
         color: #fff;
     }
 
     .actives {
-        border: 1px solid #37a000;
+        border: 1px solid #126e21;
     }
 
     .col-form-label {

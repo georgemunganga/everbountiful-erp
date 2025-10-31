@@ -32,3 +32,10 @@ $route['customer/customer_statement_pdf/(:num)'] = 'customer/customer/customer_s
 $route['customer/statement'] = 'customer/customer/customer_statement';
 $route['customer/statement/(:num)'] = 'customer/customer/customer_statement/$1';
 $route['customer/statement/(:num)/pdf'] = 'customer/customer/customer_statement_pdf/$1';
+
+// Customer Groups explicit routes
+$route['customer/customer_groups']           = 'customer/customer/customer_groups';
+$route['customer/customer_group_form']       = 'customer/customer/customer_group_form';
+$route['customer/customer_group_form/(:num)']= 'customer/customer/customer_group_form/$1';
+$route['customer/customer_group_save']       = 'customer/customer/customer_group_save';
+$route['customer/customer_group_delete/(:num)'] = 'customer/customer/customer_group_delete/$1';

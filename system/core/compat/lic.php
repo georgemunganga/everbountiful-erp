@@ -179,7 +179,7 @@ class Lic
                 return false;
             }
 
-            $this->message = "Your application license has expired! <br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>bdtask.com</a></i>";
+            $this->message = "Your application license has expired! <br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>Greenwebb.tech</a></i>";
             if (file_exists($this->log_path)) {
                 if (!$this->fileRead())
                     $this->html($this->product_key);
@@ -193,11 +193,11 @@ class Lic
     {
         if (strtotime($LicSysLog->expire_date) <= @strtotime(date('Y-m-d'))) {
             //call to purchase
-            $this->message = "Your application license has expired on ". @date("M d, Y",@strtotime($LicSysLog->expire_date)) ."! <br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>bdtask.com</a></i>";
+            $this->message = "Your application license has expired on ". @date("M d, Y",@strtotime($LicSysLog->expire_date)) ."! <br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>Greenwebb.tech</a></i>";
             $this->html();
 
         } else if (isset($_SESSION['response']) && $_SESSION['response']) {
-            $this->message = "This copy of application is not genuine <br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>bdtask.com</a></i>";
+            $this->message = "This copy of application is not genuine <br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>Greenwebb.tech</a></i>";
             $this->html();
 
         } else if($this->update_day != $LicSysLog->update_day) {
@@ -209,7 +209,7 @@ class Lic
                 $this->updateFile($data['whitelist'], $data['product_key']);
                 $_SESSION['response'] = false;
             } else {
-                $this->message = "This copy of application is not genuine <br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>bdtask.com</a></i>";
+                $this->message = "This copy of application is not genuine <br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>Greenwebb.tech</a></i>";
                 $this->html();
             }
             $_SESSION['response'] = true;
@@ -230,10 +230,10 @@ class Lic
                     $this->updateFile($data['whitelist'], $data['product_key']);
                     $_SESSION['response'] = false;
                 } else {
-                    $this->message = "Invalid purchase key! <br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>bdtask.com</a></i>";
+                    $this->message = "Invalid purchase key! <br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>Greenwebb.tech</a></i>";
                 }
             } else {
-                $this->message = "Server error occurs! please try another time.<br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>bdtask.com</a></i>";
+                $this->message = "Server error occurs! please try another time.<br>Contact <i><a href='https://bdtask.com/#contact' target='_blank' style='color:#f5f5f5'>Greenwebb.tech</a></i>";
             }
         }
 

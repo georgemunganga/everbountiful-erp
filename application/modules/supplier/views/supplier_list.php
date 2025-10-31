@@ -30,13 +30,20 @@
                        
                     </tbody>
                     <tfoot>
-                                            <tr>
-                <th colspan="9" class="text-right"><?php echo display('total') ?>:</th>
-                <th id="stockqty"></th>
-                   <th></th>
-            </tr>
-                                            
-                                        </tfoot>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th class="text-right"><?php echo display('total') ?>:</th>
+                            <th id="stockqty"></th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
                   </table>  
                   
             </div>

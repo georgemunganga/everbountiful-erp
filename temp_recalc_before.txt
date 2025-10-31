@@ -1,0 +1,7 @@
+    public function recalc_invoice_paid_due()
+    {
+        $invoice_id = (int)$this->input->post('invoice_id', true);
+        if (empty($invoice_id)) {
+            echo json_encode(['status'=>false, 'message'=>'Invalid invoice id', 'csrf_test_name'=>$this->security->get_csrf_hash()]);
+            return;
+        }

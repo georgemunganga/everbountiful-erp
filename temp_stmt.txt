@@ -1,0 +1,124 @@
+                </ul>
+              </div>
+
+              <div class="tab-pane<?php echo ($active_group==='statement'?' active in':''); ?>" id="statement" <?php echo ($active_group==='statement'?'':'style="display:none"'); ?> >
+                <div class="row">
+                  <div class="col-sm-4">
+                <form method="get">
+                  <input type="hidden" name="tab" value="statement">
+                      <div class="form-group">
+                        <label>From</label>
+                        <input type="date" name="from_date" class="form-control" value="<?php echo html_escape($from_date ?? ''); ?>">
+                      </div>
+                      <div class="form-group">
+                        <label>To</label>
+                        <input type="date" name="to_date" class="form-control" value="<?php echo html_escape($to_date ?? ''); ?>">
+                      </div>
+                      <button type="submit" class="btn btn-primary">Filter</button>
+                      <a href="<?php echo base_url('customer/statement/'.$customer->customer_id.'/pdf'); ?>?from_date=<?php echo urlencode($from_date ?? ''); ?>&to_date=<?php echo urlencode($to_date ?? ''); ?>" target="_blank" class="btn btn-default">Download PDF</a>
+                    </form>
+                  </div>
+                  <div class="col-sm-8">
+                    <h4>Account Statement</h4>
+                    <?php
+                      $statementData = (isset($statement) && is_array($statement)) ? $statement : array('summary' => array(), 'lines' => array());
+                      $summaryDefaults = array(
+                        'beginning'   => 0.0,
+                        'invoiced'    => 0.0,
+                        'paid'        => 0.0,
+                        'balance_due' => 0.0,
+                      );
+                      $statementSummaryRaw = isset($statementData['summary']) && is_array($statementData['summary']) ? $statementData['summary'] : array();
+                      $hasStatementSummary = !empty($statementSummaryRaw);
+                      $statementSummary = array_merge($summaryDefaults, array_intersect_key($statementSummaryRaw, $summaryDefaults));
+                      foreach ($statementSummary as $key => $value) {
+                        $statementSummary[$key] = is_numeric($value) ? (float) $value : 0.0;
+                      }
+
+                      $statementLines = array();
+                      if (isset($statementData['lines']) && is_array($statementData['lines'])) {
+                        foreach ($statementData['lines'] as $entry) {
+                          if (!is_array($entry)) {
+                            continue;
+                          }
+                          $statementLines[] = array(
+                            'date'        => isset($entry['date']) ? $entry['date'] : '',
+                            'description' => isset($entry['description']) ? $entry['description'] : '',
+                            'debit'       => isset($entry['debit']) && is_numeric($entry['debit']) ? (float) $entry['debit'] : 0.0,
+                            'credit'      => isset($entry['credit']) && is_numeric($entry['credit']) ? (float) $entry['credit'] : 0.0,
+                            'balance'     => isset($entry['balance']) && is_numeric($entry['balance']) ? (float) $entry['balance'] : 0.0,
+                          );
+                        }
+                      }
+                    ?>
+                    <?php if ($hasStatementSummary) { ?>
+                      <table class="table table-condensed table-bordered" style="margin-bottom:15px;">
+                        <tr>
+                          <th>Beginning Balance</th>
+                          <td class="text-right"><?php echo $formatCurrency(isset($statementSummary['beginning']) ? $statementSummary['beginning'] : 0); ?></td>
+                        </tr>
+                        <tr>
+                          <th>Total Invoiced</th>
+                          <td class="text-right"><?php echo $formatCurrency(isset($statementSummary['invoiced']) ? $statementSummary['invoiced'] : 0); ?></td>
+                        </tr>
+                        <tr>
+                          <th>Payments Received</th>
+                          <td class="text-right"><?php echo $formatCurrency(isset($statementSummary['paid']) ? $statementSummary['paid'] : 0); ?></td>
+                        </tr>
+                        <tr>
+                          <th>Balance Due</th>
+                          <td class="text-right"><?php echo $formatCurrency(isset($statementSummary['balance_due']) ? $statementSummary['balance_due'] : 0); ?></td>
+                        </tr>
+                      </table>
+                    <?php } ?>
+                    <table class="table table-bordered table-striped">
+                      <thead><tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th></tr></thead>
+                      <tbody>
+                        <?php if (!empty($statementLines)) {
+                          foreach ($statementLines as $entry) {
+                            $entryDate = !empty($entry['date']) ? date('d-m-Y', strtotime($entry['date'])) : '';
+                            $debitAmount = isset($entry['debit']) ? (float)$entry['debit'] : 0.0;
+                            $creditAmount = isset($entry['credit']) ? (float)$entry['credit'] : 0.0;
+                            $balanceAmount = isset($entry['balance']) ? (float)$entry['balance'] : ($debitAmount - $creditAmount);
+                            ?>
+                            <tr>
+                              <td><?php echo html_escape($entryDate); ?></td>
+                              <td><?php echo html_escape($entry['description'] ?? ''); ?></td>
+                              <td class="text-right"><?php echo $debitAmount > 0 ? $formatCurrency($debitAmount, false) : ''; ?></td>
+                              <td class="text-right"><?php echo $creditAmount > 0 ? $formatCurrency($creditAmount, false) : ''; ?></td>
+                              <td class="text-right"><?php echo $formatCurrency($balanceAmount); ?></td>
+                            </tr>
+                          <?php }
+                        } else { ?>
+                            <tr><td colspan="5" class="text-center">No activity for selected period.</td></tr>
+                          <?php } ?>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tab-pane<?php echo ($active_group==='invoices'?' active in':''); ?>" id="invoices" <?php echo ($active_group==='invoices'?'':'style="display:none"'); ?> >
+                <div class="clearfix" style="margin-bottom:10px;">
+                  <a href="<?php echo base_url('add_invoice?customer_id=' . urlencode($customer->customer_id)); ?>" class="btn btn-success">New Invoice</a>
+                </div>
+                <table class="table table-bordered table-striped">
+                  <thead><tr><th>Invoice #</th><th>Date</th><th>Total</th><th>Paid</th><th>Due</th><th>Status</th><th>Action</th></tr></thead>
+                  <tbody>
+                    <?php if (!empty($invoices)) { foreach ($invoices as $invoice) { ?>
+                      <?php $invoice_number = isset($invoice['invoice_no']) ? $invoice['invoice_no'] : (isset($invoice['invoice']) ? $invoice['invoice'] : $invoice['invoice_id']); ?>
+                      <tr>
+                        <td><a href="<?php echo base_url('invoice/invoice_details/'.$invoice['invoice_id'].'?customer_id=' . urlencode($customer->customer_id)); ?>"><?php echo html_escape($invoice_number); ?></a></td>
+                        <td><?php echo date('d-m-Y', strtotime($invoice['date'])); ?></td>
+                        <td class="text-right"><?php echo $formatCurrency($invoice['total_amount']); ?></td>
+                        <td class="text-right"><?php echo $formatCurrency($invoice['paid_amount'], false); ?></td>
+                        <td class="text-right"><?php echo $formatCurrency($invoice['due_amount'], false); ?></td>
+                        <td><span class="<?php echo html_escape($invoice['status_class']); ?>"><?php echo html_escape($invoice['status_label']); ?></span></td>
+                        <td>
+                          <a href="<?php echo base_url('invoice/invoice_details/'.$invoice['invoice_id'].'?customer_id=' . urlencode($customer->customer_id)); ?>" class="btn btn-xs btn-info">View</a>
+                          <a href="<?php echo base_url('invoice/edit_invoice/'.$invoice['invoice_id'].'?customer_id=' . urlencode($customer->customer_id)); ?>" class="btn btn-xs btn-primary">Edit</a>
+                        </td>
+                      </tr>
+                    <?php } } else { ?>
+                      <tr><td colspan="7" class="text-center">No invoices found</td></tr>
+                    <?php } ?>

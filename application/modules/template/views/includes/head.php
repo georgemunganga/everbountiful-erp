@@ -61,3 +61,21 @@
 <script src="<?php echo base_url('assets/js/jquery-3.4.1.min.js?v=3.4.1') ?>" type="text/javascript"></script>
 <script src="<?php echo base_url() ?>assets/js/wickedpicker.min.js"></script>
 <script src="<?php echo base_url() ?>assets/js/jquery.validate.min.js" type="text/javascript"></script>
+
+<!-- Global font: Poppins -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body,
+  h1, h2, h3, h4, h5, h6,
+  p, span, a, li,
+  label, small, strong, em,
+  td, th, tr,
+  .form-control, .btn, .nav, .navbar, .panel, .table,
+  .pagination, .breadcrumb, .dropdown-menu,
+  input, select, textarea, button {
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Arial, sans-serif;
+  }
+  /* Do not target icon classes here to avoid overriding icon fonts */
+</style>

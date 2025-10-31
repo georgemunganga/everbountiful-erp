@@ -7,8 +7,27 @@
                     <h4><?php echo display('invoice_edit') ?></h4>
                 </div>
             </div>
+            <div class="alert alert-warning" style="margin:15px;">
+                <strong>Heads up:</strong> Editing this invoice will reverse previous accounting entries and re‑post them on save.
+            </div>
             <?php echo form_open('invoice/invoice/bdtask_update_invoice', array('class' => 'form-vertical', 'id' => 'update_invoice')) ?>
             <div class="panel-body">
+
+                <?php $sale_type_value = (!empty($is_credit) && (int)$is_credit === 1) ? 'credit_sale' : 'cash'; ?>
+                <input type="hidden" name="sale_type" id="sale_type" value="<?php echo html_escape($sale_type_value); ?>">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group row">
+                            <label for="sale_type_selector" class="col-sm-3 col-form-label">Payment Type</label>
+                            <div class="col-sm-9">
+                                <select id="sale_type_selector" name="sale_type_option" class="form-control sale-type-select">
+                                    <option value="cash" <?php echo ($sale_type_value !== 'credit_sale') ? 'selected' : ''; ?>>Pay Now</option>
+                                    <option value="credit_sale" <?php echo ($sale_type_value === 'credit_sale') ? 'selected' : ''; ?>>Pay Later</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="row">
                     <div class="col-sm-6" id="payment_from_1">
@@ -52,7 +71,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6" id="bank_div">
+                    <div class="col-sm-6 invoice-payment-controls" id="bank_div">
                         <div class="form-group row">
                             <label for="bank" class="col-sm-3 col-form-label"><?php
                                     echo display('bank');
@@ -332,8 +351,8 @@
                     <input type="hidden" name="finyear" value="<?php echo financial_year(); ?>">
                     <p hidden id="pay-amount"><?php echo $paid_amount;?></p>
                     <p hidden id="change-amount"></p>
-                    <div class="col-sm-6 table-bordered p-20">
-                        <div id="adddiscount" class="display-none">
+                    <div class="col-sm-6 table-bordered p-20 invoice-payment-controls">
+                        <div id="adddiscount">
 
                             <input type="hidden" id="invoice_edit_page" value="1">
                             <input type="hidden" id="is_credit_edit" value="<?php echo $is_credit?>">
@@ -348,8 +367,8 @@
                                         <label for="payments"
                                             class="col-form-label pb-2"><?php echo display('payment_type');?></label>
 
-                                        <?php 
-                                        echo form_dropdown('multipaytype[]',$all_pmethod,(!empty($all_paytype)?$all_paytype->COAID:null),'onchange = "check_creditsale()" class="card_typesl postform resizeselect form-control "') ?>
+                                <?php 
+                                        echo form_dropdown('multipaytype[]',$all_pmethodwith_cr,(!empty($all_paytype)?$all_paytype->COAID:null),'onchange = "check_creditsale()" class="card_typesl postform resizeselect form-control "') ?>
 
                                     </div>
                                     <div class="form-group col-md-6">

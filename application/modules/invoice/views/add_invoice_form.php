@@ -1,5 +1,9 @@
 <!-- Invoice js -->
 <script src="<?php echo base_url() ?>my-assets/js/admin_js/invoice.js" type="text/javascript"></script>
+<style>
+/* Hide advanced payment controls to keep a single Payment Type */
+.invoice-payment-controls{display:none !important;}
+</style>
 
 
 
@@ -24,7 +28,7 @@
 
             <div class="panel-body">
                 <?php echo form_open_multipart('invoice/invoice/bdtask_manual_sales_insert',array('class' => 'form-vertical', 'id' => 'insert_sale','name' => 'insert_sale'))?>
-                <?php $sale_type_value = set_value('sale_type', 'cash'); ?>
+                <?php $sale_type_value = set_value('sale_type', 'credit_sale'); ?>
                 <input type="hidden" name="sale_type" id="sale_type" value="<?php echo html_escape($sale_type_value); ?>">
                 <div class="row">
 
@@ -57,7 +61,7 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <div class="form-group row">
-                            <label for="sale_type_selector" class="col-sm-3 col-form-label">Payment Timing</label>
+                            <label for="sale_type_selector" class="col-sm-3 col-form-label">Payment Type</label>
                             <div class="col-sm-9">
                                 <select id="sale_type_selector" name="sale_type_option" class="form-control sale-type-select">
                                     <option value="cash" <?php echo ($sale_type_value !== 'credit_sale') ? 'selected' : ''; ?>>Pay Now</option>
@@ -84,22 +88,7 @@
                         </div>
                     </div>
 
-                    <div class="col-sm-6 invoice-payment-controls" id="bank_div" <?php echo $show_payment_sections ? '' : 'style="display:none;"'; ?>>
-                        <div class="form-group row">
-                            <label for="bank_id" class="col-sm-3 col-form-label">Payment Method <i class="text-danger">*</i></label>
-                            <div class="col-sm-6">
-                                <select name="bank_id" class="form-control bankpayment" id="bank_id">
-                                    <option value=""><?php echo display('select_option'); ?></option>
-                                    <?php foreach($bank_list as $bank){?>
-                                    <option value="<?php echo html_escape($bank['bank_id'])?>">
-                                        <?php echo html_escape($bank['bank_name']);?></option>
-                                    <?php }?>
-                                </select>
-
-                            </div>
-
-                        </div>
-                    </div>
+                    <!-- Payment Method (bank) removed to simplify UI to a single Payment Type -->
                 </div>
                 <br>
                 <div class="table-responsive">
@@ -320,8 +309,7 @@
                         <div id="adddiscount" class="display-none">
                             <div class="row no-gutters">
                                 <div class="form-group col-md-6 payment-type-wrapper">
-                                    <label for="payments"
-                                        class="col-form-label pb-2"><?php echo display('payment_type');?></label>
+                                    <label for="payments" class="col-form-label pb-2">Paying With</label>
 
                                     <?php 
                                     $card_type=1020101; 

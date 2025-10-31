@@ -13,7 +13,7 @@
             color: #333;
         }
         .header {
-            border-bottom: 2px solid #37a000;
+            border-bottom: 2px solid #126e21;
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
@@ -24,7 +24,7 @@
         .company-name {
             font-size: 24px;
             font-weight: bold;
-            color: #37a000;
+            color: #126e21;
             margin-bottom: 5px;
         }
         .company-address {
@@ -39,7 +39,7 @@
         .statement-title {
             font-size: 28px;
             font-weight: bold;
-            color: #37a000;
+            color: #126e21;
             margin-bottom: 10px;
         }
         .statement-meta {
@@ -54,7 +54,7 @@
             margin: 30px 0;
             padding: 20px;
             background-color: #f8f9fa;
-            border-left: 4px solid #37a000;
+            border-left: 4px solid #126e21;
         }
         .customer-title {
             font-size: 16px;
@@ -111,7 +111,7 @@
             margin-bottom: 20px;
         }
         .transactions-table th {
-            background-color: #37a000;
+            background-color: #126e21;
             color: #ffffff;
             padding: 12px 8px;
             text-align: left;
@@ -132,7 +132,7 @@
             margin-top: 20px;
             padding: 15px;
             background-color: #eaf7ea;
-            border: 2px solid #37a000;
+            border: 2px solid #126e21;
             text-align: center;
         }
         .balance-due-label {
@@ -143,7 +143,7 @@
         .balance-due-amount {
             font-size: 24px;
             font-weight: bold;
-            color: #37a000;
+            color: #126e21;
             margin-top: 5px;
         }
         .footer {

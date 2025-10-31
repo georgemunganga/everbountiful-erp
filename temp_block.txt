@@ -1,0 +1,15 @@
+            return;
+        }
+        $inv = $this->db->select('total_amount')->from('invoice')->where('invoice_id', $invoice_id)->get()->row();
+        if (!$inv) {
+            echo json_encode(['status'=>false, 'message'=>'Invoice not found', 'csrf_test_name'=>$this->security->get_csrf_hash()]);
+            return;
+        }
+        $row = $this->db->select('IFNULL(SUM(Credit),0) AS paid')
+            ->from('acc_vaucher')
+            ->where('Vtype', 'CV')
+            ->where('referenceNo', $invoice_id)
+            ->get()->row();
+        $paid = (float)($row ? $row->paid : 0.0);
+        $total = (float)$inv->total_amount;
+        $paid = min($paid, $total);

@@ -158,11 +158,14 @@ $(document).ready(function() {
                             printRawHtmlInvoice(data.details);
 
                         } else {
-
-                            if (returnTo) {
-                                window.location.href = returnTo;
+                            if (window.parent && window.parent !== window) {
+                                window.parent.postMessage({ type: 'paymentSaved', return_to: returnTo || '' }, '*');
                             } else {
-                                location.reload();
+                                if (returnTo) {
+                                    window.location.href = returnTo;
+                                } else {
+                                    location.reload();
+                                }
                             }
                         }
 
@@ -193,10 +196,14 @@ function printRawHtmlInvoice(view) {
 
 function printJobCompleteInvoice() {
     var returnTo = $('#customer_receive_form').find('input[name="return_to"]').val();
-    if (returnTo) {
-        window.location.href = returnTo;
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'paymentSaved', return_to: returnTo || '' }, '*');
     } else {
-        location.reload();
+        if (returnTo) {
+            window.location.href = returnTo;
+        } else {
+            location.reload();
+        }
     }
 
 }

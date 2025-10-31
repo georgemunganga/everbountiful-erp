@@ -353,12 +353,341 @@ class Livestock extends MX_Controller
     public function productions()
     {
         $data['title']        = $this->phrase('productions', 'Productions');
-        $totalRows = $this->livestock_model->count_productions();
+
+        // Filters: q (search), from, to
+        $qRaw   = $this->input->get('q', true);
+        $fromIn = $this->input->get('from', true);
+        $toIn   = $this->input->get('to', true);
+
+        $from   = $this->normalize_date_input($fromIn, null);
+        $to     = $this->normalize_date_input($toIn, null);
+        $q      = ($qRaw !== null) ? trim((string) $qRaw) : '';
+
+        $filters = array(
+            'q'    => $q,
+            'from' => $from,
+            'to'   => $to,
+        );
+
+        $totalRows = $this->livestock_model->count_productions($filters);
         list($perPage, $offset, $links) = $this->configure_pagination('productions', $totalRows);
-        $data['productions']  = $this->livestock_model->get_productions($perPage, $offset);
+        $data['productions']  = $this->livestock_model->get_productions($filters, $perPage, $offset);
         $data['links']        = $links;
         $data['offset']       = $offset;
+
+        // Persist active filter values to view
+        $data['active_q']     = $q;
+        $data['active_from']  = $from;
+        $data['active_to']    = $to;
         $this->render('productions/index', $data);
+    }
+
+    /**
+     * Import daily productions from an Excel file and upsert by production_date.
+     *
+     * Accepts .xlsx/.xls/.csv. The importer tries to map columns by header name heuristics:
+     * - date: date, production_date, day
+     * - total: eggs, total, total_eggs, produced_total, total_output
+     * - mortality: mortality, dead, deaths, loss
+     * - damaged: damaged, broken, cracks, cracked
+     * - extras: extras, extra, consumed
+     * - notes: notes, note, remarks, description
+     *
+     * For each row: if a production exists for that date -> update; otherwise insert.
+     */
+    public function import_productions()
+    {
+        $data['title'] = 'Import Productions';
+
+        // Preload dropdown data
+        $data['sheds'] = $this->livestock_model->get_sheds();
+        $data['products'] = $this->db->select('product_id, product_name')
+            ->from('product_information')
+            ->order_by('product_name', 'asc')
+            ->get()->result_array();
+
+        // Attempt a sensible default for Eggs
+        $data['default_product_id'] = null;
+        foreach ($data['products'] as $p) {
+            if (preg_match('/egg/i', (string) $p['product_name'])) {
+                $data['default_product_id'] = $p['product_id'];
+                break;
+            }
+        }
+
+        if (strtoupper($this->input->server('REQUEST_METHOD')) !== 'POST') {
+            return $this->render('productions/import', $data);
+        }
+
+        // Validate minimal inputs
+        $shedId           = (int) $this->input->post('shed_id', true);
+        $outputProductId  = trim((string) $this->input->post('output_product_id', true));
+        $namePrefix       = trim((string) $this->input->post('name_prefix', true));
+        $eggsPerTray      = (int) $this->input->post('eggs_per_tray', true);
+        if ($eggsPerTray <= 0) { $eggsPerTray = 30; }
+        if ($namePrefix === '') { $namePrefix = 'Daily Production'; }
+
+        if ($shedId <= 0) {
+            $this->session->set_flashdata('exception', 'Please select a Shed.');
+            return redirect('productions/import');
+        }
+
+        if (empty($_FILES['xlsx']['name'])) {
+            $this->session->set_flashdata('exception', 'Please select an Excel file to upload.');
+            return redirect('productions/import');
+        }
+
+        // Fallback to default Eggs-like product if none selected
+        if ($outputProductId === '' && !empty($data['default_product_id'])) {
+            $outputProductId = $data['default_product_id'];
+        }
+
+        // Resolve stock location from shed (required)
+        $locationId = $this->inventoryledger->resolveShedLocationId($shedId);
+
+        // Try to ensure unique constraint on production_date (non-blocking if duplicates exist)
+        if (method_exists($this->livestock_model, 'ensure_production_date_unique')) {
+            $uniq = $this->livestock_model->ensure_production_date_unique();
+            if (!empty($uniq['message']) && $uniq['status'] !== 'ok') {
+                // Surface as a soft warning; continue with import
+                $this->session->set_flashdata('exception', $uniq['message']);
+            }
+        }
+
+        // Load PHPExcel
+        $this->load->library('excel');
+        if (!class_exists('PHPExcel_IOFactory')) {
+            @require_once(APPPATH . 'libraries/PHPExcel/IOFactory.php');
+        }
+        if (!class_exists('PHPExcel_Cell')) {
+            @require_once(APPPATH . 'libraries/PHPExcel/Cell.php');
+        }
+        if (!class_exists('PHPExcel_Shared_Date')) {
+            @require_once(APPPATH . 'libraries/PHPExcel/Shared/Date.php');
+        }
+        $tmpPath = $_FILES['xlsx']['tmp_name'];
+
+        try {
+            $obj = PHPExcel_IOFactory::load($tmpPath);
+        } catch (\Throwable $e) {
+            $this->session->set_flashdata('exception', 'Unable to read file: ' . $e->getMessage());
+            return redirect('productions/import');
+        }
+
+        $sheet = $obj->getSheet(0);
+        $highestRow = (int) $sheet->getHighestRow();
+        $highestCol = $sheet->getHighestColumn();
+        $highestColIndex = PHPExcel_Cell::columnIndexFromString($highestCol) - 1; // zero-based
+
+        // Find header row by looking for any recognized header token in a row (more robust),
+        // otherwise fall back to first row with at least two non-empty cells, else row 1.
+        $headerRow = 1;
+        $headerTokens = [
+            'date','production_date','day',
+            'eggs','total','total_eggs','produced_total','total_output',
+            'no_of_eggs','number_of_eggs','eggs_picked','eggs_collected','egg_count','noofeggs','no_eggs',
+            'tray','trays','no_of_trays','number_of_trays',
+            'mortality','dead','deaths','loss',
+            'damaged','broken','cracks','cracked',
+            'extras','extra','consumed',
+            'notes','note','remarks','description'
+        ];
+        $tokenRow = null; $firstNonEmpty2 = null;
+        for ($r = 1; $r <= min(50, $highestRow); $r++) {
+            $nonEmpty = 0; $hasToken = false;
+            for ($c = 0; $c <= $highestColIndex; $c++) {
+                $vraw = (string) $sheet->getCellByColumnAndRow($c, $r)->getValue();
+                $val = trim($vraw);
+                if ($val !== '') { $nonEmpty++; }
+                $norm = strtolower(preg_replace('/[^a-z0-9]+/i', '_', $val));
+                $norm = trim($norm, '_');
+                if ($norm !== '' && in_array($norm, $headerTokens, true)) { $hasToken = true; }
+            }
+            if ($firstNonEmpty2 === null && $nonEmpty >= 2) { $firstNonEmpty2 = $r; }
+            if ($hasToken) { $tokenRow = $r; break; }
+        }
+        if ($tokenRow !== null) { $headerRow = $tokenRow; }
+        elseif ($firstNonEmpty2 !== null) { $headerRow = $firstNonEmpty2; }
+
+        // Build header map
+        $headers = [];
+        for ($c = 0; $c <= $highestColIndex; $c++) {
+            $raw = trim((string) $sheet->getCellByColumnAndRow($c, $headerRow)->getValue());
+            $norm = strtolower(preg_replace('/[^a-z0-9]+/i', '_', $raw));
+            $norm = trim($norm, '_');
+            if ($norm === '') { $norm = 'col_' . $c; }
+            $headers[$c] = $norm;
+        }
+
+        // Helper to find first matching column by candidates
+        $findCol = function(array $candidates) use ($headers) {
+            foreach ($headers as $idx => $h) {
+                foreach ($candidates as $cand) {
+                    if ($h === $cand) return $idx;
+                    // fuzzy contains
+                    if ($cand !== '' && strpos($h, $cand) !== false) return $idx;
+                }
+            }
+            return null;
+        };
+
+        $dateCol  = $findCol(['date','production_date','day']);
+        $totalCol = $findCol(['eggs','total','total_eggs','produced_total','total_output','no_of_eggs','number_of_eggs','eggs_picked','eggs_collected','egg_count','noofeggs','no_eggs']);
+        $traysCol = $findCol(['tray','trays','no_of_trays','number_of_trays']);
+        $mortCol  = $findCol(['mortality','dead','deaths','loss']);
+        $damCol   = $findCol(['damaged','broken','cracks','cracked']);
+        $extraCol = $findCol(['extras','extra','consumed']);
+        $noteCol  = $findCol(['notes','note','remarks','description']);
+
+        if ($dateCol === null || ($totalCol === null && $traysCol === null)) {
+            $this->session->set_flashdata('exception', 'Could not detect required columns. Please ensure your header row includes Date and either Total Eggs or Trays.');
+            return redirect('productions/import');
+        }
+
+        // Pre-resolve a default output product if none selected
+        $productIdDefault = $outputProductId;
+        if ($productIdDefault === '') {
+            if (!empty($data['default_product_id'])) {
+                $productIdDefault = $data['default_product_id'];
+            } else {
+                $rowP = $this->db->select('product_id')->from('product_information')->order_by('product_name','asc')->limit(1)->get()->row_array();
+                $productIdDefault = $rowP ? $rowP['product_id'] : '';
+            }
+        }
+        if ($productIdDefault === '') {
+            $this->session->set_flashdata('exception', 'No products found. Please create an "Eggs" product (or select one in the form) and try again.');
+            return redirect('productions/import');
+        }
+
+        $inserted = 0; $updated = 0; $skipped = 0; $errors = 0;
+        $errorRows = [];
+
+        // Iterate rows after header
+        for ($r = $headerRow + 1; $r <= $highestRow; $r++) {
+            try {
+                $rawDate = $sheet->getCellByColumnAndRow($dateCol, $r);
+                $dateVal = $rawDate->getValue();
+                $dateStr = '';
+                if (PHPExcel_Shared_Date::isDateTime($rawDate)) {
+                    $ts = PHPExcel_Shared_Date::ExcelToPHP($dateVal);
+                    $dateStr = date('Y-m-d', $ts);
+                } else {
+                    $dateStr = $this->normalize_date_input((string) $dateVal, '');
+                }
+                if ($dateStr === '' || $dateStr === '1970-01-01') {
+                    // attempt fallback via formatted value
+                    $fv = trim((string) $rawDate->getFormattedValue());
+                    $dateStr = $this->normalize_date_input($fv, '');
+                }
+                if ($dateStr === '') { $skipped++; continue; }
+
+                // Domain mapping: mortality => bird deaths; extras => leftover eggs not forming a full tray
+                $mort  = ($mortCol !== null) ? (float) ($sheet->getCellByColumnAndRow($mortCol, $r)->getCalculatedValue()) : 0.0; // birds (not used for inventory)
+                $damEggs   = ($damCol  !== null) ? (float) ($sheet->getCellByColumnAndRow($damCol,  $r)->getCalculatedValue())  : 0.0; // broken eggs (eggs count)
+                $extraEggs = ($extraCol!== null) ? (float) ($sheet->getCellByColumnAndRow($extraCol,$r)->getCalculatedValue()) : 0.0; // leftover eggs (eggs count)
+
+                // Read trays and/or total-egg columns and derive values correctly
+                $traysVal = ($traysCol !== null) ? (float) ($sheet->getCellByColumnAndRow($traysCol, $r)->getCalculatedValue()) : null;
+                $totalEggsVal = ($totalCol !== null) ? (float) ($sheet->getCellByColumnAndRow($totalCol, $r)->getCalculatedValue()) : null;
+
+                $fullTrays = 0.0; // full trays count
+                if ($traysVal !== null && $totalEggsVal !== null) {
+                    // Both present: take trays as full trays; derive extras if not provided
+                    $fullTrays = (float) $traysVal;
+                    if ($extraCol === null) {
+                        $derivedExtrasEggs = (float) $totalEggsVal - ($fullTrays * $eggsPerTray);
+                        if (!is_finite($derivedExtrasEggs)) { $derivedExtrasEggs = 0.0; }
+                        $extraEggs = max(0.0, $derivedExtrasEggs);
+                    }
+                } elseif ($traysVal !== null) {
+                    // Only trays provided
+                    $fullTrays = (float) $traysVal;
+                } else {
+                    // Only total eggs provided: split into trays + extras
+                    $totalEggsVal = (float) ($totalEggsVal ?? 0);
+                    if ($totalEggsVal > 0) {
+                        $fullTrays = floor($totalEggsVal / $eggsPerTray);
+                        $extraEggs = $totalEggsVal - ($fullTrays * $eggsPerTray);
+                    } else {
+                        $fullTrays = 0.0; // explicit
+                        // keep $extraEggs as read (likely 0)
+                    }
+                }
+
+                // Convert egg counts to base unit fractions (assumes base unit aligns to trays)
+                $extraTrays = ($eggsPerTray > 0) ? ((float)$extraEggs / $eggsPerTray) : 0.0;
+                $damTrays   = ($eggsPerTray > 0) ? ((float)$damEggs   / $eggsPerTray) : 0.0;
+                $notes = ($noteCol !== null) ? trim((string) $sheet->getCellByColumnAndRow($noteCol, $r)->getValue()) : '';
+
+                // Even if all numeric values are zero, we still upsert a row for this date
+                // so the day exists in reports. Only skip if date itself is invalid (handled above).
+
+                // Resolve product and unit
+                $productId = $outputProductId !== '' ? $outputProductId : $productIdDefault;
+                
+                $unitId = $this->inventoryledger->getBaseUnitId($productId);
+                $shed   = $shedId > 0 ? $shedId : 0;
+
+                // Upsert production by date
+                $existing = $this->db->select('id')
+                    ->from('productions')
+                    ->where('production_date', $dateStr)
+                    ->order_by('updated_at', 'desc')
+                    ->order_by('id', 'desc')
+                    ->limit(1)->get()->row_array();
+
+                $payload = array(
+                    'name'                   => sprintf('%s - %s', $namePrefix, $dateStr),
+                    'shed_id'                => $shed,
+                    'unit_type_id'           => (int) $unitId,
+                    'description'            => $notes ? ('Excel Import: ' . $notes) : 'Excel Import',
+                    'produced_total_qty'     => $this->format_decimal($fullTrays),
+                    'produced_mortality_qty' => $this->format_decimal($mort),
+                    'produced_damaged_qty'   => $this->format_decimal($damTrays),
+                    'produced_extras_qty'    => $this->format_decimal($extraTrays),
+                    'output_product_id'      => $productId,
+                    'stock_location_id'      => (int) $locationId,
+                    'output_unit_id'         => (int) $unitId,
+                    'production_date'        => $dateStr,
+                );
+
+                if ($existing) {
+                    $ok = $this->livestock_model->update_production((int) $existing['id'], $payload);
+                    $prodId = (int) $existing['id'];
+                    $updated += $ok ? 1 : 0;
+                } else {
+                    $prodId = (int) $this->livestock_model->create_production($payload);
+                    if ($prodId) { $inserted++; } else { $errors++; $errorRows[] = $r; continue; }
+                }
+
+                // Sync outputs to inventory
+                // Important: do NOT deduct bird mortality from eggs inventory. Only damaged eggs reduce stock.
+                $outPayloads = array(array(
+                    'product_id'    => $productId,
+                    'unit_id'       => (int) $unitId,
+                    'quantity'      => $fullTrays,   // full trays
+                    'mortality_qty' => 0,        // birds, not eggs
+                    'damaged_qty'   => $damTrays,     // broken eggs in tray fraction
+                    'extras_qty'    => $extraTrays,   // leftover eggs in tray fraction
+                    'location_id'   => (int) $locationId,
+                ));
+
+                $this->sync_production_inventory($prodId, $outPayloads, $dateStr);
+
+            } catch (\Throwable $e) {
+                $errors++; $errorRows[] = $r;
+                log_message('error', 'Import production failed at row '.$r.': '.$e->getMessage());
+            }
+        }
+
+        $summary = sprintf('Import complete. Inserted: %d, Updated: %d, Skipped: %d, Errors: %d', $inserted, $updated, $skipped, $errors);
+        if (!empty($errorRows)) {
+            $summary .= '. Error rows: ' . implode(', ', array_slice($errorRows, 0, 10));
+            if (count($errorRows) > 10) { $summary .= ' ...'; }
+        }
+
+        $this->session->set_flashdata($errors ? 'exception' : 'message', $summary);
+        return redirect('productions');
     }
 
     public function production_form($id = null)
@@ -586,12 +915,35 @@ class Livestock extends MX_Controller
             return $fallback;
         }
 
-        $timestamp = strtotime($input);
-        if ($timestamp === false) {
-            return $fallback;
+        // Fast path for ISO dates
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $input)) {
+            return $input;
         }
 
-        return date('Y-m-d', $timestamp);
+        // Support common human formats explicitly, including dd.mm.YYYY
+        $formats = array(
+            '!d.m.Y', '!d/m/Y', '!d-m-Y',
+            '!m/d/Y', '!Y/m/d', '!Y.m.d', '!Y-m-d',
+            '!d.m.y', '!d/m/y', '!d-m-y', '!m/d/y',
+        );
+
+        foreach ($formats as $fmt) {
+            $dt = DateTime::createFromFormat($fmt, $input);
+            if ($dt instanceof DateTime) {
+                $errors = DateTime::getLastErrors();
+                if ((int)($errors['warning_count'] ?? 0) === 0 && (int)($errors['error_count'] ?? 0) === 0) {
+                    return $dt->format('Y-m-d');
+                }
+            }
+        }
+
+        // As a last resort, let strtotime try
+        $timestamp = strtotime($input);
+        if ($timestamp !== false) {
+            return date('Y-m-d', $timestamp);
+        }
+
+        return $fallback;
     }
 
     private function sync_production_inventory($productionId, array $outputs, $productionDate)

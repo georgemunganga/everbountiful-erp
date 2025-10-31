@@ -61,7 +61,7 @@
                     <a href="<?php echo base_url('customer_list') ?>" class="btn btn-primary m-b-5 m-r-2"><i class="ti-align-justify"> </i>  <?php echo display('manage_customer') ?> </a>
                  <?php }?>
                  <?php if($this->permission1->method('credit_customer','read')->access()){ ?>
-                    <a href="<?php echo base_url('credit_customer') ?>" class="btn btn-success m-b-5 m-r-2"><i class="ti-align-justify"> </i>  <?php echo display('credit_customer') ?> </a>
+                     <a href="<?php echo base_url('credit_customer') ?>" class="btn btn-success m-b-5 m-r-2"><i class="ti-align-justify"> </i>  <?php echo html_escape('Owing Customers'); ?> </a>
                     <?php }?>
                    <?php if($this->permission1->method('paid_customer','read')->access()){ ?>
                     <a href="<?php echo base_url('paid_customer') ?>" class="btn btn-warning m-b-5 m-r-2"><i class="ti-align-justify"> </i>  <?php echo display('paid_customer') ?> </a>

@@ -318,3 +318,157 @@
         </div>
     </div>
 </div>
+
+<!-- Payments + Inline Payment for Invoice -->
+<div class="row" style="margin-top:10px;">
+  <div class="col-sm-12">
+    <h4>Payments Applied</h4>
+    <?php if (!empty($payments)) { ?>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Voucher No</th>
+            <th>Method</th>
+            <th class="text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php $ptotal = 0.0; foreach ($payments as $p) { 
+          $pdate = !empty($p->VDate) ? date('d-M-Y', strtotime($p->VDate)) : '';
+          $vno = isset($p->VNo) ? $p->VNo : '';
+          $mth = isset($p->MethodName) ? $p->MethodName : '';
+          $amt = isset($p->Credit) ? (float)$p->Credit : 0.0;
+          $ptotal += $amt;
+        ?>
+          <tr>
+            <td><?php echo html_escape($pdate); ?></td>
+            <td><?php echo html_escape($vno); ?></td>
+            <td><?php echo html_escape($mth); ?></td>
+            <td class="text-right"><?php echo ($position == 0) ? $currency.' '.number_format($amt,2) : number_format($amt,2).' '.$currency; ?></td>
+          </tr>
+        <?php } ?>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="3" class="text-right">Total Paid</th>
+            <th class="text-right"><?php echo ($position == 0) ? $currency.' '.number_format($ptotal,2) : number_format($ptotal,2).' '.$currency; ?></th>
+          </tr>
+        </tfoot>
+      </table>
+    <?php } else { ?>
+      <div class="alert alert-info" style="margin-bottom:0;">No payments recorded for this invoice yet.</div>
+    <?php } ?>
+    <?php if (isset($raw_due) && (float)$raw_due > 0) { ?>
+      <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalRecordPaymentInvoice" data-invoice="<?php echo (int)$invoice_id; ?>" data-due="<?php echo (float)$raw_due; ?>">Record Payment</button>
+    <?php } ?>
+  </div>
+</div>
+
+<!-- Inline Payment Modal (Invoice page) -->
+<div class="modal fade" id="modalRecordPaymentInvoice" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Record Payment</h4>
+      </div>
+      <div class="modal-body">
+        <form id="inlinePaymentFormInvoice">
+          <input type="hidden" id="CSRF_TOKEN" value="<?php echo $this->security->get_csrf_hash(); ?>">
+          <input type="hidden" name="voucher_no" id="inv_voucher_no" value="<?php echo (int)$invoice_id; ?>">
+          <input type="hidden" name="customer_id" id="inv_customer_id" value="<?php echo isset($customer_id) ? (int)$customer_id : 0; ?>">
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" class="form-control" name="dtpDate" id="inv_date" value="<?php echo date('Y-m-d'); ?>" required>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label>Amount</label>
+                <input type="number" step="0.01" min="0" class="form-control" name="txtAmount" id="inv_amount" value="<?php echo isset($raw_due) ? number_format((float)$raw_due, 2, '.', '') : '0.00'; ?>" required>
+                <small class="text-muted">Max due: <span id="inv_due_hint"><?php echo isset($raw_due) ? number_format((float)$raw_due, 2, '.', '') : '0.00'; ?></span></small>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label>Payment Method</label>
+                <select name="multipaytype[]" id="inv_method" class="form-control" required>
+                  <option value="">Select method</option>
+                  <?php if (!empty($pay_methods)) { foreach ($pay_methods as $mid => $mname) { ?>
+                    <option value="<?php echo html_escape($mid); ?>"><?php echo html_escape($mname); ?></option>
+                  <?php } } ?>
+                </select>
+                <input type="hidden" name="pamount_by_method[]" id="inv_method_amount" value="<?php echo isset($raw_due) ? number_format((float)$raw_due, 2, '.', '') : '0.00'; ?>">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Remarks</label>
+            <textarea class="form-control" name="txtRemarks" id="inv_remarks" rows="2" placeholder="Optional note..."></textarea>
+          </div>
+          <div class="text-right">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success">Save Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var baseUrl = '<?php echo base_url(); ?>';
+  $('#modalRecordPaymentInvoice').on('show.bs.modal', function(e){
+    var $t = $(e.relatedTarget);
+    var inv = $t && $t.data('invoice') ? String($t.data('invoice')) : '<?php echo (int)$invoice_id; ?>';
+    var due = $t && $t.data('due') ? parseFloat($t.data('due')) : parseFloat($('#inv_due_hint').text()||0);
+    $('#inv_voucher_no').val(inv);
+    $('#inv_amount').val(due.toFixed(2));
+    $('#inv_method_amount').val(due.toFixed(2));
+    $('#inv_due_hint').text(due.toFixed(2));
+  });
+  $('#inlinePaymentFormInvoice').on('submit', function(ev){
+    ev.preventDefault();
+    var amount = parseFloat($('#inv_amount').val()||0);
+    var due = parseFloat($('#inv_due_hint').text()||0);
+    if (amount <= 0) { alert('Enter payment amount'); return; }
+    if (amount > due + 0.0001) { alert('Amount cannot exceed due'); return; }
+    $('#inv_method_amount').val(amount.toFixed(2));
+    var data = {
+      voucher_no: $('#inv_voucher_no').val(),
+      dtpDate: $('#inv_date').val(),
+      customer_id: $('#inv_customer_id').val(),
+      txtRemarks: $('#inv_remarks').val(),
+      txtAmount: amount.toFixed(2),
+      'multipaytype[]': $('#inv_method').val(),
+      'pamount_by_method[]': amount.toFixed(2),
+      csrf_test_name: $('#CSRF_TOKEN').val()
+    };
+    $.ajax({
+      url: baseUrl + 'account/accounts/create_customer_receive',
+      type: 'POST',
+      dataType: 'json',
+      data: data,
+      success: function(res){
+        if (res && res.status === true) {
+          if (window.toastr) { toastr.success(res.message || 'Payment recorded'); }
+          $('#modalRecordPaymentInvoice').modal('hide');
+          setTimeout(function(){ window.location.reload(); }, 200);
+        } else {
+          var msg = (res && (res.exception || res.message)) ? res.exception || res.message : 'Failed to save payment';
+          alert(msg);
+        }
+      },
+      error: function(xhr){
+        var msg = 'Request failed';
+        try { if (xhr && xhr.responseText) { msg = xhr.responseText; } } catch(e) {}
+        alert(msg);
+      }
+    });
+  });
+})();
+</script>

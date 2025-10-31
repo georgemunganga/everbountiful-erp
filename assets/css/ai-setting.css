@@ -44,7 +44,7 @@
 }
 .ai_setting_container .form_container .input_label .input_section:focus {
   outline: none;
-  border: 1px solid #37a000;
+  border: 1px solid #126e21;
 }
 .ai_setting_container .submit_button_section {
   margin-top: 20px;
@@ -193,7 +193,7 @@
 }
 .modal_ai .modal_content_ai .input_section:focus {
   outline: none;
-  border: 1px solid #37a000;
+  border: 1px solid #126e21;
 }
 .modal_ai .modal_content_ai .modal_actions {
   text-align: right;
@@ -338,7 +338,7 @@
 }
 .data_range .input_section_content .input_section:focus {
   outline: none;
-  border: 1px solid #37a000;
+  border: 1px solid #126e21;
 }
 .data_range .input_section_content .calender_icon {
   position: absolute;

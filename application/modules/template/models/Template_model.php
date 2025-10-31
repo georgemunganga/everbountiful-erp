@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed');
 #------------------------------------    
 # Author: Bdtask Ltd
-# Author link: https://www.bdtask.com/
+# Author link: https://www.greenwebb.tech/
 # Dynamic style php file
 # Developed by :Isahaq
 #------------------------------------    
@@ -43,6 +43,17 @@ class Template_model extends CI_Model
             return $query->result_array();
         }
         return false;
+    }
+
+    // Backward compatible wrappers for renamed methods
+    public function bd_task_company_info()
+    {
+        return $this->bdtask_company_info();
+    }
+
+    public function bd_task_bank_list()
+    {
+        return $this->bdtask_bank_list();
     }
 
 

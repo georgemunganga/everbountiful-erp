@@ -2,13 +2,18 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 #------------------------------------    
 # Author:Greenwebb Ltd
-# Author link: https://www.bdtask.com/
+# Author link: https://www.greenwebb.tech/
 # Dynamic style php file
 # Developed by :Isahaq
 #------------------------------------    
 
 class Customer_model extends CI_Model
 {
+  public function __construct()
+  {
+    parent::__construct();
+    $this->ensure_group_id_column();
+  }
 
   private $customer_tables_checked = array();
 
@@ -176,6 +181,22 @@ class Customer_model extends CI_Model
     return $result;
   }
 
+  private function ensure_group_id_column()
+  {
+    // Add group_id column to customer_information if missing
+    if (!$this->db->table_exists('customer_information')) {
+      return;
+    }
+    if (!$this->db->field_exists('group_id', 'customer_information')) {
+      $this->load->dbforge();
+      // Add nullable INT column for customer group assignment
+      $fields = array(
+        'group_id' => array('type' => 'INT', 'constraint' => 11, 'null' => true),
+      );
+      $this->dbforge->add_column('customer_information', $fields);
+    }
+  }
+
 
   public function create($data = array())
   {
@@ -247,18 +268,37 @@ class Customer_model extends CI_Model
   // Invoices for a customer within date range
   public function get_customer_invoices($customer_id, $from_date = null, $to_date = null)
   {
-    $this->db->select('i.id, i.invoice_id, i.invoice as invoice_no, i.date, i.total_amount, i.paid_amount, i.due_amount, i.status AS invoice_status');
+    // Sales invoices
+    $this->db->select('i.id, i.invoice_id, i.invoice as invoice_no, i.date, i.total_amount, i.paid_amount, i.due_amount, i.is_credit, i.status AS invoice_status');
     $this->db->from('invoice i');
     $this->db->where('i.customer_id', $customer_id);
-    if (!empty($from_date)) {
-      $this->db->where('DATE(i.date) >=', $from_date);
-    }
-    if (!empty($to_date)) {
-      $this->db->where('DATE(i.date) <=', $to_date);
-    }
+    if (!empty($from_date)) { $this->db->where('DATE(i.date) >=', $from_date); }
+    if (!empty($to_date))   { $this->db->where('DATE(i.date) <=', $to_date); }
     $this->db->order_by('i.date', 'desc');
     $this->db->order_by('i.id', 'desc');
-    return $this->db->get()->result_array();
+    $sales = $this->db->get()->result_array();
+    foreach ($sales as &$row) { $row['source'] = 'sales'; }
+
+    // Service invoices (normalize columns to match list)
+    $this->db->select('s.id as id, s.voucher_no as invoice_id, s.voucher_no as invoice_no, s.date, s.total_amount, s.paid_amount, s.due_amount, s.is_credit');
+    $this->db->from('service_invoice s');
+    $this->db->where('s.customer_id', $customer_id);
+    if (!empty($from_date)) { $this->db->where('DATE(s.date) >=', $from_date); }
+    if (!empty($to_date))   { $this->db->where('DATE(s.date) <=', $to_date); }
+    $this->db->order_by('s.date', 'desc');
+    $this->db->order_by('s.id', 'desc');
+    $service = $this->db->get()->result_array();
+    foreach ($service as &$row) { $row['source'] = 'service'; $row['invoice_status'] = null; }
+
+    // Merge and sort by date desc, then id desc
+    $all = array_merge($sales, $service);
+    usort($all, function($a, $b){
+      $ad = strtotime(isset($a['date']) ? $a['date'] : '1970-01-01');
+      $bd = strtotime(isset($b['date']) ? $b['date'] : '1970-01-01');
+      if ($ad === $bd) { return (int)($b['id'] ?? 0) <=> (int)($a['id'] ?? 0); }
+      return $bd <=> $ad; // desc
+    });
+    return $all;
   }
 
   public function get_customer_contacts($customer_id)
@@ -293,19 +333,71 @@ class Customer_model extends CI_Model
   // Payments for a customer within date range (from acc_transaction via COA)
   public function get_customer_payments($customer_id, $from_date = null, $to_date = null)
   {
+    $results = array();
     $head = $this->db->select('HeadCode')->from('acc_coa')->where('customer_id', $customer_id)->get()->row();
-    if (!$head) return [];
-    $this->db->select('VDate as date, VNo as voucher_no, Debit, Credit, Narration');
-    $this->db->from('acc_transaction');
-    $this->db->where('COAID', $head->HeadCode);
-    $this->db->where('IsAppove', 1);
-    if (!empty($from_date)) {
-      $this->db->where('DATE(VDate) >=', $from_date);
+    if ($head) {
+      // Approved ledger entries
+      $this->db->select('VDate as date, VNo as voucher_no, Debit, Credit, Narration');
+      $this->db->from('acc_transaction');
+      $this->db->where('COAID', $head->HeadCode);
+      $this->db->where('IsAppove', 1);
+      if (!empty($from_date)) {
+        $this->db->where('DATE(VDate) >=', $from_date);
+      }
+      if (!empty($to_date)) {
+        $this->db->where('DATE(VDate) <=', $to_date);
+      }
+      $ledger = $this->db->get()->result_array();
+      $results = array_merge($results, $ledger);
     }
-    if (!empty($to_date)) {
-      $this->db->where('DATE(VDate) <=', $to_date);
+
+    // Include voucher entries tied to this customer sub-code (covers pending/unposted)
+    $sub = $this->db->select('id')
+      ->from('acc_subcode')
+      ->where('referenceNo', $customer_id)
+      ->where('subTypeId', 3)
+      ->get()->row();
+    if ($sub) {
+      $this->db->select('VDate as date, VNo as voucher_no, Debit, Credit, Narration');
+      $this->db->from('acc_vaucher');
+      $this->db->where('subType', 3);
+      $this->db->where('subCode', $sub->id);
+      if (!empty($from_date)) {
+        $this->db->where('DATE(VDate) >=', $from_date);
+      }
+      if (!empty($to_date)) {
+        $this->db->where('DATE(VDate) <=', $to_date);
+      }
+      $vchs = $this->db->get()->result_array();
+      $results = array_merge($results, $vchs);
     }
-    $this->db->order_by('VDate', 'asc');
+
+    // Sort by date ASC, then voucher
+    usort($results, function($a, $b){
+      $ad = strtotime(isset($a['date']) ? $a['date'] : '1970-01-01');
+      $bd = strtotime(isset($b['date']) ? $b['date'] : '1970-01-01');
+      if ($ad === $bd) { return strcmp(isset($a['voucher_no']) ? $a['voucher_no'] : '', isset($b['voucher_no']) ? $b['voucher_no'] : ''); }
+      return $ad <=> $bd;
+    });
+    return $results;
+  }
+
+  // Customer cash receipts (voucher rows) for CRUD on Payments tab
+  public function get_customer_receipts($customer_id, $from_date = null, $to_date = null)
+  {
+    // Resolve subcode id for this customer (subTypeId 3)
+    $sub = $this->db->select('id')->from('acc_subcode')
+      ->where('referenceNo', $customer_id)->where('subTypeId', 3)->get()->row();
+    if (!$sub) { return array(); }
+    $this->db->select('v.VNo, v.VDate as date, v.referenceNo as invoice_id, v.Credit as amount, v.RevCodde as method_coa, v.ledgerComment as group_note, v.CreateDate as create_dt, pm.HeadName')
+      ->from('acc_vaucher v')
+      ->join('acc_coa pm', 'pm.HeadCode = v.RevCodde', 'left')
+      ->where('v.subType', 3)
+      ->where('v.subCode', $sub->id)
+      ->where('v.Vtype', 'CV');
+    if (!empty($from_date)) { $this->db->where('DATE(v.VDate) >=', $from_date); }
+    if (!empty($to_date))   { $this->db->where('DATE(v.VDate) <=', $to_date); }
+    $this->db->order_by('v.VDate','desc')->order_by('v.VNo','desc');
     return $this->db->get()->result_array();
   }
 
@@ -342,45 +434,102 @@ class Customer_model extends CI_Model
       ->row();
     $invoiced = (float)$inv_q->total;
 
-    // Amount paid entries (ledger transactions if available)
+    // Entries: invoices first
     $entries = [];
     $invoices = $this->get_customer_invoices($customer_id, $from_date, $to_date);
     foreach ($invoices as $inv) {
+      $tag = '';
+      if (isset($inv['is_credit'])) {
+        $tag = ((int)$inv['is_credit'] === 1) ? ' (Pay Later)' : ' (Pay Now)';
+      }
       $entries[] = [
         'date'       => $inv['date'],
-        'description'=> sprintf('Invoice %s', $inv['invoice_no']),
+        'description'=> sprintf('Invoice %s%s', $inv['invoice_no'], $tag),
         'debit'      => (float)$inv['total_amount'],
         'credit'     => 0.0,
         'type_sort'  => 1,
         'sort_ts'    => strtotime($inv['date']),
       ];
-      $paid_on_invoice = isset($inv['paid_amount']) ? (float)$inv['paid_amount'] : 0.0;
-      if ($paid_on_invoice > 0.0001) {
-        $entries[] = [
-          'date'       => $inv['date'],
-          'description'=> sprintf('Payment (Invoice %s)', $inv['invoice_no']),
+      // Do not add a separate payment line here to avoid double counting.
+      // Payments will be listed from ledger/voucher entries below.
+    }
+
+    // Payments: derive from vouchers; group FIFO batches as one credit + breakdown lines
+    $entries_pay = [];
+    $sub = $this->db->select('id')->from('acc_subcode')->where('referenceNo', $customer_id)->where('subTypeId', 3)->get()->row();
+    if ($sub) {
+      $vouchers = $this->db->select('VNo, VDate as date, referenceNo as invoice_id, Credit, ledgerComment')
+        ->from('acc_vaucher')
+        ->where('Vtype','CV')
+        ->where('subType', 3)
+        ->where('subCode', $sub->id)
+        ->where('DATE(VDate) >=', date('Y-m-d', strtotime($from_date)))
+        ->where('DATE(VDate) <=', date('Y-m-d', strtotime($to_date)))
+        ->order_by('VDate','asc')->order_by('id','asc')
+        ->get()->result_array();
+
+      // Map invoice ids to numbers for friendlier breakdowns
+      $invIds = [];
+      foreach ($vouchers as $v) { if (!empty($v['invoice_id'])) { $invIds[(int)$v['invoice_id']] = true; } }
+      $invMap = [];
+      if (!empty($invIds)) {
+        $rows = $this->db->select('invoice_id, invoice')->from('invoice')->where_in('invoice_id', array_keys($invIds))->get()->result_array();
+        foreach ($rows as $r) { $invMap[(int)$r['invoice_id']] = $r['invoice']; }
+      }
+
+      // Group by ledgerComment when it starts with 'Group Payment'
+      $groups = [];
+      $singles = [];
+      foreach ($vouchers as $v) {
+        $lc = trim((string)($v['ledgerComment'] ?? ''));
+        if (stripos($lc, 'Group Payment') === 0) {
+          if (!isset($groups[$lc])) { $groups[$lc] = ['date' => $v['date'], 'total' => 0.0, 'items' => []]; }
+          // keep earliest date
+          if (strtotime($v['date']) < strtotime($groups[$lc]['date'])) { $groups[$lc]['date'] = $v['date']; }
+          $groups[$lc]['total'] += (float)$v['Credit'];
+          $groups[$lc]['items'][] = $v;
+        } else {
+          $singles[] = $v;
+        }
+      }
+
+      foreach ($groups as $label => $g) {
+        $entries_pay[] = [
+          'date'       => $g['date'],
+          'description'=> sprintf('Payment (Group) %s', $label),
           'debit'      => 0.0,
-          'credit'     => min($paid_on_invoice, (float)$inv['total_amount']),
+          'credit'     => (float)$g['total'],
           'type_sort'  => 2,
-          'sort_ts'    => strtotime($inv['date']) + 0.5,
+          'sort_ts'    => strtotime($g['date']),
+        ];
+        // Breakdown lines (no amounts, just explanation)
+        foreach ($g['items'] as $it) {
+          $invNo = isset($invMap[(int)$it['invoice_id']]) ? $invMap[(int)$it['invoice_id']] : ('#'.(int)$it['invoice_id']);
+          $entries_pay[] = [
+            'date'       => $it['date'],
+            'description'=> sprintf('  -> Applied to Invoice %s: %0.2f', $invNo, (float)$it['Credit']),
+            'debit'      => 0.0,
+            'credit'     => 0.0,
+            'type_sort'  => 3,
+            'sort_ts'    => strtotime($it['date']) + 0.001, // ensure after group header same day
+          ];
+        }
+      }
+      // Non-group vouchers as simple payments
+      foreach ($singles as $v) {
+        $entries_pay[] = [
+          'date'       => $v['date'],
+          'description'=> sprintf('Payment %s', $v['VNo'] ?? ''),
+          'debit'      => 0.0,
+          'credit'     => (float)$v['Credit'],
+          'type_sort'  => 2,
+          'sort_ts'    => strtotime($v['date']),
         ];
       }
     }
 
-    $payments = array();
-    if ($headCode) {
-      $payments = $this->get_customer_payments($customer_id, $from_date, $to_date);
-    }
-    foreach ($payments as $p) {
-      $entries[] = [
-        'date'       => $p['date'],
-        'description'=> trim('Payment ' . $p['voucher_no'] . ' ' . ($p['Narration'] ?? '')),
-        'debit'      => 0.0,
-        'credit'     => (float)$p['Credit'],
-        'type_sort'  => 2,
-        'sort_ts'    => strtotime($p['date']),
-      ];
-    }
+    // Merge payments into entries
+    foreach ($entries_pay as $e) { $entries[] = $e; }
 
 
     usort($entries, function ($a, $b) {
@@ -739,8 +888,9 @@ class Customer_model extends CI_Model
     $totalRecordwithFilter = $this->db->get()->num_rows();
 
     ## Fetch records
-    $this->db->select("a.*,b.HeadCode,((select ifnull(sum(Debit),0) from acc_transaction  where subCode= `s`.`id` AND subType = 3)-(select ifnull(sum(Credit),0) from acc_transaction where subCode= `s`.`id` AND subType = 3)) as balance");
+    $this->db->select("a.*,b.HeadCode,cg.group_name,((select ifnull(sum(Debit),0) from acc_transaction  where subCode= `s`.`id` AND subType = 3)-(select ifnull(sum(Credit),0) from acc_transaction where subCode= `s`.`id` AND subType = 3)) as balance");
     $this->db->from('customer_information a');
+    $this->db->join('customer_groups cg', 'cg.id = a.group_id', 'left');
 
     $this->db->join('acc_coa b', 'a.customer_id = b.customer_id', 'left');
     $this->db->join('acc_subcode s', 'a.customer_id = s.referenceNo', 'left');
@@ -790,6 +940,7 @@ class Customer_model extends CI_Model
         'fax'              => $record->fax,
         'city'             => $record->email_address,
         'state'            => $record->contact,
+        'customer_group'   => isset($record->group_name) ? $record->group_name : '',
         'zip'              => $record->zip,
         'country'          => $record->country,
         'balance'          => (!empty($record->balance) ? $record->balance : 0),
@@ -802,9 +953,9 @@ class Customer_model extends CI_Model
     ## Response
     $response = array(
       "draw" => intval($draw),
-      "iTotalRecords" => $totalRecordwithFilter,
-      "iTotalDisplayRecords" => $totalRecords,
-      "aaData" => $data
+      "iTotalRecords" => $totalRecords, "recordsTotal" => $totalRecords,
+      "iTotalDisplayRecords" => $totalRecordwithFilter, "recordsFiltered" => $totalRecordwithFilter,
+      "aaData" => $data, "data" => $data
     );
 
     return $response;
@@ -934,9 +1085,9 @@ class Customer_model extends CI_Model
     ## Response
     $response = array(
       "draw" => intval($draw),
-      "iTotalRecords" => $totalRecordwithFilter,
-      "iTotalDisplayRecords" => $totalRecords,
-      "aaData" => $data
+      "iTotalRecords" => $totalRecords, "recordsTotal" => $totalRecords,
+      "iTotalDisplayRecords" => $totalRecordwithFilter, "recordsFiltered" => $totalRecordwithFilter,
+      "aaData" => $data, "data" => $data
     );
 
     return $response;
@@ -1066,9 +1217,9 @@ class Customer_model extends CI_Model
     ## Response
     $response = array(
       "draw" => intval($draw),
-      "iTotalRecords" => $totalRecordwithFilter,
-      "iTotalDisplayRecords" => $totalRecords,
-      "aaData" => $data
+      "iTotalRecords" => $totalRecords, "recordsTotal" => $totalRecords,
+      "iTotalDisplayRecords" => $totalRecordwithFilter, "recordsFiltered" => $totalRecordwithFilter,
+      "aaData" => $data, "data" => $data
     );
 
     return $response;

@@ -1,4 +1,4 @@
-<div class="row">
+﻿<div class="row">
   <div class="col-sm-12">
     <div class="panel panel-bd lobidrag">
       <div class="panel-heading">
@@ -34,10 +34,10 @@
             }
             .vertical-nav-tabs li a:hover {
               background: #e9ecef;
-              color: #37a000;
+              color: #126e21;
             }
             .vertical-nav-tabs li.active a {
-              background: #37a000;
+              background: #126e21;
               color: #fff;
               border-left: 4px solid #2d8000;
             }
@@ -72,7 +72,7 @@
               white-space: nowrap;
             }
             .vertical-nav-tabs li.active a {
-              background: #37a000;
+              background: #126e21;
               color: #fff;
             }
             .vertical-tab-content {
@@ -84,7 +84,7 @@
         <?php
         $queryParams = $this->input->get() ?: array();
         $return_query = $queryParams;
-        $return_query['tab'] = 'payments';
+        $return_query['group'] = 'payments';
         $return_payments_url = current_url() . '?' . http_build_query($return_query);
         $credit_notes = $credit_notes ?? array();
         $estimates = $estimates ?? array();
@@ -109,24 +109,25 @@
           return $currency_position == 0 ? $currency_symbol . ' ' . $formatted : $formatted . ' ' . $currency_symbol;
         };
         ?>
+        <?php $active_group = $this->input->get('group', true); $active_group = $active_group ? strtolower($active_group) : 'profile'; ?>
         <div class="vertical-tabs-container">
           <ul class="vertical-nav-tabs" role="tablist">
-            <li class="active"><a href="#profile" data-toggle="tab">Profile</a></li>
-            <li><a href="#contacts" data-toggle="tab">Contacts</a></li>
-            <li><a href="#notes" data-toggle="tab">Notes</a></li>
-            <li><a href="#statement" data-toggle="tab">Statement</a></li>
-            <li><a href="#invoices" data-toggle="tab">Invoices</a></li>
-            <li><a href="#payments" data-toggle="tab">Payments</a></li>
-            <li><a href="#credit_notes" data-toggle="tab">Credit Notes</a></li>
-            <li><a href="#estimates" data-toggle="tab">Estimates</a></li>
-            <li><a href="#expenses" data-toggle="tab">Expenses</a></li>
-            <li><a href="#reminders" data-toggle="tab">Reminders</a></li>
-            <li><a href="#map" data-toggle="tab">Map</a></li>
+            <li class="<?php echo ($active_group==='profile'?'active':''); ?>"><a href="<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=profile'); ?>">Profile</a></li>
+            <li class="<?php echo ($active_group==='contacts'?'active':''); ?>"><a href="<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=contacts'); ?>">Contacts</a></li>
+            <li class="<?php echo ($active_group==='notes'?'active':''); ?>"><a href="<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=notes'); ?>">Notes</a></li>
+            <li class="<?php echo ($active_group==='statement'?'active':''); ?>"><a href="<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=statement'); ?>">Statement</a></li>
+            <li class="<?php echo ($active_group==='invoices'?'active':''); ?>"><a href="<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=invoices'); ?>">Invoices</a></li>
+            <li class="<?php echo ($active_group==='payments'?'active':''); ?>"><a href="<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=payments'); ?>">Payments</a></li>
+            <li class="<?php echo ($active_group==='credit_notes'?'active':''); ?>"><a href="<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=credit_notes'); ?>">Credit Notes</a></li>
+            <li class="<?php echo ($active_group==='estimates'?'active':''); ?>"><a href="<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=estimates'); ?>">Estimates</a></li>
+            <li class="<?php echo ($active_group==='expenses'?'active':''); ?>"><a href="<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=expenses'); ?>">Expenses</a></li>
+            <li class="<?php echo ($active_group==='reminders'?'active':''); ?>"><a href="<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=reminders'); ?>">Reminders</a></li>
+            <li class="<?php echo ($active_group==='map'?'active':''); ?>"><a href="<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=map'); ?>">Map</a></li>
           </ul>
 
           <div class="vertical-tab-content">
-            <div class="tab-content">
-              <div class="tab-pane active" id="profile">
+              <div class="tab-content">
+              <div class="tab-pane<?php echo ($active_group==='profile'?' active in':''); ?>" id="profile" <?php echo ($active_group==='profile'?'':'style="display:none"'); ?> >
                 <div class="row">
                   <div class="col-sm-6">
                     <table class="table table-striped">
@@ -155,7 +156,7 @@
                 </div>
               </div>
 
-              <div class="tab-pane" id="contacts">
+              <div class="tab-pane<?php echo ($active_group==='contacts'?' active in':''); ?>" id="contacts" <?php echo ($active_group==='contacts'?'':'style="display:none"'); ?> >
                 <div class="row">
                   <div class="col-sm-4">
                     <?php echo form_open('customer/add_contact/'.$customer->customer_id); ?>
@@ -202,7 +203,7 @@
                 </div>
               </div>
 
-              <div class="tab-pane" id="notes">
+              <div class="tab-pane<?php echo ($active_group==='notes'?' active in':''); ?>" id="notes" <?php echo ($active_group==='notes'?'':'style="display:none"'); ?> >
                 <form method="post" action="<?php echo base_url('customer/add_note/'.$customer->customer_id); ?>">
                   <div class="form-group">
                     <label>Add Note</label>
@@ -225,25 +226,75 @@
                 </ul>
               </div>
 
-              <div class="tab-pane" id="statement">
-                <div class="row">
-                  <div class="col-sm-4">
-                <form method="get">
-                  <input type="hidden" name="tab" value="statement">
+              <div class="tab-pane<?php echo ($active_group==='statement'?' active in':''); ?>" id="statement" <?php echo ($active_group==='statement'?'':'style="display:none"'); ?> >
+                <style>
+                  .stmt-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+                  .stmt-filters { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+                  .stmt-doc { background:#fff; border:1px solid #e5e7eb; border-radius:4px; padding:12px; box-shadow:0 1px 2px rgba(0,0,0,0.04); }
+                </style>
+                <div class="stmt-toolbar">
+                  <div class="stmt-filters">
+                    <div class="dropdown">
+                      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <?php echo html_escape(ucwords(str_replace('_',' ', $range ?? 'this_month'))); ?> <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" role="menu" style="margin-top:0;margin-bottom:0;">
+                        <?php
+                          $base = base_url('customer/customer_detail/'.$customer->customer_id.'?group=statement');
+                          $opts = array(
+                            'today' => 'Today',
+                            'this_week' => 'This Week',
+                            'this_month' => 'This Month',
+                            'last_month' => 'Last Month',
+                            'this_year' => 'This Year',
+                            'last_year' => 'Last Year',
+                            'all_time' => 'All Time',
+                            'period' => 'Period',
+                          );
+                          foreach ($opts as $key => $label):
+                            $active = ($range === $key) ? 'selected active' : '';
+                            $href = $base . ($key === 'period' ? '' : ('&range='.$key));
+                        ?>
+                        <li class="<?php echo $active; ?>">
+                          <a role="option" tabindex="0" class="<?php echo $active; ?>" aria-selected="<?php echo $active ? 'true':'false'; ?>" href="<?php echo $href; ?>">
+                            <span class="text"> <?php echo html_escape($label); ?> </span>
+                          </a>
+                        </li>
+                        <?php endforeach; ?>
+                      </ul>
+                    </div>
+                      <form class="form-inline" method="get" action="<?php echo base_url('customer/customer_detail/'.$customer->customer_id); ?>" style="margin-left:5px; <?php echo ($range==='period') ? '' : 'display:none;'; ?>" id="stmt-period-form">
+                      <input type="hidden" name="group" value="statement">
                       <div class="form-group">
-                        <label>From</label>
-                        <input type="date" name="from_date" class="form-control" value="<?php echo html_escape($from_date ?? ''); ?>">
+                        <label style="margin-right:4px; font-weight:normal; color:#6b7280;">From</label>
+                        <input type="date" name="from_date" class="form-control input-sm" value="<?php echo html_escape($from_date ?? ''); ?>" style="height:30px; padding:2px 6px;">
                       </div>
-                      <div class="form-group">
-                        <label>To</label>
-                        <input type="date" name="to_date" class="form-control" value="<?php echo html_escape($to_date ?? ''); ?>">
+                      <div class="form-group" style="margin-left:6px;">
+                        <label style="margin-right:4px; font-weight:normal; color:#6b7280;">To</label>
+                        <input type="date" name="to_date" class="form-control input-sm" value="<?php echo html_escape($to_date ?? ''); ?>" style="height:30px; padding:2px 6px;">
                       </div>
-                      <button type="submit" class="btn btn-primary">Filter</button>
-                      <a href="<?php echo base_url('customer/statement/'.$customer->customer_id.'/pdf'); ?>?from_date=<?php echo urlencode($from_date ?? ''); ?>&to_date=<?php echo urlencode($to_date ?? ''); ?>" target="_blank" class="btn btn-default">Download PDF</a>
+                      <button type="submit" class="btn btn-primary btn-sm" style="margin-left:6px;">Filter</button>
                     </form>
+                    <script>
+                      $(function(){
+                        $('.stmt-filters .dropdown-menu a').on('click', function(e){
+                          var text = $(this).text().trim();
+                          if (text === 'Period') {
+                            e.preventDefault();
+                            $('#stmt-period-form').show();
+                          }
+                        });
+                      });
+                    </script>
                   </div>
-                  <div class="col-sm-8">
-                    <h4>Account Statement</h4>
+                  <div>
+                    <a href="#" onclick="window.print(); return false;" class="btn btn-default btn-sm">Print</a>
+                    <a href="<?php echo base_url('customer/customer_statement_pdf/'.$customer->customer_id); ?>?from_date=<?php echo urlencode($from_date ?? ''); ?>&to_date=<?php echo urlencode($to_date ?? ''); ?>" target="_blank" class="btn btn-primary btn-sm">Download PDF</a>
+                  </div>
+                </div>
+
+                <div class="stmt-doc">
+                  <h4 style="margin-top:0;">Account Statement</h4>
                     <?php
                       $statementData = (isset($statement) && is_array($statement)) ? $statement : array('summary' => array(), 'lines' => array());
                       $summaryDefaults = array(
@@ -318,11 +369,10 @@
                           <?php } ?>
                       </tbody>
                     </table>
-                  </div>
                 </div>
               </div>
 
-              <div class="tab-pane" id="invoices">
+              <div class="tab-pane<?php echo ($active_group==='invoices'?' active in':''); ?>" id="invoices" <?php echo ($active_group==='invoices'?'':'style="display:none"'); ?> >
                 <div class="clearfix" style="margin-bottom:10px;">
                   <a href="<?php echo base_url('add_invoice?customer_id=' . urlencode($customer->customer_id)); ?>" class="btn btn-success">New Invoice</a>
                 </div>
@@ -332,15 +382,30 @@
                     <?php if (!empty($invoices)) { foreach ($invoices as $invoice) { ?>
                       <?php $invoice_number = isset($invoice['invoice_no']) ? $invoice['invoice_no'] : (isset($invoice['invoice']) ? $invoice['invoice'] : $invoice['invoice_id']); ?>
                       <tr>
-                        <td><a href="<?php echo base_url('invoice/invoice_details/'.$invoice['invoice_id'].'?customer_id=' . urlencode($customer->customer_id)); ?>"><?php echo html_escape($invoice_number); ?></a></td>
+                        <td>
+                          <?php if (isset($invoice['source']) && $invoice['source'] === 'service') { ?>
+                            <a href="<?php echo base_url('service/service/service_invoice_view/'.(int)$invoice['invoice_id']); ?>"><?php echo html_escape($invoice_number); ?></a>
+                          <?php } else { ?>
+                            <a href="<?php echo base_url('invoice_details/'.(int)$invoice['invoice_id'].'?customer_id=' . urlencode($customer->customer_id)); ?>"><?php echo html_escape($invoice_number); ?></a>
+                          <?php } ?>
+                        </td>
                         <td><?php echo date('d-m-Y', strtotime($invoice['date'])); ?></td>
                         <td class="text-right"><?php echo $formatCurrency($invoice['total_amount']); ?></td>
                         <td class="text-right"><?php echo $formatCurrency($invoice['paid_amount'], false); ?></td>
                         <td class="text-right"><?php echo $formatCurrency($invoice['due_amount'], false); ?></td>
                         <td><span class="<?php echo html_escape($invoice['status_class']); ?>"><?php echo html_escape($invoice['status_label']); ?></span></td>
                         <td>
-                          <a href="<?php echo base_url('invoice/invoice_details/'.$invoice['invoice_id'].'?customer_id=' . urlencode($customer->customer_id)); ?>" class="btn btn-xs btn-info">View</a>
-                          <a href="<?php echo base_url('invoice/edit_invoice/'.$invoice['invoice_id'].'?customer_id=' . urlencode($customer->customer_id)); ?>" class="btn btn-xs btn-primary">Edit</a>
+                          <?php if (isset($invoice['source']) && $invoice['source'] === 'service') { ?>
+                            <a href="<?php echo base_url('service/service/service_invoice_view/'.(int)$invoice['invoice_id']); ?>" class="btn btn-xs btn-info">View</a>
+                            <a href="<?php echo base_url('edit_service_invoice/'.(int)$invoice['invoice_id']); ?>" class="btn btn-xs btn-primary">Edit</a>
+                          <?php } else { ?>
+                            <a href="<?php echo base_url('invoice_details/'.(int)$invoice['invoice_id'].'?customer_id=' . urlencode($customer->customer_id)); ?>" class="btn btn-xs btn-info">View</a>
+                            <a href="<?php echo base_url('invoice_edit/'.(int)$invoice['invoice_id'].'?customer_id=' . urlencode($customer->customer_id)); ?>" class="btn btn-xs btn-primary">Edit</a>
+                          <?php } ?>
+                          <button type="button" class="btn btn-xs btn-danger js-delete-invoice" data-invoice="<?php echo (int)$invoice['invoice_id']; ?>">Delete</button>
+                          <?php if ((!(isset($invoice['source']) && $invoice['source'] === 'service')) && !empty($invoice['due_amount']) && (float)$invoice['due_amount'] > 0) { ?>
+                            <button type="button" class="btn btn-xs btn-success" data-toggle="modal" data-target="#modalRecordPayment" data-invoice="<?php echo (int)$invoice['invoice_id']; ?>" data-due="<?php echo (float)$invoice['due_amount']; ?>">Record Payment</button>
+                          <?php } ?>
                         </td>
                       </tr>
                     <?php } } else { ?>
@@ -350,14 +415,177 @@
                 </table>
               </div>
 
-              <div class="tab-pane" id="payments">
+              <div class="tab-pane<?php echo ($active_group==='payments'?' active in':''); ?>" id="payments" <?php echo ($active_group==='payments'?'':'style="display:none"'); ?> >
                 <div class="clearfix" style="margin-bottom:10px;">
-                  <a class="btn btn-success" href="<?php echo base_url('customer_receive?customer_id=' . urlencode($customer->customer_id) . '&return_to=' . urlencode($return_payments_url)); ?>">Record Payment</a>
+                  <!-- Record Payment button (kept only once below); removed duplicate -->
                 </div>
+                <?php if (!empty($customer_receipts)) { ?>
+                <style>
+                  /* Ensure only the payments table is visible under the Payments tab */
+                  #payments .table:not(.payments-table) { display: none !important; }
+                </style>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped payments-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Voucher</th>
+                        <th>Invoice</th>
+                        <th>Method</th>
+                        <th class="text-right">Amount</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php foreach ($customer_receipts as $rc) { ?>
+                      <tr>
+                        <td><?php echo !empty($rc['date']) ? date('d-m-Y', strtotime($rc['date'])) : ''; ?></td>
+                        <td><?php echo html_escape($rc['VNo']); ?></td>
+                        <td><a href="<?php echo base_url('invoice_details/' . (int)$rc['invoice_id']); ?>" target="_blank"><?php echo (int)$rc['invoice_id']; ?></a></td>
+                        <td><?php echo html_escape($rc['HeadName']); ?></td>
+                        <td class="text-right"><?php echo $formatCurrency($rc['amount']); ?></td>
+                        <td>
+                          <button type="button" class="btn btn-xs btn-primary js-edit-payment"
+                            data-toggle="modal" data-target="#modalRecordPayment"
+                            data-vno="<?php echo html_escape($rc['VNo']); ?>"
+                            data-date="<?php echo html_escape($rc['date']); ?>"
+                            data-amount="<?php echo (float)$rc['amount']; ?>"
+                            data-method="<?php echo html_escape($rc['method_coa']); ?>"
+                            data-invoice="<?php echo (int)$rc['invoice_id']; ?>">
+                            Edit
+                          </button>
+                          <button type="button" class="btn btn-xs btn-danger js-delete-payment" data-vno="<?php echo html_escape($rc['VNo']); ?>">Delete</button>
+                        </td>
+                      </tr>
+                      <?php } ?>
+                    </tbody>
+                  </table>
+                </div>
+                <?php } else { ?>
+                  <p class="text-muted">No payments recorded for this period.</p>
+                <?php } ?>
+              </div>
+
+              <div class="tab-pane<?php echo ($active_group==='payments'?' active in':''); ?>" id="payments" <?php echo ($active_group==='payments'?'':'style="display:none"'); ?> >
+                <div class="clearfix" style="margin-bottom:10px;">
+                  <button class="btn btn-success" data-toggle="modal" data-target="#modalRecordPayment">Record Payment</button>
+                  <div class="help-block text-muted" style="margin-top:6px;">
+                    Use this to record group payments. If no invoice is selected, the amount is automatically distributed across the customer's oldest unpaid invoices (FIFO). To pay a single invoice, open that invoice and use Record Payment on the invoice page, or use the Invoices tab action.
+                  </div>
+                  <?php if (!empty($payment_groups)) { ?>
+                    <div class="panel panel-default" style="margin-top:10px;">
+                      <div class="panel-heading"><strong>Bulk Payments (Lump sums)</strong></div>
+                      <div class="panel-body" style="padding:8px;">
+                        <table class="table table-condensed" style="margin:0;">
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Group</th>
+                              <th class="text-right">Total</th>
+                              <th class="text-right" style="width:90px;">Details</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php foreach ($payment_groups as $pg) { $gid = 'pg_'.substr(md5(($pg['label'] ?? '').'|'.($pg['date'] ?? '')),0,8); ?>
+                              <tr>
+                                <td><?php echo !empty($pg['date']) ? date('d-m-Y', strtotime($pg['date'])) : ''; ?></td>
+                                <td><?php echo html_escape($pg['label']); ?></td>
+                                <td class="text-right"><?php echo $formatCurrency($pg['total']); ?></td>
+                                <td class="text-right">
+                                  <button type="button" class="btn btn-xs btn-default" data-toggle="collapse" data-target="#<?php echo $gid; ?>" aria-expanded="false" aria-controls="<?php echo $gid; ?>">
+                                    <span class="toggle-text">Show</span>
+                                  </button>
+                                </td>
+                              </tr>
+                              <tr id="<?php echo $gid; ?>" class="collapse">
+                                <td colspan="4" style="background:#fafafa;">
+                                  <?php if (!empty($pg['items'])) { ?>
+                                    <table class="table table-condensed" style="margin:0;">
+                                      <thead>
+                                        <tr>
+                                          <th style="width:140px;">Applied Date</th>
+                                          <th>Applied To</th>
+                                          <th class="text-right">Amount</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <?php foreach ($pg['items'] as $it) { ?>
+                                          <tr>
+                                            <td><?php echo !empty($it['date']) ? date('d-m-Y', strtotime($it['date'])) : ''; ?></td>
+                                            <td class="text-muted">Invoice <?php echo html_escape($it['invoice_id']); ?> (Voucher <?php echo html_escape($it['voucher']); ?>)</td>
+                                            <td class="text-right text-muted"><?php echo $formatCurrency($it['amount']); ?></td>
+                                          </tr>
+                                        <?php } ?>
+                                      </tbody>
+                                    </table>
+                                  <?php } else { ?>
+                                    <div class="text-muted">No breakdown.</div>
+                                  <?php } ?>
+                                </td>
+                              </tr>
+                            <?php } ?>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <script>
+                      (function(){
+                        $(document).on('shown.bs.collapse hidden.bs.collapse', '.panel .collapse', function(){
+                          var $btn = $("[data-target='#"+this.id+"']");
+                          var $txt = $btn.find('.toggle-text');
+                          if ($(this).hasClass('in')) { $txt.text('Hide'); } else { $txt.text('Show'); }
+                        });
+                      })();
+                    </script>
+                  <?php } ?>
+
+                  <?php if (!empty($customer_receipts)) { ?>
+                  <div class="table-responsive" style="margin-top:10px;">
+                    <table class="table table-bordered table-striped">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Voucher</th>
+                          <th>Invoice</th>
+                          <th>Method</th>
+                          <th class="text-right">Amount</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php foreach ($customer_receipts as $rc) { ?>
+                        <tr>
+                          <td><?php echo !empty($rc['date']) ? date('d-m-Y', strtotime($rc['date'])) : ''; ?></td>
+                          <td><?php echo html_escape($rc['VNo']); ?></td>
+                          <td><a href="<?php echo base_url('invoice_details/' . (int)$rc['invoice_id']); ?>" target="_blank"><?php echo (int)$rc['invoice_id']; ?></a></td>
+                          <td><?php echo html_escape($rc['HeadName']); ?></td>
+                          <td class="text-right"><?php echo $formatCurrency($rc['amount']); ?></td>
+                          <td>
+                            <button type="button" class="btn btn-xs btn-primary js-edit-payment"
+                              data-toggle="modal" data-target="#modalRecordPayment"
+                              data-vno="<?php echo html_escape($rc['VNo']); ?>"
+                              data-date="<?php echo html_escape($rc['date']); ?>"
+                              data-amount="<?php echo (float)$rc['amount']; ?>"
+                              data-method="<?php echo html_escape($rc['method_coa']); ?>"
+                              data-invoice="<?php echo (int)$rc['invoice_id']; ?>">
+                              Edit
+                            </button>
+                            <button type="button" class="btn btn-xs btn-danger js-delete-payment" data-vno="<?php echo html_escape($rc['VNo']); ?>">Delete</button>
+                          </td>
+                        </tr>
+                        <?php } ?>
+                      </tbody>
+                    </table>
+                  </div>
+                  <?php } else { ?>
+                    <p class="text-muted" style="margin-top:10px;">No payments recorded for this period.</p>
+                  <?php } ?>
+                </div>
+                <?php if (!empty($payments)) { ?>
                 <table class="table table-bordered table-striped">
                   <thead><tr><th>Date</th><th>Voucher</th><th>Narration</th><th>Debit</th><th>Credit</th></tr></thead>
                   <tbody>
-                    <?php if (!empty($payments)) { foreach ($payments as $payment) { ?>
+                    <?php foreach ($payments as $payment) { ?>
                       <tr>
                         <td><?php echo date('d-m-Y', strtotime($payment['date'])); ?></td>
                         <td><?php echo html_escape($payment['voucher_no']); ?></td>
@@ -365,14 +593,13 @@
                         <td class="text-right"><?php echo $payment['Debit'] ? $formatCurrency($payment['Debit'], false) : ''; ?></td>
                         <td class="text-right"><?php echo $payment['Credit'] ? $formatCurrency($payment['Credit'], false) : ''; ?></td>
                       </tr>
-                    <?php } } else { ?>
-                      <tr><td colspan="5" class="text-center">No payments recorded.</td></tr>
                     <?php } ?>
                   </tbody>
                 </table>
+                <?php } ?>
               </div>
 
-              <div class="tab-pane" id="credit_notes">
+              <div class="tab-pane<?php echo ($active_group==='credit_notes'?' active in':''); ?>" id="credit_notes" <?php echo ($active_group==='credit_notes'?'':'style="display:none"'); ?> >
                 <div class="panel panel-default">
                   <div class="panel-heading"><strong>Add Credit Note</strong></div>
                   <div class="panel-body">
@@ -446,7 +673,7 @@
                 </table>
               </div>
 
-              <div class="tab-pane" id="estimates">
+              <div class="tab-pane<?php echo ($active_group==='estimates'?' active in':''); ?>" id="estimates" <?php echo ($active_group==='estimates'?'':'style="display:none"'); ?> >
                 <div class="panel panel-default">
                   <div class="panel-heading"><strong>Add Estimate</strong></div>
                   <div class="panel-body">
@@ -520,7 +747,7 @@
                 </table>
               </div>
 
-              <div class="tab-pane" id="expenses">
+              <div class="tab-pane<?php echo ($active_group==='expenses'?' active in':''); ?>" id="expenses" <?php echo ($active_group==='expenses'?'':'style="display:none"'); ?> >
                 <div class="panel panel-default">
                   <div class="panel-heading"><strong>Add Expense</strong></div>
                   <div class="panel-body">
@@ -587,7 +814,7 @@
                 </table>
               </div>
 
-              <div class="tab-pane" id="reminders">
+              <div class="tab-pane<?php echo ($active_group==='reminders'?' active in':''); ?>" id="reminders" <?php echo ($active_group==='reminders'?'':'style="display:none"'); ?> >
                 <form method="post" action="<?php echo base_url('customer/add_reminder/'.$customer->customer_id); ?>" class="form-inline">
                   <div class="form-group">
                     <input type="text" name="title" class="form-control" placeholder="Reminder title" required>
@@ -615,7 +842,7 @@
                 </table>
               </div>
 
-              <div class="tab-pane" id="map">
+              <div class="tab-pane<?php echo ($active_group==='map'?' active in':''); ?>" id="map" <?php echo ($active_group==='map'?'':'style="display:none"'); ?> >
                 <?php $addr = trim(($customer->customer_address ?? '').' '.($customer->city ?? '').' '.($customer->country ?? '')); ?>
                 <p>Address: <?php echo html_escape($addr); ?></p>
                 <?php if ($addr) { ?>
@@ -633,6 +860,62 @@
     </div>
   </div>
 </div>
+
+<!-- Record Payment Modal (global, outside tabs) -->
+<div class="modal fade" id="modalRecordPayment" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Record Payment for <?php echo html_escape($customer->customer_name); ?></h4>
+      </div>
+      <div class="modal-body">
+        <form id="inlinePaymentForm">
+          <input type="hidden" id="CSRF_TOKEN" value="<?php echo $this->security->get_csrf_hash(); ?>">
+          <input type="hidden" id="ip_edit_vno" name="edit_vno" value="">
+          <input type="hidden" name="voucher_no" id="ip_voucher_no" value="">
+          <input type="hidden" name="customer_id" id="ip_customer_id" value="<?php echo html_escape($customer->customer_id); ?>">
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" class="form-control" name="dtpDate" id="ip_date" value="<?php echo date('Y-m-d'); ?>" required>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label>Amount</label>
+                <input type="number" step="0.01" min="0" class="form-control" name="txtAmount" id="ip_amount" required>
+                <small class="text-muted">Max due: <span id="ip_due_hint">0.00</span></small>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label>Payment Method</label>
+                <select name="multipaytype[]" id="ip_method" class="form-control" required>
+                  <option value="">Select method</option>
+                  <?php if (!empty($pay_methods)) { foreach ($pay_methods as $mid => $mname) { ?>
+                    <option value="<?php echo html_escape($mid); ?>"><?php echo html_escape($mname); ?></option>
+                  <?php } } ?>
+                </select>
+                <input type="hidden" name="pamount_by_method[]" id="ip_method_amount" value="">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Remarks</label>
+            <textarea class="form-control" name="txtRemarks" id="ip_remarks" rows="2" placeholder="Optional note..."></textarea>
+          </div>
+          <div class="text-right">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success">Save Payment</button>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer hidden"></div>
+      </div>
+    </div>
+    </div>
 
 <!-- Modals -->
 <div class="modal fade" id="modalAddContact" tabindex="-1">
@@ -687,20 +970,207 @@
   </div></div>
 </div>
 
+<!-- Tabs are now server-driven via ?group=... links; JS not needed -->
 <script>
-$(function () {
-  var storageKey = 'customer_detail_tab_<?php echo (int) $customer->customer_id; ?>';
-  var $tabs = $('.vertical-nav-tabs a[data-toggle="tab"]');
-  var params = new URLSearchParams(window.location.search);
-  var targetTab = params.get('tab') ? '#' + params.get('tab') : null;
-  var stored = targetTab || localStorage.getItem(storageKey);
-  if (stored && $tabs.filter('[href="' + stored + '"]').length) {
-    $tabs.filter('[href="' + stored + '"]').tab('show');
-  } else {
-    $tabs.filter(':first').tab('show');
-  }
-  $tabs.on('shown.bs.tab', function (e) {
-    localStorage.setItem(storageKey, $(e.target).attr('href'));
-  });
-});
-</script>
+  (function(){
+    var baseUrl = '<?php echo base_url(); ?>';
+    $('#modalRecordPayment').on('show.bs.modal', function (e) {
+      var $trigger = $(e.relatedTarget);
+      var invoiceId = $trigger && $trigger.data('invoice') ? String($trigger.data('invoice')) : '';
+      var due = $trigger && $trigger.data('due') ? parseFloat($trigger.data('due')) : 0;
+      var vno = $trigger && $trigger.data('vno') ? String($trigger.data('vno')) : '';
+      var amt = $trigger && $trigger.data('amount') ? parseFloat($trigger.data('amount')) : 0;
+      var mth = $trigger && $trigger.data('method') ? String($trigger.data('method')) : '';
+      var dt  = $trigger && $trigger.data('date') ? String($trigger.data('date')) : '';
+      $('#ip_voucher_no').val(invoiceId);
+      // edit vs create
+      if (vno) {
+        $('#ip_edit_vno').val(vno);
+        if (amt > 0) { $('#ip_amount').val(amt.toFixed(2)); $('#ip_method_amount').val(amt.toFixed(2)); }
+        if (mth) { $('#ip_method').val(mth); }
+        if (dt) { $('#ip_date').val(dt); }
+        $('#ip_due_hint').text('â€”');
+        $('#ip_invoice_select_wrap').hide();
+      } else {
+        $('#ip_edit_vno').val('');
+        $('#ip_amount').val(due.toFixed(2));
+        $('#ip_method_amount').val(due.toFixed(2));
+        $('#ip_due_hint').text(due.toFixed(2));
+        // If opening without invoice, let user select due invoice
+        if (!invoiceId) {
+          $('#ip_invoice_select_wrap').show();
+          $.ajax({
+            url: baseUrl + 'account/accounts/customer_headcode',
+            type: 'POST',
+            dataType: 'json',
+            data: { customer_id: $('#ip_customer_id').val(), csrf_test_name: $('#CSRF_TOKEN').val() },
+            success: function(res){
+              if (res && res.vouchers) {
+                $('#ip_invoice_select_holder').html(res.vouchers);
+                var $sel = $('#ip_invoice_select_holder').find('select');
+                $sel.on('change', function(){
+                  var inv = $(this).val();
+                  $('#ip_voucher_no').val(inv);
+                  // fetch due for selected
+                  $.ajax({
+                    url: baseUrl + 'account/accounts/customer_voucher_due_amount',
+                    type: 'POST',
+                    dataType: 'text',
+                    data: { invoice_id: inv, csrf_test_name: $('#CSRF_TOKEN').val() },
+                    success: function(txt){
+                      var d = parseFloat(txt||0);
+                      $('#ip_due_hint').text(d.toFixed(2));
+                      $('#ip_amount').val(d.toFixed(2));
+                      $('#ip_method_amount').val(d.toFixed(2));
+                    }
+                  });
+                });
+                // trigger initial
+                setTimeout(function(){ $sel.trigger('change'); }, 50);
+              } else {
+                $('#ip_invoice_select_holder').html('<div class="text-warning">No due invoices.</div>');
+              }
+            },
+            error: function(){ $('#ip_invoice_select_holder').html('<div class="text-danger">Failed to load invoices</div>'); }
+          });
+        } else {
+          $('#ip_invoice_select_wrap').hide();
+        }
+      }
+    });
+
+    // Listen for payment completion from iframe and refresh Payments tab
+    window.addEventListener('message', function(evt){
+      if (!evt || !evt.data) return;
+      try {
+        var data = evt.data;
+        if (typeof data === 'string') {
+          data = JSON.parse(data);
+        }
+        if (data && data.type === 'paymentSaved') {
+          var destRaw = data.return_to && data.return_to.length ? data.return_to : '<?php echo base_url('customer/customer_detail/'.$customer->customer_id.'?group=payments'); ?>';
+          var dest = destRaw;
+          try { dest = decodeURIComponent(destRaw); } catch(err) {}
+          $('#modalRecordPayment').modal('hide');
+          // small delay to allow modal to close animation
+          setTimeout(function(){ window.location.href = dest; }, 150);
+        }
+      } catch (e) {
+        // ignore
+      }
+    });
+
+    // Delete payment
+    $(document).on('click', '.js-delete-payment', function(){
+      var vno = $(this).data('vno');
+      if (!vno) return;
+      if (!confirm('Delete this payment voucher '+vno+'?')) return;
+      $.ajax({
+        url: baseUrl + 'account/accounts/delete_customer_payment',
+        type: 'POST',
+        dataType: 'json',
+        data: { vno: vno, csrf_test_name: $('#CSRF_TOKEN').val() },
+        success: function(res){
+          if (res && res.status) {
+            if (window.toastr) toastr.success(res.message || 'Deleted');
+            window.location.href = baseUrl + 'customer/customer_detail/<?php echo (int)$customer->customer_id; ?>?group=payments';
+          } else {
+            alert((res && (res.exception||res.message)) ? (res.exception||res.message) : 'Unable to delete');
+          }
+        },
+        error: function(xhr){
+          var msg = 'Request failed';
+          try { if (xhr && xhr.responseText) { msg = xhr.responseText; } } catch(e) {}
+          alert(msg);
+        }
+      });
+    });
+
+    // Delete invoice handler
+    $(document).on('click', '.js-delete-invoice', function(){
+      var invoiceId = $(this).data('invoice');
+      if (!invoiceId) return;
+      var csrf = $('#CSRF_TOKEN').val();
+      var endpoint = baseUrl + 'invoice/invoice/bdtask_delete_invoice';
+      var doDelete = function(force){
+        $.ajax({
+          url: endpoint,
+          type: 'POST',
+          dataType: 'json',
+          data: { invoice_id: invoiceId, force_delete: force ? 1 : 0, csrf_test_name: csrf },
+          success: function(res){
+            if (res && res.status === true) {
+              if (window.toastr) { toastr.success(res.message || 'Deleted'); }
+              window.location.href = baseUrl + 'customer/customer_detail/<?php echo (int)$customer->customer_id; ?>?group=invoices';
+              return;
+            }
+            if (res && res.needs_force) {
+              if (confirm(res.message + '\n\nDelete anyway? This may remove linked vouchers/adjustments.')) {
+                doDelete(true);
+              }
+              return;
+            }
+            alert(res && res.message ? res.message : 'Unable to delete invoice.');
+          },
+          error: function(){ alert('Request failed.'); }
+        });
+      };
+      if (confirm('Delete this invoice? This action cannot be undone.')) {
+        doDelete(false);
+      }
+    });
+
+    // Inline payment submit
+    $('#inlinePaymentForm').on('submit', function(ev){
+      ev.preventDefault();
+      var amount = parseFloat($('#ip_amount').val() || 0);
+      var isEdit = ($('#ip_edit_vno').val() || '').length > 0;
+      var due = parseFloat($('#ip_due_hint').text() || 0);
+      var invId = ($('#ip_voucher_no').val() || '').trim();
+      
+      if (amount <= 0) { alert('Enter payment amount'); return; }
+      if (!isEdit && invId && (amount > due + 0.0001)) { alert('Amount cannot exceed due'); return; }
+      $('#ip_method_amount').val(amount.toFixed(2));
+      var editVno = $('#ip_edit_vno').val();
+      var data = {
+        voucher_no: invId,
+        dtpDate: $('#ip_date').val(),
+        customer_id: $('#ip_customer_id').val(),
+        txtRemarks: $('#ip_remarks').val(),
+        txtAmount: amount.toFixed(2),
+        'multipaytype[]': $('#ip_method').val(),
+        'pamount_by_method[]': amount.toFixed(2),
+        csrf_test_name: $('#CSRF_TOKEN').val()
+      };
+      var postUrl = editVno ? (baseUrl + 'account/accounts/update_customer_payment') : (baseUrl + 'account/accounts/create_customer_receive');
+      if (editVno) { data['edit_vno'] = editVno; }
+      $.ajax({
+        url: postUrl,
+        type: 'POST',
+        dataType: 'json',
+        data: data,
+        success: function(res){
+          if (res && res.status === true) {
+            if (window.toastr) { toastr.success(res.message || 'Payment recorded'); }
+            $('#modalRecordPayment').modal('hide');
+            setTimeout(function(){ window.location.href = baseUrl + 'customer/customer_detail/<?php echo (int)$customer->customer_id; ?>?group=payments'; }, 150);
+          } else {
+            var msg = (res && (res.exception || res.message)) ? res.exception || res.message : 'Failed to save payment';
+            alert(msg);
+          }
+        },
+        error: function(xhr){
+          var msg = 'Request failed';
+          try { if (xhr && xhr.responseText) { msg = xhr.responseText; } } catch(e) {}
+          alert(msg);
+        }
+      });
+    });
+  })();
+  </script>
+
+
+
+
+
+

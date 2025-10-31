@@ -1,0 +1,200 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * InventoryLedger
+ *
+ * Helper library to centralise stock lot creation and stock movement posting.
+ */
+class InventoryLedger
+{
+    /** @var CI_Controller */
+    protected $ci;
+
+    /** @var InventoryAuditTrail|null */
+    protected $auditTrail = null;
+
+    /** @var array<string,int> */
+    protected $reasonCache = [];
+
+    /** @var array<int,array> */
+    protected $productUnitCache = [];
+
+    /** @var int|null */
+    protected $defaultLocationId = null;
+
+    public function __construct()
+    {
+        $this->ci =& get_instance();
+        $this->ci->load->database();
+        $this->ci->load->library('InventoryAuditTrail');
+        if (isset($this->ci->inventoryaudittrail) && $this->ci->inventoryaudittrail instanceof InventoryAuditTrail) {
+            $this->auditTrail = $this->ci->inventoryaudittrail;
+        }
+    }
+
+    /**
+     * Resolve a valid stock location id. Returns default location if the supplied id is invalid.
+     */
+    public function resolveLocationId($locationId = null)
+    {
+        $locationId = (int) $locationId;
+        if ($locationId > 0 && $this->locationExists($locationId)) {
+            return $locationId;
+        }
+        return $this->getDefaultLocationId();
+    }
+
+    /**
+     * Resolve a shed's location id (maps to the SHDxxxx location code seeded in stock_locations).
+     */
+    public function resolveShedLocationId($shedId)
+    {
+        $shedId = (int) $shedId;
+        if ($shedId <= 0) {
+            return $this->getDefaultLocationId();
+        }
+        $code = sprintf('SHD%04d', $shedId);
+        $row = $this->ci->db->select('id')
+            ->from('stock_locations')
+            ->where('location_code', $code)
+            ->where('is_active', 1)
+            ->limit(1)
+            ->get()
+            ->row();
+        if ($row) {
+            return (int) $row->id;
+        }
+        return $this->getDefaultLocationId();
+    }
+
+    /**
+     * Fetch all active stock locations (id, code, name, type).
+     */
+    public function getActiveLocations()
+    {
+        return $this->ci->db->select('id, location_code, location_name, location_type')
+            ->from('stock_locations')
+            ->where('is_active', 1)
+            ->order_by('location_name', 'asc')
+            ->get()
+            ->result_array();
+    }
+
+    /**
+     * Record a purchase receipt: create lot + stock movements and return identifiers.
+     *
+     * @param array $payload {
+     *   string product_id,
+     *   int location_id,
+     *   int unit_id,
+     *   float quantity,
+     *   string|null batch_no,
+     *   string|null expiry_date,
+     *   string purchase_id,
+     *   string purchase_detail_id,
+     *   string purchase_date,
+     *   float total_amount,
+     *   float discount_amount,
+     *   float vat_amount,
+     *   int|null created_by
+     * }
+     * @return array{lot_id:int,movement_id:int}|false
+     */
+    public function recordPurchaseReceipt(array $payload)
+    {
+        $productId   = isset($payload['product_id']) ? trim($payload['product_id']) : '';
+        $locationId  = (int) ($payload['location_id'] ?? 0);
+        $unitId      = (int) ($payload['unit_id'] ?? 0);
+        $quantity    = (float) ($payload['quantity'] ?? 0);
+        if ($productId === '' || $locationId <= 0 || $quantity <= 0) {
+            return false;
+        }
+
+        $baseUnit    = $this->getBaseUnitContext($productId);
+        if (!$baseUnit) {
+            return false;
+        }
+
+        if ($unitId <= 0) {
+            $unitId = $baseUnit['unit_id'];
+        }
+
+        $quantityBase = $this->convertToBaseQuantity($productId, $unitId, $quantity);
+        $lotCode      = $payload['batch_no'] ?? null;
+        $lotId        = $this->ensureLot([
+            'lot_code'              => $lotCode ?: $this->generateLotCode('PUR'),
+            'product_id'            => $productId,
+            'base_unit_id'          => $baseUnit['unit_id'],
+            'location_id'           => $locationId,
+            'initial_quantity'      => $quantityBase,
+            'source_type'           => 'purchase',
+            'source_reference'      => $payload['purchase_id'] ?? null,
+            'source_reference_line' => $payload['purchase_detail_id'] ?? null,
+            'production_date'       => $this->safeDate($payload['purchase_date'] ?? null),
+            'expiry_date'           => $this->safeDate($payload['expiry_date'] ?? null),
+            'notes'                 => null,
+        ]);
+
+        if (!$lotId) {
+            return false;
+        }
+
+        $reasonId     = $this->getReasonId('PURCHASE_RECEIPT');
+        if (!$reasonId) {
+            return false;
+        }
+
+        $costTotal    = (float) ($payload['total_amount'] ?? 0);
+        $costPerUnit  = $quantityBase > 0 ? ($costTotal / $quantityBase) : 0;
+        $movementDate = $this->safeDate($payload['purchase_date'] ?? null);
+
+        $movementId = $this->createMovement([
+            'movement_date'    => $movementDate,
+            'product_id'       => $productId,
+            'lot_id'           => $lotId,
+            'location_id'      => $locationId,
+            'unit_id'          => $baseUnit['unit_id'],
+            'quantity_in'      => $quantityBase,
+            'quantity_out'     => 0,
+            'cost_per_unit'    => $costPerUnit,
+            'cost_total'       => $costTotal,
+            'reason_id'        => $reasonId,
+            'reference_type'   => 'purchase',
+            'reference_id'     => $payload['purchase_id'] ?? null,
+            'reference_line_id'=> $payload['purchase_detail_id'] ?? null,
+            'narration'        => sprintf('Purchase receipt %s', $payload['purchase_id'] ?? ''),
+            'created_by'       => $payload['created_by'] ?? null,
+        ]);
+
+        if (!$movementId) {
+            return false;
+        }
+
+        return [
+            'lot_id'       => (int) $lotId,
+            'movement_id'  => (int) $movementId,
+        ];
+    }
+
+    /**
+     * Record an opening balance movement for a product/location.
+     */
+    public function recordOpeningBalance(array $payload)
+    {
+        $productId  = isset($payload['product_id']) ? trim($payload['product_id']) : '';
+        $locationId = (int) ($payload['location_id'] ?? 0);
+        $unitId     = (int) ($payload['unit_id'] ?? 0);
+        $quantity   = (float) ($payload['quantity'] ?? 0);
+        if ($productId === '' || $locationId <= 0 || $quantity <= 0) {
+            return false;
+        }
+
+        $baseUnit = $this->getBaseUnitContext($productId);
+        if (!$baseUnit) {
+            return false;
+        }
+        if ($unitId <= 0) {
+            $unitId = (int) $baseUnit['unit_id'];
+        }
+

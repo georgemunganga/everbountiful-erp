@@ -2,7 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 #------------------------------------    
 # Author: Bdtask Ltd
-# Author link: https://www.bdtask.com/
+# Author link: https://www.greenwebb.tech/
 # Dynamic style php file
 # Developed by :Isahaq
 #------------------------------------    
@@ -525,7 +525,7 @@ class Product extends MX_Controller
         $image_name = $product_id . '.png';
         $params['savename'] = FCPATH . 'my-assets/image/qr/' . $image_name;
         $this->ciqrcode->generate($params);
-        $product_info = $this->product_model->bdtask_barcode_productdata($product_id);
+        $product_info = $this->product_model->bd_task_barcode_productdata($product_id);
         $data = array(
             'title'           => display('qr_code'),
             'product_name'    => $product_info[0]['product_name'],
@@ -543,7 +543,7 @@ class Product extends MX_Controller
     // bar code part
     public function barcode_print($product_id)
     {
-        $product_info = $this->product_model->bdtask_barcode_productdata($product_id);
+        $product_info = $this->product_model->bd_task_barcode_productdata($product_id);
 
         $data = array(
             'title'           => display('barcode'),
@@ -563,7 +563,7 @@ class Product extends MX_Controller
 
     public function bdtask_product_details($product_id = null)
     {
-        $details_info = $this->product_model->bdtask_barcode_productdata($product_id);
+        $details_info = $this->product_model->bd_task_barcode_productdata($product_id);
         $purchaseData = $this->product_model->product_purchase_info($product_id);
         $totalPurchase = 0;
         $totalPrcsAmnt = 0;

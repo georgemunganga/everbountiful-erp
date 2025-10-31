@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
 use Dompdf\Dompdf;
@@ -6,7 +6,7 @@ use Dompdf\Options;
 
 #------------------------------------    
 # Author: Bdtask Ltd
-# Author link: https://www.bdtask.com/
+# Author link: https://www.greenwebb.tech/
 # Dynamic style php file
 # Developed by :Isahaq
 #------------------------------------    
@@ -98,6 +98,207 @@ class Invoice extends MX_Controller
         echo modules::run('template/layout', $data);
     }
 
+    // List mergeable invoices for a customer excluding current invoice (JSON)
+    public function list_mergeable_invoices()
+    {
+        $customer_id = (int)$this->input->get('customer_id', true);
+        $exclude_id  = (int)$this->input->get('exclude_id', true);
+        if (empty($customer_id)) {
+            echo json_encode(['status'=>false,'exception'=>'Invalid customer']);
+            return;
+        }
+        $rows = $this->db->select('invoice_id, invoice as invoice_no, date, total_amount, paid_amount, due_amount')
+            ->from('invoice')
+            ->where('customer_id', $customer_id)
+            ->where('invoice_id !=', $exclude_id)
+            ->order_by('date','desc')->order_by('invoice_id','desc')->get()->result_array();
+        echo json_encode(['status'=>true,'invoices'=>$rows]);
+    }
+
+    // Merge selected invoices into a target invoice
+    public function merge_invoices()
+    {
+        $target_id = (int)$this->input->post('target_id', true);
+        $merge_ids = $this->input->post('merge_ids', true);
+        if (empty($target_id) || empty($merge_ids) || !is_array($merge_ids)) {
+            echo json_encode(['status'=>false,'exception'=>'Invalid input']);
+            return;
+        }
+        $target = $this->db->select('*')->from('invoice')->where('invoice_id', $target_id)->get()->row();
+        if (!$target) { echo json_encode(['status'=>false,'exception'=>'Target invoice not found']); return; }
+        $customer_id = (int)$target->customer_id;
+        $merge_ids = array_map('intval', $merge_ids);
+        // Filter to same-customer invoices only
+        $valid_sources = $this->db->select('invoice_id, invoice, total_amount, paid_amount, due_amount')
+            ->from('invoice')
+            ->where_in('invoice_id', $merge_ids)
+            ->where('customer_id', $customer_id)
+            ->get()->result();
+        if (empty($valid_sources)) { echo json_encode(['status'=>false,'exception'=>'No valid invoices to merge']); return; }
+
+        $this->db->trans_start();
+        $moved_items = 0; $moved_vouchers = 0; $moved_taxes = 0;
+        $source_summary = [];
+        foreach ($valid_sources as $src) {
+            $src_id = (int)$src->invoice_id;
+            if ($src_id === $target_id) { continue; }
+            // Move line items
+            $this->db->where('invoice_id', $src_id)->update('invoice_details', ['invoice_id'=>$target_id]);
+            $moved_items += $this->db->affected_rows();
+            // Move tax rows
+            $this->db->where('relation_id', $src_id)->update('tax_collection', ['relation_id'=>$target_id]);
+            $moved_taxes += $this->db->affected_rows();
+            // Move vouchers (payments) by referenceNo = src id or invoice number
+            $this->db->where('referenceNo', $src_id)->update('acc_vaucher', ['referenceNo'=>$target_id]);
+            $moved_vouchers += $this->db->affected_rows();
+            $this->db->where('referenceNo', $src->invoice)->update('acc_vaucher', ['referenceNo'=>$target_id]);
+            $moved_vouchers += $this->db->affected_rows();
+
+            // Accumulate and mark source as merged with a note; zero due to avoid showing it
+            $source_summary[] = [
+                'invoice_id' => $src_id,
+                'invoice_no' => $src->invoice,
+                'total' => (float)$src->total_amount,
+                'paid'  => (float)$src->paid_amount,
+                'due'   => (float)$src->due_amount,
+            ];
+            $note = 'Merged into '.$target->invoice.' ('.$target_id.') on '.date('Y-m-d H:i');
+            @$this->db->where('invoice_id', $src_id)->set('details', $note, false)->update('invoice', ['due_amount'=>0]);
+        }
+        // Update target totals (best-effort add of totals; detailed totals will still show from items)
+        $add = $this->db->select('IFNULL(SUM(total_amount),0) AS t, IFNULL(SUM(total_tax),0) AS tax, IFNULL(SUM(total_discount),0) AS disc, IFNULL(SUM(total_vat_amnt),0) AS vat, IFNULL(SUM(paid_amount),0) AS paid')
+            ->from('invoice')->where_in('invoice_id', array_column($valid_sources,'invoice_id'))->get()->row();
+        if ($add) {
+            $this->db->where('invoice_id', $target_id)->set('total_amount', 'total_amount + '.(float)$add->t, false)
+                ->set('total_tax', 'total_tax + '.(float)$add->tax, false)
+                ->set('total_discount', 'total_discount + '.(float)$add->disc, false)
+                ->set('total_vat_amnt', 'total_vat_amnt + '.(float)$add->vat, false)
+                ->set('paid_amount', 'paid_amount + '.(float)$add->paid, false)
+                ->update('invoice');
+            // refresh due = total - paid
+            $tn = $this->db->select('total_amount, paid_amount')->from('invoice')->where('invoice_id',$target_id)->get()->row();
+            if ($tn) {
+                $new_due = max(0, (float)$tn->total_amount - (float)$tn->paid_amount);
+                $this->db->where('invoice_id',$target_id)->update('invoice', ['due_amount'=>$new_due]);
+            }
+        }
+        // Log merge
+        if (!$this->db->table_exists('invoice_merge_log')) {
+            $this->load->dbforge();
+            $fields = [
+                'id' => ['type'=>'INT','constraint'=>11,'unsigned'=>true,'auto_increment'=>true],
+                'to_invoice_id' => ['type'=>'INT','constraint'=>11],
+                'from_invoice_id' => ['type'=>'INT','constraint'=>11],
+                'customer_id' => ['type'=>'INT','constraint'=>11],
+                'merged_by' => ['type'=>'INT','constraint'=>11,'null'=>true],
+                'merged_at' => ['type'=>'DATETIME','null'=>true],
+                'note' => ['type'=>'VARCHAR','constraint'=>255,'null'=>true],
+            ];
+            $this->dbforge->add_field($fields);
+            $this->dbforge->add_key('id', true);
+            @$this->dbforge->create_table('invoice_merge_log', true);
+        }
+        $uid = (int)$this->session->userdata('id');
+        foreach ($source_summary as $s) {
+            $this->db->insert('invoice_merge_log', [
+                'to_invoice_id' => $target_id,
+                'from_invoice_id' => $s['invoice_id'],
+                'customer_id' => $customer_id,
+                'merged_by' => $uid,
+                'merged_at' => date('Y-m-d H:i:s'),
+                'note' => 'Merged totals: total='.$s['total'].', paid='.$s['paid'].', due='.$s['due'],
+            ]);
+        }
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === false) {
+            echo json_encode(['status'=>false,'exception'=>'DB error']);
+            return;
+        }
+        // Recalculate due on target and return
+        $row = $this->db->select('paid_amount,due_amount')->from('invoice')->where('invoice_id', $target_id)->get()->row();
+        echo json_encode(['status'=>true,'moved_items'=>$moved_items,'moved_vouchers'=>$moved_vouchers,'moved_taxes'=>$moved_taxes,'paid'=>(float)($row?$row->paid_amount:0),'due'=>(float)($row?$row->due_amount:0)]);
+    }
+
+    // Recalculate paid/due from vouchers (CV) and persist to invoice
+    public function recalc_invoice_paid_due()
+    {
+        $invoice_id = (int)$this->input->post('invoice_id', true);
+        if (empty($invoice_id)) {
+            echo json_encode(['status'=>false, 'message'=>'Invalid invoice id', 'csrf_test_name'=>$this->security->get_csrf_hash()]);
+            return;
+        }
+        $inv = $this->db->select('customer_id, date, total_amount, paid_amount, due_amount')->from('invoice')->where('invoice_id', $invoice_id)->get()->row();
+        if (!$inv) {
+            echo json_encode(['status'=>false, 'message'=>'Invoice not found', 'csrf_test_name'=>$this->security->get_csrf_hash()]);
+            return;
+        }
+        // Auto-apply any advance credits (unapplied CV vouchers) dated on/before this invoice date
+        $cid = (int)$inv->customer_id;
+        $inv_date = $inv->date ? $inv->date : date('Y-m-d');
+        $due_now = max(0.0, (float)$inv->due_amount);
+        if ($cid && $due_now > 0.0001) {
+            $sub = $this->db->select('id')->from('acc_subcode')->where('referenceNo', $cid)->where('subTypeId', 3)->get()->row();
+            if ($sub) {
+                $adv = $this->db->select('*')->from('acc_vaucher')
+                    ->where('Vtype','CV')
+                    ->where('subType', 3)
+                    ->where('subCode', $sub->id)
+                    ->group_start()
+                        ->where('referenceNo', 0)
+                        ->or_where('referenceNo IS NULL', null, false)
+                    ->group_end()
+                    ->where('DATE(VDate) <=', $inv_date)
+                    ->order_by('VDate','asc')->order_by('id','asc')->get()->result();
+                $auto_applied = 0.0;
+                $this->db->trans_start();
+                foreach ($adv as $row) {
+                    $avail = (float)$row->Credit;
+                    if ($avail <= 0.0001 || $due_now <= 0.0001) { continue; }
+                    $apply = $avail < $due_now ? $avail : $due_now;
+                    if ($apply <= 0.0001) { continue; }
+                    $left = $avail - $apply;
+                    // Reduce or remove the advance voucher
+                    if ($left <= 0.0001) {
+                        $this->db->where('VNo', $row->VNo)->delete('acc_vaucher');
+                        $this->db->where('VNo', $row->VNo)->where('Vtype','CV')->delete('acc_transaction');
+                    } else {
+                        $this->db->where('VNo', $row->VNo)->update('acc_vaucher', ['Credit'=>$left]);
+                        $this->db->where('VNo', $row->VNo)->where('Vtype','CV')->update('acc_transaction', ['Credit'=>$left]);
+                    }
+                    // Create a new voucher tied to this invoice using same COA/method/subcode
+                    $this->accounts_model->insert_sales_due($invoice_id, $row->COAID, 'Credit', $apply, 'Applied from Advance', 'Applied from Advance '.$row->VNo, $row->RevCodde, $row->subCode);
+                    // Update invoice running due/paid
+                    $due_now = max(0.0, $due_now - $apply);
+                    $auto_applied += $apply;
+                    // Auto-approve if enabled
+                    $setting_row = $this->db->select('is_autoapprove_v')->from('web_setting')->where('setting_id', 1)->get()->row();
+                    if ($setting_row && (int)$setting_row->is_autoapprove_v === 1) {
+                        $last = $this->db->select('VNo')->from('acc_vaucher')->where('Vtype','CV')->where('referenceNo', $invoice_id)->order_by('id','DESC')->limit(1)->get()->row();
+                        if ($last && !empty($last->VNo)) {
+                            $this->accounts_model->approved_vaucher($last->VNo, 'active');
+                        }
+                    }
+                    if ($due_now <= 0.0001) { break; }
+                }
+                $this->db->trans_complete();
+            }
+        }
+        $row = $this->db->select('IFNULL(SUM(Credit),0) AS paid')
+            ->from('acc_vaucher')
+            ->where('Vtype', 'CV')
+            ->where('referenceNo', $invoice_id)
+            ->get()->row();
+        $paid = (float)($row ? $row->paid : 0.0);
+        $total = (float)$inv->total_amount;
+        $paid = min($paid, $total);
+        $due  = max(0.0, $total - $paid);
+        $this->db->where('invoice_id', $invoice_id)->update('invoice', [
+            'paid_amount' => $paid,
+            'due_amount'  => $due,
+        ]);
+        echo json_encode(['status'=>true, 'paid'=>$paid, 'due'=>$due, 'csrf_test_name'=>$this->security->get_csrf_hash()]);
+    }
+
     public function CheckInvoiceList()
     {
         $postData = $this->input->post();
@@ -106,6 +307,59 @@ class Invoice extends MX_Controller
     }
 
 
+
+    public function bdtask_delete_invoice()
+    {
+        if (!$this->permission1->method('manage_invoice', 'delete')->access()) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'You do not have permission to delete invoices.',
+                'csrf_test_name' => $this->security->get_csrf_hash(),
+            ]);
+            return;
+        }
+
+        $invoice_id = $this->input->post('invoice_id', true);
+        $force_delete = (int)$this->input->post('force_delete', true) === 1;
+
+        if (empty($invoice_id)) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Invalid invoice id.',
+                'csrf_test_name' => $this->security->get_csrf_hash(),
+            ]);
+            return;
+        }
+
+        if (!$force_delete && $this->invoice_model->is_invoice_approved($invoice_id)) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Approved voucher cannot be deleted without confirmation.',
+                'needs_force' => true,
+                'csrf_test_name' => $this->security->get_csrf_hash(),
+            ]);
+            return;
+        }
+
+        $result = $this->invoice_model->delete_invoice($invoice_id);
+
+        if (!empty($result['status'])) {
+            echo json_encode([
+                'status' => true,
+                'message' => display('delete_successfully'),
+                'csrf_test_name' => $this->security->get_csrf_hash(),
+            ]);
+            return;
+        }
+
+        $message = !empty($result['message']) ? $result['message'] : display('please_try_again');
+
+        echo json_encode([
+            'status' => false,
+            'message' => $message,
+            'csrf_test_name' => $this->security->get_csrf_hash(),
+        ]);
+    }
 
     public function delivery_note()
     {
@@ -214,16 +468,70 @@ class Invoice extends MX_Controller
         $raw_total = isset($invoice_detail[0]['total_amount']) ? (float)$invoice_detail[0]['total_amount'] : 0.0;
         $raw_paid  = isset($invoice_detail[0]['paid_amount']) ? (float)$invoice_detail[0]['paid_amount'] : 0.0;
         $raw_due   = isset($invoice_detail[0]['due_amount']) ? (float)$invoice_detail[0]['due_amount'] : max(0.0, $raw_total - $raw_paid);
+        // Initial status from stored values
         [$status_label, $status_class] = $this->resolve_invoice_status($raw_total, $raw_paid, $raw_due);
 
         $totalbal = $raw_total + (isset($invoice_detail[0]['prevous_due']) ? (float)$invoice_detail[0]['prevous_due'] : 0.0);
+        // Payments applied to this invoice (voucher entries). Match by id or invoice number (legacy), and this customer.
+        $payments = $this->invoice_model->invoice_method_wise_balance($invoice_id, $invoice_detail[0]['invoice'], $invoice_detail[0]['customer_id']);
+        $payments_total = 0.0;
+        if (!empty($payments)) {
+            foreach ($payments as $p) {
+                $payments_total += isset($p->Credit) ? (float)$p->Credit : 0.0;
+            }
+        }
+
+        // Advance credit: show available (unapplied) and applied to this invoice
+        $advance_available = 0.0;
+        $advance_applied   = 0.0;
+        $cust_id_for_credit = isset($invoice_detail[0]['customer_id']) ? (int)$invoice_detail[0]['customer_id'] : 0;
+        $inv_date_for_credit = isset($invoice_detail[0]['final_date']) ? $invoice_detail[0]['final_date'] : (isset($invoice_detail[0]['date']) ? $invoice_detail[0]['date'] : date('Y-m-d'));
+        if ($cust_id_for_credit > 0) {
+            $sub = $this->db->select('id')->from('acc_subcode')
+                ->where('referenceNo', $cust_id_for_credit)->where('subTypeId', 3)->get()->row();
+            if ($sub) {
+                // Unapplied advance credit pool (referenceNo = 0 or NULL)
+                $row_adv = $this->db->select('IFNULL(SUM(Credit),0) AS credit')
+                    ->from('acc_vaucher')
+                    ->where('Vtype','CV')
+                    ->where('subType', 3)
+                    ->where('subCode', $sub->id)
+                    ->where('DATE(VDate) <=', $inv_date_for_credit)
+                    ->group_start()
+                        ->where('referenceNo', 0)
+                        ->or_where('referenceNo IS NULL', null, false)
+                    ->group_end()
+                    ->get()->row();
+                $advance_available = (float)($row_adv ? $row_adv->credit : 0.0);
+            }
+            // Credit applied to this invoice from advance
+            $row_app = $this->db->select('IFNULL(SUM(Credit),0) AS credit')
+                ->from('acc_vaucher')
+                ->where('Vtype','CV')
+                ->where('referenceNo', (int)$invoice_id)
+                ->group_start()
+                    ->like('Narration', 'Applied from Advance')
+                    ->or_like('ledgerComment', 'Applied from Advance')
+                ->group_end()
+                ->get()->row();
+            $advance_applied = (float)($row_app ? $row_app->credit : 0.0);
+        }
+        // Prefer voucher-driven paid/due for UI accuracy
+        $ui_paid = $raw_paid;
+        $ui_due  = $raw_due;
+        [$status_label, $status_class] = $this->resolve_invoice_status($raw_total, $ui_paid, $ui_due);
+        // Note: Do not write back recalculated paid/due here to avoid unintended persistence.
         $amount_inword = $totalbal;
         $user_id = $invoice_detail[0]['sales_by'];
         $users = $this->invoice_model->user_invoice_data($user_id);
+        // Settings and company info for view formatting
+        $currency_details = $this->invoice_model->retrieve_setting_editdata();
+        $company_info = $this->invoice_model->retrieve_company();
         $data = array(
             'title' => display('invoice_details'),
             'invoice_id' => $invoice_detail[0]['invoice_id'],
             'invoice_no' => $invoice_detail[0]['invoice'],
+            'customer_id' => $invoice_detail[0]['customer_id'],
             'customer_name' => $invoice_detail[0]['customer_name'],
             'customer_address' => $invoice_detail[0]['customer_address'],
             'customer_mobile' => $invoice_detail[0]['customer_mobile'],
@@ -241,8 +549,8 @@ class Invoice extends MX_Controller
             'subTotal_ammount' => number_format($subTotal_ammount !== null ? $subTotal_ammount : 0, 2, '.', ','),
 
             'subTotal_amount_cal' => $subTotal_ammount,
-            'paid_amount' => number_format($raw_paid, 2, '.', ','),
-            'due_amount' => number_format($raw_due, 2, '.', ','),
+            'paid_amount' => number_format($ui_paid, 2, '.', ','),
+            'due_amount' => number_format($ui_due, 2, '.', ','),
             'previous' => number_format($invoice_detail[0]['prevous_due'] !== null ? $invoice_detail[0]['prevous_due'] : 0, 2, '.', ','),
             'shipping_cost' => number_format($invoice_detail[0]['shipping_cost'] !== null ? $invoice_detail[0]['shipping_cost'] : 0, 2, '.', ','),
 
@@ -260,8 +568,23 @@ class Invoice extends MX_Controller
             'is_unit' => $isunit,
             'status_label' => $status_label,
             'status_class' => $status_class,
+            'raw_due' => $ui_due,
+            'raw_paid' => $ui_paid,
+            'payments' => $payments,
+            'payments_total' => $payments_total,
+            'advance_credit_available' => number_format($advance_available, 2, '.', ','),
+            'advance_credit_applied'   => number_format($advance_applied, 2, '.', ','),
+            // Formatting helpers
+            'company_info' => $company_info,
+            'currency' => isset($currency_details[0]['currency']) ? $currency_details[0]['currency'] : 'ZMW',
+            'position' => isset($currency_details[0]['currency_position']) ? $currency_details[0]['currency_position'] : 0,
+            'discount_type' => isset($currency_details[0]['discount_type']) ? $currency_details[0]['discount_type'] : 0,
+            'currency_details' => $currency_details,
         );
+        // Payment methods for inline modal
+        $data['pay_methods'] = $this->accounts_model->pmethod_dropdown();
         $data['module'] = "invoice";
+        // Render the standard invoice view and show payments below
         $data['page'] = "invoice_html";
         echo modules::run('template/layout', $data);
     }
@@ -450,7 +773,7 @@ class Invoice extends MX_Controller
             'customer_mobile' => $invoice_detail[0]['customer_mobile'],
             'customer_email' => $invoice_detail[0]['customer_email'],
             'final_date' => $invoice_detail[0]['final_date'],
-            'print_setting' => $this->invoice_model->bdtask_print_settingdata(),
+            'print_setting' => $this->invoice_model->bd_task_print_settingdata(),
             'invoice_details' => $invoice_detail[0]['invoice_details'],
             'total_amount' => number_format($totalbal !== null ? $totalbal : 0, 2, '.', ','),
             'subTotal_cartoon' => $subTotal_cartoon,
@@ -779,6 +1102,9 @@ class Invoice extends MX_Controller
             'is_desc' => $descript,
             'is_serial' => $isserial,
             'is_unit' => $isunit,
+            'raw_due' => $raw_due,
+            'raw_paid' => $raw_paid,
+            'raw_total' => $raw_total,
         );
 
 
@@ -990,7 +1316,10 @@ class Invoice extends MX_Controller
     {
         $this->form_validation->set_rules('customer_id', display('customer_name'), 'required|max_length[15]');
         $this->form_validation->set_rules('invoice_no', display('invoice_no'), 'required|max_length[20]');
-        $this->form_validation->set_rules('multipaytype[]', display('payment_type'), 'required');
+        $sale_type_post = $this->input->post('sale_type', true);
+        if ($sale_type_post !== 'credit_sale') {
+            $this->form_validation->set_rules('multipaytype[]', display('payment_type'), 'required');
+        }
         $this->form_validation->set_rules('product_id[]', display('product'), 'required|max_length[20]');
         $this->form_validation->set_rules('product_quantity[]', display('quantity'), 'required|max_length[20]');
         $this->form_validation->set_rules('product_rate[]', display('rate'), 'required|max_length[20]');
@@ -1020,7 +1349,10 @@ class Invoice extends MX_Controller
                             $data['exception'] = $this->session->set_userdata(array('error_message' => display('please_config_your_mail_setting')));
                         }
                     }
-                    $data['details'] = $this->load->view('invoice/invoice_html', $data, true);
+                // Payment methods for inline modal on invoice page
+                $data['pay_methods'] = $this->accounts_model->pmethod_dropdown();
+
+                $data['details'] = $this->load->view('invoice/invoice_html', $data, true);
                 } else {
                     $data['status'] = false;
                     $data['exception'] = 'Please Try Again';
@@ -2113,3 +2445,6 @@ class Invoice extends MX_Controller
         redirect("terms_list");
     }
 }
+
+
+
