@@ -59737,3 +59737,251 @@ DEBUG - 2025-10-31 15:58:58 --> File loaded: C:\xampp\htdocs\everb\application\m
 DEBUG - 2025-10-31 15:58:58 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
 INFO - 2025-10-31 15:58:58 --> Final output sent to browser
 DEBUG - 2025-10-31 15:58:58 --> Total execution time: 1.8986
+INFO - 2025-10-31 12:51:57 --> Config Class Initialized
+INFO - 2025-10-31 12:51:57 --> Hooks Class Initialized
+DEBUG - 2025-10-31 12:51:58 --> UTF-8 Support Enabled
+INFO - 2025-10-31 12:51:58 --> Utf8 Class Initialized
+INFO - 2025-10-31 12:51:58 --> URI Class Initialized
+DEBUG - 2025-10-31 12:51:59 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-31 12:51:59 --> Router Class Initialized
+DEBUG - 2025-10-31 12:52:00 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-31 12:52:00 --> Input Class Initialized
+INFO - 2025-10-31 12:52:00 --> Language Class Initialized
+INFO - 2025-10-31 12:52:01 --> Loader Class Initialized
+INFO - 2025-10-31 12:52:01 --> Helper loaded: url_helper
+INFO - 2025-10-31 12:52:01 --> Helper loaded: file_helper
+INFO - 2025-10-31 12:52:01 --> Helper loaded: html_helper
+INFO - 2025-10-31 12:52:02 --> Helper loaded: form_helper
+INFO - 2025-10-31 12:52:02 --> Helper loaded: text_helper
+INFO - 2025-10-31 12:52:02 --> Helper loaded: lang_helper
+INFO - 2025-10-31 12:52:02 --> Helper loaded: global_helper
+INFO - 2025-10-31 12:52:02 --> Helper loaded: directory_helper
+INFO - 2025-10-31 12:52:02 --> Helper loaded: dompdf_helper
+INFO - 2025-10-31 12:52:03 --> Database Driver Class Initialized
+INFO - 2025-10-31 12:52:03 --> Email Class Initialized
+INFO - 2025-10-31 12:52:04 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-31 12:52:04 --> Form Validation Class Initialized
+INFO - 2025-10-31 12:52:04 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-31 12:52:04 --> Pagination Class Initialized
+INFO - 2025-10-31 17:52:05 --> Controller Class Initialized
+DEBUG - 2025-10-31 17:52:05 --> Customer MX_Controller Initialized
+INFO - 2025-10-31 17:52:05 --> Model Class Initialized
+DEBUG - 2025-10-31 17:52:05 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customer_model.php
+INFO - 2025-10-31 17:52:05 --> Model Class Initialized
+DEBUG - 2025-10-31 17:52:05 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customergroups_model.php
+INFO - 2025-10-31 17:52:05 --> Model Class Initialized
+INFO - 2025-10-31 17:52:05 --> Database Forge Class Initialized
+DEBUG - 2025-10-31 17:52:06 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-31 17:52:06 --> Model Class Initialized
+DEBUG - 2025-10-31 17:52:06 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-31 17:52:06 --> Model Class Initialized
+DEBUG - 2025-10-31 17:52:06 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-31 17:52:06 --> Template MX_Controller Initialized
+DEBUG - 2025-10-31 17:52:06 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-31 17:52:07 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-31 17:52:16 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-31 17:52:16 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+ERROR - 2025-10-31 17:52:17 --> Severity: Warning --> Undefined property: stdClass::$customer_phone C:\xampp\htdocs\everb\application\modules\customer\views\customer_detail_tabs.php 136
+DEBUG - 2025-10-31 17:52:17 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/views/customer_detail_tabs.php
+DEBUG - 2025-10-31 17:52:17 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-31 17:52:17 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-31 17:52:17 --> Final output sent to browser
+DEBUG - 2025-10-31 17:52:17 --> Total execution time: 19.7655
+INFO - 2025-10-31 12:54:19 --> Config Class Initialized
+INFO - 2025-10-31 12:54:19 --> Hooks Class Initialized
+DEBUG - 2025-10-31 12:54:19 --> UTF-8 Support Enabled
+INFO - 2025-10-31 12:54:19 --> Utf8 Class Initialized
+INFO - 2025-10-31 12:54:19 --> URI Class Initialized
+DEBUG - 2025-10-31 12:54:19 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-31 12:54:19 --> Router Class Initialized
+INFO - 2025-10-31 12:54:19 --> Output Class Initialized
+INFO - 2025-10-31 12:54:19 --> Security Class Initialized
+DEBUG - 2025-10-31 12:54:20 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-31 12:54:20 --> Input Class Initialized
+INFO - 2025-10-31 12:54:20 --> Language Class Initialized
+INFO - 2025-10-31 12:54:20 --> Language Class Initialized
+INFO - 2025-10-31 12:54:20 --> Config Class Initialized
+INFO - 2025-10-31 12:54:20 --> Loader Class Initialized
+INFO - 2025-10-31 12:54:20 --> Helper loaded: url_helper
+INFO - 2025-10-31 12:54:20 --> Helper loaded: file_helper
+INFO - 2025-10-31 12:54:20 --> Helper loaded: html_helper
+INFO - 2025-10-31 12:54:20 --> Helper loaded: form_helper
+INFO - 2025-10-31 12:54:20 --> Helper loaded: text_helper
+INFO - 2025-10-31 12:54:20 --> Helper loaded: lang_helper
+INFO - 2025-10-31 12:54:20 --> Helper loaded: global_helper
+INFO - 2025-10-31 12:54:20 --> Helper loaded: directory_helper
+INFO - 2025-10-31 12:54:20 --> Helper loaded: dompdf_helper
+INFO - 2025-10-31 12:54:20 --> Database Driver Class Initialized
+INFO - 2025-10-31 12:54:20 --> Email Class Initialized
+INFO - 2025-10-31 12:54:20 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-31 12:54:20 --> Form Validation Class Initialized
+INFO - 2025-10-31 12:54:20 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-31 12:54:20 --> Pagination Class Initialized
+INFO - 2025-10-31 17:54:20 --> Controller Class Initialized
+DEBUG - 2025-10-31 17:54:20 --> Customer MX_Controller Initialized
+INFO - 2025-10-31 17:54:20 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:20 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customer_model.php
+INFO - 2025-10-31 17:54:20 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:20 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customergroups_model.php
+INFO - 2025-10-31 17:54:20 --> Model Class Initialized
+INFO - 2025-10-31 17:54:20 --> Database Forge Class Initialized
+DEBUG - 2025-10-31 17:54:20 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-31 17:54:20 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:20 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-31 17:54:20 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:20 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-31 17:54:20 --> Template MX_Controller Initialized
+DEBUG - 2025-10-31 17:54:20 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-31 17:54:20 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-31 17:54:21 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-31 17:54:21 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+ERROR - 2025-10-31 17:54:21 --> Severity: Warning --> Undefined property: stdClass::$customer_phone C:\xampp\htdocs\everb\application\modules\customer\views\customer_detail_tabs.php 136
+DEBUG - 2025-10-31 17:54:21 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/views/customer_detail_tabs.php
+DEBUG - 2025-10-31 17:54:21 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-31 17:54:21 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-31 17:54:21 --> Final output sent to browser
+DEBUG - 2025-10-31 17:54:21 --> Total execution time: 1.8414
+INFO - 2025-10-31 12:54:22 --> Config Class Initialized
+INFO - 2025-10-31 12:54:22 --> Hooks Class Initialized
+DEBUG - 2025-10-31 12:54:22 --> UTF-8 Support Enabled
+INFO - 2025-10-31 12:54:22 --> Utf8 Class Initialized
+INFO - 2025-10-31 12:54:22 --> URI Class Initialized
+DEBUG - 2025-10-31 12:54:22 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/config/routes.php
+INFO - 2025-10-31 12:54:22 --> Router Class Initialized
+INFO - 2025-10-31 12:54:22 --> Output Class Initialized
+INFO - 2025-10-31 12:54:22 --> Security Class Initialized
+DEBUG - 2025-10-31 12:54:22 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-31 12:54:23 --> Input Class Initialized
+INFO - 2025-10-31 12:54:23 --> Language Class Initialized
+INFO - 2025-10-31 12:54:23 --> Language Class Initialized
+INFO - 2025-10-31 12:54:23 --> Config Class Initialized
+INFO - 2025-10-31 12:54:23 --> Loader Class Initialized
+INFO - 2025-10-31 12:54:23 --> Helper loaded: url_helper
+INFO - 2025-10-31 12:54:23 --> Helper loaded: file_helper
+INFO - 2025-10-31 12:54:23 --> Helper loaded: html_helper
+INFO - 2025-10-31 12:54:23 --> Helper loaded: form_helper
+INFO - 2025-10-31 12:54:23 --> Helper loaded: text_helper
+INFO - 2025-10-31 12:54:23 --> Helper loaded: lang_helper
+INFO - 2025-10-31 12:54:23 --> Helper loaded: global_helper
+INFO - 2025-10-31 12:54:23 --> Helper loaded: directory_helper
+INFO - 2025-10-31 12:54:23 --> Helper loaded: dompdf_helper
+INFO - 2025-10-31 12:54:23 --> Database Driver Class Initialized
+INFO - 2025-10-31 12:54:23 --> Email Class Initialized
+INFO - 2025-10-31 12:54:23 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-31 12:54:23 --> Form Validation Class Initialized
+INFO - 2025-10-31 12:54:23 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-31 12:54:23 --> Pagination Class Initialized
+INFO - 2025-10-31 17:54:23 --> Controller Class Initialized
+DEBUG - 2025-10-31 17:54:23 --> Customer MX_Controller Initialized
+INFO - 2025-10-31 17:54:23 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:23 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customer_model.php
+INFO - 2025-10-31 17:54:23 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:23 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customergroups_model.php
+INFO - 2025-10-31 17:54:23 --> Model Class Initialized
+INFO - 2025-10-31 17:54:23 --> Database Forge Class Initialized
+DEBUG - 2025-10-31 17:54:23 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-31 17:54:23 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:23 --> File loaded: C:\xampp\htdocs\everb\application\modules/account/models/Accounts_model.php
+INFO - 2025-10-31 17:54:23 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:24 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-31 17:54:24 --> Template MX_Controller Initialized
+DEBUG - 2025-10-31 17:54:24 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-31 17:54:24 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-31 17:54:25 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-31 17:54:25 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+ERROR - 2025-10-31 17:54:25 --> Severity: Warning --> Undefined property: stdClass::$customer_phone C:\xampp\htdocs\everb\application\modules\customer\views\customer_detail_tabs.php 136
+DEBUG - 2025-10-31 17:54:25 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/views/customer_detail_tabs.php
+DEBUG - 2025-10-31 17:54:25 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-31 17:54:25 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-31 17:54:25 --> Final output sent to browser
+DEBUG - 2025-10-31 17:54:25 --> Total execution time: 3.0749
+INFO - 2025-10-31 12:54:25 --> Config Class Initialized
+INFO - 2025-10-31 12:54:25 --> Hooks Class Initialized
+INFO - 2025-10-31 12:54:25 --> Config Class Initialized
+INFO - 2025-10-31 12:54:25 --> Hooks Class Initialized
+DEBUG - 2025-10-31 12:54:25 --> UTF-8 Support Enabled
+INFO - 2025-10-31 12:54:25 --> Utf8 Class Initialized
+INFO - 2025-10-31 12:54:25 --> URI Class Initialized
+DEBUG - 2025-10-31 12:54:25 --> UTF-8 Support Enabled
+INFO - 2025-10-31 12:54:25 --> Utf8 Class Initialized
+INFO - 2025-10-31 12:54:25 --> Router Class Initialized
+INFO - 2025-10-31 12:54:25 --> Output Class Initialized
+INFO - 2025-10-31 12:54:25 --> Security Class Initialized
+DEBUG - 2025-10-31 12:54:25 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-31 12:54:25 --> Input Class Initialized
+INFO - 2025-10-31 12:54:25 --> Language Class Initialized
+ERROR - 2025-10-31 12:54:25 --> 404 Page Not Found: /index
+INFO - 2025-10-31 12:54:25 --> URI Class Initialized
+INFO - 2025-10-31 12:54:25 --> Router Class Initialized
+INFO - 2025-10-31 12:54:25 --> Output Class Initialized
+INFO - 2025-10-31 12:54:25 --> Security Class Initialized
+DEBUG - 2025-10-31 12:54:26 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-31 12:54:26 --> Input Class Initialized
+INFO - 2025-10-31 12:54:26 --> Language Class Initialized
+ERROR - 2025-10-31 12:54:26 --> 404 Page Not Found: /index
+INFO - 2025-10-31 12:54:35 --> Config Class Initialized
+INFO - 2025-10-31 12:54:35 --> Hooks Class Initialized
+DEBUG - 2025-10-31 12:54:35 --> UTF-8 Support Enabled
+INFO - 2025-10-31 12:54:35 --> Utf8 Class Initialized
+INFO - 2025-10-31 12:54:35 --> URI Class Initialized
+DEBUG - 2025-10-31 12:54:35 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/config/routes.php
+INFO - 2025-10-31 12:54:35 --> Router Class Initialized
+INFO - 2025-10-31 12:54:35 --> Output Class Initialized
+INFO - 2025-10-31 12:54:35 --> Security Class Initialized
+DEBUG - 2025-10-31 12:54:35 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-10-31 12:54:35 --> Input Class Initialized
+INFO - 2025-10-31 12:54:35 --> Language Class Initialized
+INFO - 2025-10-31 12:54:35 --> Language Class Initialized
+INFO - 2025-10-31 12:54:35 --> Config Class Initialized
+INFO - 2025-10-31 12:54:35 --> Loader Class Initialized
+INFO - 2025-10-31 12:54:35 --> Helper loaded: url_helper
+INFO - 2025-10-31 12:54:35 --> Helper loaded: file_helper
+INFO - 2025-10-31 12:54:35 --> Helper loaded: html_helper
+INFO - 2025-10-31 12:54:35 --> Helper loaded: form_helper
+INFO - 2025-10-31 12:54:35 --> Helper loaded: text_helper
+INFO - 2025-10-31 12:54:35 --> Helper loaded: lang_helper
+INFO - 2025-10-31 12:54:35 --> Helper loaded: global_helper
+INFO - 2025-10-31 12:54:35 --> Helper loaded: directory_helper
+INFO - 2025-10-31 12:54:35 --> Helper loaded: dompdf_helper
+INFO - 2025-10-31 12:54:35 --> Database Driver Class Initialized
+INFO - 2025-10-31 12:54:35 --> Email Class Initialized
+INFO - 2025-10-31 12:54:35 --> Session: Class initialized using 'files' driver.
+INFO - 2025-10-31 12:54:35 --> Form Validation Class Initialized
+INFO - 2025-10-31 12:54:35 --> Language file loaded: language/english/pagination_lang.php
+INFO - 2025-10-31 12:54:35 --> Pagination Class Initialized
+INFO - 2025-10-31 17:54:35 --> Controller Class Initialized
+DEBUG - 2025-10-31 17:54:35 --> Home MX_Controller Initialized
+INFO - 2025-10-31 17:54:35 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:35 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/models/Home_model.php
+INFO - 2025-10-31 17:54:35 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:35 --> File loaded: C:\xampp\htdocs\everb\application\modules/livestock/models/Livestock_model.php
+INFO - 2025-10-31 17:54:35 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:35 --> File loaded: C:\xampp\htdocs\everb\application\modules/inventory/models/Inventory_model.php
+INFO - 2025-10-31 17:54:35 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:35 --> File loaded: C:\xampp\htdocs\everb\application\modules/customer/models/Customer_model.php
+INFO - 2025-10-31 17:54:35 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:36 --> File loaded: C:\xampp\htdocs\everb\application\controllers/../modules/template/controllers/Template.php
+DEBUG - 2025-10-31 17:54:36 --> Template MX_Controller Initialized
+DEBUG - 2025-10-31 17:54:36 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/models/Template_model.php
+INFO - 2025-10-31 17:54:36 --> Model Class Initialized
+DEBUG - 2025-10-31 17:54:36 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/head.php
+DEBUG - 2025-10-31 17:54:36 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/header.php
+DEBUG - 2025-10-31 17:54:36 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/sidebar.php
+DEBUG - 2025-10-31 17:54:36 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/messages.php
+DEBUG - 2025-10-31 17:54:38 --> File loaded: C:\xampp\htdocs\everb\application\modules/dashboard/views/home/home.php
+DEBUG - 2025-10-31 17:54:38 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/includes/js.php
+DEBUG - 2025-10-31 17:54:38 --> File loaded: C:\xampp\htdocs\everb\application\modules/template/views/layout.php
+INFO - 2025-10-31 17:54:38 --> Final output sent to browser
+DEBUG - 2025-10-31 17:54:38 --> Total execution time: 2.7526
+INFO - 2025-10-31 12:54:38 --> Config Class Initialized
+INFO - 2025-10-31 12:54:38 --> Hooks Class Initialized
+INFO - 2025-10-31 12:54:38 --> Config Class Initialized
+INFO - 2025-10-31 12:54:38 --> Hooks Class Initialized
+DEBUG - 2025-10-31 12:54:38 --> UTF-8 Support Enabled
+INFO - 2025-10-31 12:54:38 --> Utf8 Class Initialized
+INFO - 2025-10-31 12:54:38 --> URI Class Initialized
+DEBUG - 2025-10-31 12:54:38 --> UTF-8 Support Enabled
+INFO - 2025-10-31 12:54:38 --> Utf8 Class Initialized
+INFO - 2025-10-31 12:54:38 --> URI Class Initialized
+INFO - 2025-10-31 12:54:38 --> Router Class Initialized
+INFO - 2025-10-31 12:54:38 --> Output Class Initialized
